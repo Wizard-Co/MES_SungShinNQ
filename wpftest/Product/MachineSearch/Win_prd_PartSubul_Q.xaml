@@ -1,0 +1,638 @@
+﻿<UserControl
+    x:Class="WizMes_SungShinNQ.Win_prd_PartSubul_Q"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:WizMes_SungShinNQ"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="620"
+    d:DesignWidth="820"
+    Loaded="UserControl_Loaded"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <local:ContainValue x:Key="ContainValue" flag="-" />
+
+        <Style x:Key="RedFore" TargetType="DataGridCell">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Converter={StaticResource ContainValue}}" Value="true">
+                    <Setter Property="Foreground" Value="Red" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Converter={StaticResource ContainValue}}" Value="false">
+                    <Setter Property="Foreground" Value="Black" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="88*" />
+            <RowDefinition Height="532*" />
+        </Grid.RowDefinitions>
+        <Grid
+            Grid.Row="0"
+            Margin="2"
+            Background="{DynamicResource WizMes_SungShinNQ}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="160*" />
+                <ColumnDefinition Width="20*" />
+                <ColumnDefinition Width="160*" />
+                <ColumnDefinition Width="230*" />
+                <ColumnDefinition Width="150*" />
+                <ColumnDefinition Width="100*" />
+            </Grid.ColumnDefinitions>
+
+
+
+            <Grid
+                x:Name="grdSrh1"
+                Grid.Row="0"
+                Grid.RowSpan="4"
+                Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Border
+                    Grid.Row="0"
+                    Background="White"
+                    BorderBrush="#424242"
+                    BorderThickness="0.9"
+                    CornerRadius="0 0 0 0">
+                    <ToggleButton
+                        x:Name="tgnCommon"
+                        Margin="1"
+                        Checked="tgnCommon_Checked"
+                        FontWeight="Normal"
+                        PreviewMouseDown="tgnCommon_PreviewMouseDown"
+                        Unchecked="tgnCommon_Unchecked">
+                        <ToggleButton.Style>
+                            <Style TargetType="{x:Type ToggleButton}">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ToggleButton">
+                                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding Background}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter Property="Background" Value="#6C757D" />
+                                        <Setter Property="Foreground" Value="White" />
+                                    </Trigger>
+                                    <Trigger Property="IsChecked" Value="False">
+                                        <Setter Property="Background" Value="#F3F7FF" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ToggleButton.Style>
+                        <StackPanel Orientation="Horizontal">
+                            <Viewbox Margin="4">
+                                <TextBlock Text="공용" />
+                            </Viewbox>
+                        </StackPanel>
+                    </ToggleButton>
+                </Border>
+
+                <Border
+                    Grid.Row="1"
+                    Background="White"
+                    BorderBrush="#424242"
+                    BorderThickness="0.9"
+                    CornerRadius="0 0 0 0">
+                    <ToggleButton
+                        x:Name="tgnSpare"
+                        Margin="1"
+                        Checked="tgnSpare_Checked"
+                        FontWeight="Normal"
+                        PreviewMouseDown="tgnSpare_PreviewMouseDown"
+                        Unchecked="tgnSpare_Unchecked">
+                        <ToggleButton.Style>
+                            <Style TargetType="{x:Type ToggleButton}">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ToggleButton">
+                                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding Background}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter Property="Background" Value="#6C757D" />
+                                        <Setter Property="Foreground" Value="White" />
+                                    </Trigger>
+                                    <Trigger Property="IsChecked" Value="False">
+                                        <Setter Property="Background" Value="#F3F7FF" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ToggleButton.Style>
+                        <Viewbox Margin="4">
+                            <TextBlock Text="설비예비품" />
+                        </Viewbox>
+                    </ToggleButton>
+                </Border>
+
+                <Border
+                    Grid.Row="2"
+                    Background="White"
+                    BorderBrush="#424242"
+                    BorderThickness="0.9"
+                    CornerRadius="0 0 0 0">
+                    <ToggleButton
+                        x:Name="tgnTool"
+                        Margin="1"
+                        Checked="tgnTool_Checked"
+                        FontWeight="Normal"
+                        PreviewMouseDown="tgnTool_PreviewMouseDown"
+                        Unchecked="tgnTool_Unchecked">
+                        <ToggleButton.Style>
+                            <Style TargetType="{x:Type ToggleButton}">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ToggleButton">
+                                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding Background}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter Property="Background" Value="#6C757D" />
+                                        <Setter Property="Foreground" Value="White" />
+                                    </Trigger>
+                                    <Trigger Property="IsChecked" Value="False">
+                                        <Setter Property="Background" Value="#F3F7FF" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ToggleButton.Style>
+                        <Viewbox Margin="4">
+                            <TextBlock Text="Tool" />
+                        </Viewbox>
+                    </ToggleButton>
+                </Border>
+
+                <Border
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Margin="-0.5"
+                    Background="White"
+                    BorderBrush="#424242"
+                    BorderThickness="0.9,1.4,1.4,1.4"
+                    CornerRadius="0 0 0 0">
+                    <ToggleButton
+                        x:Name="tgnAll"
+                        Margin="1"
+                        Checked="tgnAll_Checked"
+                        FontWeight="Normal"
+                        PreviewMouseDown="tgnAll_PreviewMouseDown"
+                        Unchecked="tgnAll_Unchecked">
+                        <ToggleButton.Style>
+                            <Style TargetType="{x:Type ToggleButton}">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ToggleButton">
+                                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding Background}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter Property="Background" Value="#6C757D" />
+                                        <Setter Property="Foreground" Value="White" />
+                                    </Trigger>
+                                    <Trigger Property="IsChecked" Value="False">
+                                        <Setter Property="Background" Value="#F3F7FF" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ToggleButton.Style>
+                        <StackPanel Orientation="Horizontal">
+                            <Viewbox Margin="4">
+                                <TextBlock Text="전체" />
+                            </Viewbox>
+                        </StackPanel>
+                    </ToggleButton>
+                </Border>
+            </Grid>
+
+            <Grid Grid.Row="0" Grid.Column="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="65*" />
+                    <ColumnDefinition Width="85*" />
+                </Grid.ColumnDefinitions>
+
+                <Label
+                    x:Name="lblMcInOutDate"
+                    Grid.Column="0"
+                    MouseLeftButtonUp="lblMcInOutDate_MouseLeftButtonUp">
+                    <StackPanel Margin="-2" Orientation="Horizontal">
+                        <Viewbox>
+                            <CheckBox
+                                x:Name="chkMcInOutDate"
+                                Margin="5,0,-5,0"
+                                VerticalAlignment="Center"
+                                Checked="chkMcInOutDate_Checked"
+                                Unchecked="chkMcInOutDate_Unchecked" />
+                        </Viewbox>
+                        <TextBlock VerticalAlignment="Center" Text=" 입출일자" />
+                    </StackPanel>
+                </Label>
+                <DatePicker
+                    x:Name="dtpSDate"
+                    Grid.Column="1"
+                    Padding="0"
+                    IsEnabled="False" />
+            </Grid>
+            <Grid Grid.Row="1" Grid.Column="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="65*" />
+                    <ColumnDefinition Width="85*" />
+                </Grid.ColumnDefinitions>
+                <DatePicker
+                    x:Name="dtpEDate"
+                    Grid.Column="1"
+                    Padding="0"
+                    IsEnabled="False" />
+            </Grid>
+            <Grid Grid.Row="2" Grid.Column="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Button
+                    x:Name="btnLastMonth"
+                    Grid.Column="0"
+                    Margin="1"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    Click="btnLastMonth_Click"
+                    Content="전월" />
+                <Button
+                    x:Name="btnThisMonth"
+                    Grid.Column="1"
+                    Margin="1"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    Click="btnThisMonth_Click"
+                    Content="금월" />
+                <Button
+                    x:Name="btnYesterDay"
+                    Grid.Column="2"
+                    Margin="1"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    Click="btnYesterDay_Click"
+                    Content="전일" />
+                <Button
+                    x:Name="btnToday"
+                    Grid.Column="3"
+                    Margin="1"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    Click="btnToday_Click"
+                    Content="금일" />
+            </Grid>
+
+            <Grid
+                Grid.Row="0"
+                Grid.Column="3"
+                Visibility="Hidden">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="95*" />
+                    <ColumnDefinition Width="95*" />
+                    <ColumnDefinition Width="20*" />
+                </Grid.ColumnDefinitions>
+                <Label
+                    x:Name="lblMCPartTypeGubun"
+                    Grid.Column="0"
+                    VerticalContentAlignment="Center"
+                    MouseLeftButtonUp="lblMCPartTypeGubun_MouseLeftButtonUp">
+                    <StackPanel Margin="-2" Orientation="Horizontal">
+                        <Viewbox>
+                            <CheckBox
+                                x:Name="chkMCPartTypeGubun"
+                                Margin="5,0,-5,0"
+                                VerticalAlignment="Center"
+                                Checked="chkMCPartTypeGubun_Checked"
+                                Unchecked="chkMCPartTypeGubun_Unchecked" />
+                        </Viewbox>
+                        <TextBlock VerticalAlignment="Center" Text=" 부품용도" />
+                    </StackPanel>
+                </Label>
+                <ComboBox
+                    x:Name="cboMCPartTypeGubun"
+                    Grid.Column="1"
+                    Padding="0"
+                    IsEnabled="False" />
+            </Grid>
+           
+            <Grid Grid.Row="1" Grid.Column="3">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="95*" />
+                    <ColumnDefinition Width="95*" />
+                    <ColumnDefinition Width="20*" />
+                </Grid.ColumnDefinitions>
+                <Label
+                    x:Name="lblMCPart"
+                    Grid.Column="0"
+                    VerticalContentAlignment="Center"
+                    MouseLeftButtonUp="lblMCPart_MouseLeftButtonUp">
+                    <StackPanel Margin="-2" Orientation="Horizontal">
+                        <Viewbox>
+                            <CheckBox
+                                x:Name="chkMCPart"
+                                Margin="5,0,-5,0"
+                                VerticalAlignment="Center"
+                                Checked="chkMCPart_Checked"
+                                Unchecked="chkMCPart_Unchecked" />
+                        </Viewbox>
+                        <TextBlock VerticalAlignment="Center" Text=" 예 비 품" />
+                    </StackPanel>
+                </Label>
+                <TextBox
+                    x:Name="txtMCPart"
+                    Grid.Column="1"
+                    Padding="0"
+                    IsEnabled="False"
+                    KeyDown="txtMCPart_KeyDown" />
+                <Button
+                    x:Name="btnPfMCPart"
+                    Grid.Column="2"
+                    Click="btnPfMCPart_Click"
+                    IsEnabled="False">
+                    <Image Margin="-2" Source="{DynamicResource btiPlusFind}" />
+                </Button>
+            </Grid>
+
+            <Grid Grid.RowSpan="4" Grid.Column="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button
+                        x:Name="btnSearch"
+                        Grid.Column="0"
+                        Click="btnSearch_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <Image
+                                VerticalAlignment="Center"
+                                Source="{DynamicResource btiSearch}"
+                                Style="{DynamicResource imgSize}" />
+                            <TextBlock VerticalAlignment="Center" Text="{Binding Source={StaticResource tblSearch}, Mode=OneWay, Path=Text}" />
+                        </StackPanel>
+                    </Button>
+                    <Button
+                        x:Name="btnClose"
+                        Grid.Column="1"
+                        Click="btnClose_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <Image
+                                VerticalAlignment="Center"
+                                Source="{DynamicResource btiClose}"
+                                Style="{DynamicResource imgSize}" />
+                            <TextBlock VerticalAlignment="Center" Text="{Binding Source={StaticResource tblClose}, Mode=OneWay, Path=Text}" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button
+                        x:Name="btnExcel"
+                        Grid.Column="1"
+                        Click="btnExcel_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <Image
+                                VerticalAlignment="Center"
+                                Source="{DynamicResource btiExcel}"
+                                Style="{DynamicResource imgSize}" />
+                            <TextBlock VerticalAlignment="Center" Text="{Binding Source={StaticResource tblExcel}, Mode=OneWay, Path=Text}" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </Grid>
+        </Grid>
+
+        <Grid Grid.Row="1" Margin="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="52" />
+            </Grid.RowDefinitions>
+            <DataGrid
+                x:Name="dgdPartSubul"
+                Grid.Row="0"
+                FrozenColumnCount="2"
+                Style="{DynamicResource DataGridSet1}">
+                <DataGrid.ColumnHeaderStyle>
+                    <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="MaxHeight" Value="25" />
+                        <Setter Property="MinHeight" Value="20" />
+                        <Setter Property="Background" Value="#365fb1" />
+                        <Setter Property="BorderBrush" Value="White" />
+                        <Setter Property="Foreground" Value="White" />
+                        <Setter Property="BorderThickness" Value="0.7" />
+                        <Setter Property="FontWeight" Value="Thin" />
+                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                        <EventSetter Event="Click" Handler="columnHeader_Click" />
+                    </Style>
+                </DataGrid.ColumnHeaderStyle>
+                <DataGrid.Resources>
+                    <Style TargetType="DataGridRow">
+                        <Setter Property="Background" Value="White" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding cls}" Value="0">
+                                <Setter Property="Background" Value="#E6E6E6" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding cls}" Value="5">
+                                <Setter Property="Background" Value="#D8D8D8" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+
+                </DataGrid.Resources>
+                <DataGrid.Columns>
+                    <DataGridTextColumn
+                        Width="auto"
+                        Binding="{Binding Num}"
+                        CellStyle="{StaticResource DataGridCellAndCentering}"
+                        Header="순번" />
+                    <DataGridTextColumn
+                        Width="auto"
+                        Binding="{Binding IODate_CV}"
+                        CellStyle="{StaticResource DataGridCellAndCentering}"
+                        Header="일자" />
+                    <DataGridTextColumn
+                        x:Name="dgtc_MCPartName"
+                        Width="auto"
+                        Binding="{Binding MCPartName}"
+                        Header="예비품" />
+                    <DataGridTextColumn
+                        Width="auto"
+                        Binding="{Binding ForUseName}"
+                        CellStyle="{StaticResource DataGridCellAndCentering}"
+                        Header="용도" />
+                    <DataGridTextColumn
+                        Width="auto"
+                        Binding="{Binding CustomName}"
+                        Header="입출고처" />
+                    <DataGridTextColumn
+                        Width="auto"
+                        Binding="{Binding UnitClssName}"
+                        CellStyle="{StaticResource DataGridCellAndCentering}"
+                        Header="단위" />
+                    <!--<DataGridTextColumn Header="일자" Binding="{Binding IODate_CV}" Width="auto"/>-->
+                    <DataGridTextColumn
+                        Width="auto"
+                        Binding="{Binding RemainQty}"
+                        Header="이전재고량">
+                        <DataGridTextColumn.CellStyle>
+                            <Style TargetType="DataGridCell">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Path=RemainQty, Converter={StaticResource ContainValue}}" Value="true">
+                                        <Setter Property="Foreground" Value="Red" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Path=RemainQty, Converter={StaticResource ContainValue}}" Value="false">
+                                        <Setter Property="Foreground" Value="Black" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                                <Setter Property="TextBlock.TextAlignment" Value="Right" />
+                            </Style>
+                        </DataGridTextColumn.CellStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn
+                        Width="auto"
+                        Binding="{Binding StuffQty}"
+                        Header="입고수량">
+                        <DataGridTextColumn.CellStyle>
+                            <Style TargetType="DataGridCell">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Path=StuffQty, Converter={StaticResource ContainValue}}" Value="true">
+                                        <Setter Property="Foreground" Value="Red" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Path=StuffQty, Converter={StaticResource ContainValue}}" Value="false">
+                                        <Setter Property="Foreground" Value="Black" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                                <Setter Property="TextBlock.TextAlignment" Value="Right" />
+                            </Style>
+                        </DataGridTextColumn.CellStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn
+                        Width="auto"
+                        Binding="{Binding OutQty}"
+                        Header="출고수량">
+                        <DataGridTextColumn.CellStyle>
+                            <Style TargetType="DataGridCell">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Path=OutQty, Converter={StaticResource ContainValue}}" Value="true">
+                                        <Setter Property="Foreground" Value="Red" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Path=OutQty, Converter={StaticResource ContainValue}}" Value="false">
+                                        <Setter Property="Foreground" Value="Black" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                                <Setter Property="TextBlock.TextAlignment" Value="Right" />
+                            </Style>
+                        </DataGridTextColumn.CellStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn
+                        Width="auto"
+                        Binding="{Binding StockQty}"
+                        Header="재고수량">
+                        <DataGridTextColumn.CellStyle>
+                            <Style TargetType="DataGridCell">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Path=StockQty, Converter={StaticResource ContainValue}}" Value="true">
+                                        <Setter Property="Foreground" Value="Red" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Path=StockQty, Converter={StaticResource ContainValue}}" Value="false">
+                                        <Setter Property="Foreground" Value="Black" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                                <Setter Property="TextBlock.TextAlignment" Value="Right" />
+                            </Style>
+                        </DataGridTextColumn.CellStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn
+                        Width="auto"
+                        Binding="{Binding Remark}"
+                        Header="비고" />
+                    <DataGridTextColumn
+                        Width="auto"
+                        Binding="{Binding Cls}"
+                        Header="Depth"
+                        Visibility="Hidden" />
+                    <DataGridTextColumn
+                        Width="auto"
+                        Binding="{Binding UnitClss}"
+                        Header="단위ID"
+                        Visibility="Hidden" />
+                </DataGrid.Columns>
+            </DataGrid>
+            <DataGrid
+                x:Name="dgdTotal"
+                Grid.Row="1"
+                FrozenColumnCount="2"
+                Style="{DynamicResource TotalGridSet1}">
+
+                <DataGrid.Columns>
+                    <DataGridTextColumn
+                        Width="40"
+                        Binding="{Binding MCPartName}"
+                        CellStyle="{StaticResource DataGridCellAndCentering}"
+                        Header="" />
+                    <DataGridTextColumn
+                        Width="*"
+                        Binding="{Binding RemainQty}"
+                        CellStyle="{StaticResource DataGridCellAndCentering}"
+                        Header="이전재고량" />
+                    <DataGridTextColumn
+                        Width="*"
+                        Binding="{Binding StuffQty}"
+                        CellStyle="{StaticResource DataGridCellAndCentering}"
+                        Header="입고수량" />
+                    <DataGridTextColumn
+                        Width="*"
+                        Binding="{Binding OutQty}"
+                        CellStyle="{StaticResource DataGridCellAndCentering}"
+                        Header="출고수량" />
+                    <DataGridTextColumn
+                        Width="*"
+                        Binding="{Binding StockQty}"
+                        CellStyle="{StaticResource DataGridCellAndCentering}"
+                        Header="재고수량" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+    </Grid>
+</UserControl>

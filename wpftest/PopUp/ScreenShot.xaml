@@ -1,0 +1,40 @@
+﻿<Window x:Class="WizMes_SungShinNQ.PopUp.ScreenShot"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:WizMes_SungShinNQ.PopUp"
+      mc:Ignorable="d" Loaded="ScreenShot_Loaded"
+      d:DesignHeight="620" d:DesignWidth="820"
+      Title="이미지 보기"
+      PreviewMouseWheel="ScreenShot_PreviewMouseWheel">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="3*"/>
+            <RowDefinition Height="99*"/>
+        </Grid.RowDefinitions>
+        <Grid.ContextMenu>
+            <ContextMenu>
+                <MenuItem x:Name="btnSaveNameOther" Header="다른이름으로 저장" Click="btnSaveNameOther_Click"/>
+                <Separator/>
+                <!--<MenuItem x:Name="btnZoom100" Header="100% 크기 (Ctrl+0)" Click="btnZoom100_Click"/>-->
+                <MenuItem x:Name="btnZoomFit" Header="창에 맞춤 (Ctrl+1)" Click="btnZoomFit_Click"/>
+                <Separator/>
+                <MenuItem x:Name="btnClose" Header="닫기" Click="btnClose_Click"/>
+            </ContextMenu>
+        </Grid.ContextMenu>
+        <Viewbox Stretch="Uniform" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0">
+            <TextBlock Text="※마우스 휠로 확대/축소, 드래그로 이동, 우클릭으로 메뉴 표시" Foreground="Blue" FontWeight="Bold"/>
+        </Viewbox>
+
+        <!-- Border with ClipToBounds for proper image containment -->
+        <Border Grid.Row="1" x:Name="ImageBorder" ClipToBounds="True">
+            <Image x:Name="ImageData" 
+                   RenderOptions.BitmapScalingMode="HighQuality"
+                   Stretch="Uniform"
+                   MouseLeftButtonDown="ImageData_MouseLeftButtonDown"
+                   MouseMove="ImageData_MouseMove"
+                   MouseLeftButtonUp="ImageData_MouseLeftButtonUp"/>
+        </Border>
+    </Grid>
+</Window>
