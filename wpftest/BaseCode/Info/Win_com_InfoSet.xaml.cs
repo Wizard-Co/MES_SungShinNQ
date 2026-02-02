@@ -24,6 +24,9 @@ namespace WizMes_SungShinNQ
     /// </summary>
     public partial class Win_com_InfoSet : UserControl
     {
+        string stDate = string.Empty;
+        string stTime = string.Empty;
+
         Lib lib = new Lib();
         string strFlag = string.Empty;
         int rowNum = 0;
@@ -68,6 +71,11 @@ namespace WizMes_SungShinNQ
         //
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
+            stDate = DateTime.Now.ToString("yyyyMMdd");
+            stTime = DateTime.Now.ToString("HHmm");
+
+            DataStore.Instance.InsertLogByFormS(this.GetType().Name, stDate, stTime, "S");
+
             Lib.Instance.UiLoading(sender);
 
             // 기존에 있던 공지사항 사원 리스트 제거
@@ -174,6 +182,8 @@ namespace WizMes_SungShinNQ
         // 저장 완료, 취소시
         private void CompleteCancelMode()
         {
+            chkUpYn_All.IsChecked = false;
+            chkUpYn_AllUser.IsEnabled = false;
             // 상단바
             btnSave.IsEnabled = false;
             btnSearch.IsEnabled = true;
@@ -247,7 +257,7 @@ namespace WizMes_SungShinNQ
 
         private void lblSearchDay_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if(chkSearchDay.IsChecked == true)
+            if (chkSearchDay.IsChecked == true)
             {
                 chkSearchDay.IsChecked = false;
             }
@@ -292,7 +302,7 @@ namespace WizMes_SungShinNQ
         // 전월 버튼 클릭 이벤트
         private void btnLastMonth_Click(object sender, RoutedEventArgs e)
         {
-            DateTime [] SearchDate = lib.BringLastMonthContinue(FromDateSearch.SelectedDate.Value);
+            DateTime[] SearchDate = lib.BringLastMonthContinue(FromDateSearch.SelectedDate.Value);
 
             FromDateSearch.SelectedDate = SearchDate[0];
             ToDateSearch.SelectedDate = SearchDate[1];
@@ -341,6 +351,7 @@ namespace WizMes_SungShinNQ
         // 닫기 버튼 클릭 이벤트
         private void btnClose_Click(object sender, RoutedEventArgs e)
         {
+            DataStore.Instance.InsertLogByFormS(this.GetType().Name, stDate, stTime, "E");
             Lib.Instance.ChildMenuClose(this.ToString());
         }
         // 검색 버튼 클릭 이벤트
@@ -393,13 +404,13 @@ namespace WizMes_SungShinNQ
                     if (aop.Equals("A")) // 전체공지사항 저장
                     {
                         sqlParameter.Clear();
-
+                        string UpYn = (chkUpYn_All.IsChecked == true) ? "Y" : "N";
                         sqlParameter.Add("sCompanyID", "");
                         sqlParameter.Add("sFromDate", FromDate_All.SelectedDate.Value.ToString("yyyyMMdd"));
                         sqlParameter.Add("sToDate", ToDate_All.SelectedDate.Value.ToString("yyyyMMdd"));
                         sqlParameter.Add("Info", txtContent_All.Text);
                         sqlParameter.Add("UserID", MainWindow.CurrentUser);
-
+                        sqlParameter.Add("UpYn", UpYn);
                         if (strFlag.Equals("IA")) // 전체 공지사항 추가
                         {
                             sqlParameter.Add("sInfoID", "");
@@ -453,7 +464,7 @@ namespace WizMes_SungShinNQ
                                     flag = true;
 
                                 }
-                            }                         
+                            }
                         }
 
                         // FTP 파일 업로드 AttachFileUpdate
@@ -482,13 +493,13 @@ namespace WizMes_SungShinNQ
                     else if (aop.Equals("P")) // 개별공지사항 저장
                     {
                         sqlParameter.Clear();
-
+                        string UpYn = (chkUpYn_AllUser.IsChecked == true) ? "Y" : "N";
                         sqlParameter.Add("sCompanyID", "");
                         sqlParameter.Add("sFromDate", FromDate_Person.SelectedDate.Value.ToString("yyyyMMdd"));
                         sqlParameter.Add("sToDate", ToDate_Person.SelectedDate.Value.ToString("yyyyMMdd"));
                         sqlParameter.Add("Info", txtContent_Person.Text);
                         sqlParameter.Add("UserID", MainWindow.CurrentUser);
-
+                        sqlParameter.Add("UpYn", UpYn);
                         // 개별 공지사항 저장 → 생성된 InfoID 를 output
                         if (strFlag.Equals("IP"))
                         {
@@ -532,7 +543,7 @@ namespace WizMes_SungShinNQ
                             ListParameter.Clear();
 
                             // output 된 InfoID 를 가지고 공지대상 저장
-                            for (int i = 0;  i < dgdTargetPerson.Items.Count; i++)
+                            for (int i = 0; i < dgdTargetPerson.Items.Count; i++)
                             {
                                 Dictionary<string, object> sqlParameterSub = new Dictionary<string, object>();
                                 sqlParameterSub.Clear();
@@ -623,7 +634,7 @@ namespace WizMes_SungShinNQ
                         }
 
                     }
-                    
+
                 }
             }
             catch (Exception ex)
@@ -642,14 +653,14 @@ namespace WizMes_SungShinNQ
 
 
         #region 유효성 검사
-        
+
         private bool CheckData()
         {
             bool flag = true;
 
             if (strFlag.Trim().Equals("IA") || strFlag.Trim().Equals("UA"))
             {
-                if (FromDate_All.SelectedDate == null 
+                if (FromDate_All.SelectedDate == null
                     || FromDate_All.SelectedDate.ToString().Trim().Equals("")
                     || ToDate_All.SelectedDate == null
                     || ToDate_All.SelectedDate.ToString().Trim().Equals(""))
@@ -735,7 +746,7 @@ namespace WizMes_SungShinNQ
                     result = DateTime.Parse(date);
                 }
             }
-           
+
 
             return result;
         }
@@ -777,6 +788,11 @@ namespace WizMes_SungShinNQ
             txtFilePath3.Text = "";
 
             rowNumAll = dgdAll.SelectedIndex;
+            // ✅ 최상단 공지 체크박스 활성화
+            chkUpYn_All.IsEnabled = true;
+
+            // ✅ 새로 추가할 때는 체크 해제
+            chkUpYn_All.IsChecked = false;
         }
 
         // 전체 공지사항 수정 버튼 클릭 이벤트
@@ -786,6 +802,10 @@ namespace WizMes_SungShinNQ
 
             if (NoticeAll != null)
             {
+                chkUpYn_All.IsEnabled = true;
+
+                // ✅ 새로 추가할 때는 체크 해제
+                chkUpYn_All.IsChecked = false;
                 strFlag = "UA";
                 SaveUpdateMode();
             }
@@ -821,7 +841,7 @@ namespace WizMes_SungShinNQ
             {
                 MessageBox.Show("삭제할 전체공지사항을 선택해주세요.");
                 return;
-            } 
+            }
 
         }
 
@@ -829,7 +849,8 @@ namespace WizMes_SungShinNQ
         private void btnCancelAll_Click(object sender, RoutedEventArgs e)
         {
             CompleteCancelMode();
-
+            chkUpYn_All.IsChecked = false;
+            chkUpYn_All.IsEnabled = false;
             rowNum = 0;
             re_Search(rowNumAll, rowNumPerson);
         }
@@ -996,7 +1017,7 @@ namespace WizMes_SungShinNQ
         private void btnImgSeeCheckAndSetting()
         {
             if (!txtFileName1.Text.Trim().Equals(""))
-            {               
+            {
                 btn_DownAttatch_M.IsEnabled = true;
                 //if (strFlag.Trim().Equals("UA") || strFlag.Trim().Equals("IA")) { btn_DelAttatch_M.IsEnabled = true; }
             }
@@ -1169,7 +1190,7 @@ namespace WizMes_SungShinNQ
             }
 
         }
-      
+
 
         // 1) 첨부문서가 있을경우, 2) FTP에 정상적으로 업로드가 완료된 경우.  >> DB에 정보 업데이트 
         private void AttachFileUpdate(string InfoID)
@@ -1202,7 +1223,7 @@ namespace WizMes_SungShinNQ
                 DataStore.Instance.CloseConnection(); //2021-09-13 
             }
         }
-       
+
         #endregion
 
         #endregion
@@ -1274,7 +1295,7 @@ namespace WizMes_SungShinNQ
         // 개별 공지사항 추가 버튼 클릭 이벤트
         private void btnAddPerson_Click(object sender, RoutedEventArgs e)
         {
-            
+
 
             // 공지사항 지정에 오늘날짜가 선택되도록
             FromDate_Person.SelectedDate = DateTime.Today.Date;
@@ -1289,6 +1310,10 @@ namespace WizMes_SungShinNQ
             dgdTargetPerson.Items.Clear();
 
             rowNumAll = dgdPerson.SelectedIndex;
+            chkUpYn_AllUser.IsEnabled = true;
+
+            // ✅ 새로 추가할 때는 체크 해제
+            chkUpYn_AllUser.IsChecked = false;
 
         }
         // 개별 공지사항 수정 버튼 클릭 이벤트
@@ -1298,6 +1323,10 @@ namespace WizMes_SungShinNQ
 
             if (NoticePerson != null)
             {
+                chkUpYn_AllUser.IsEnabled = true;
+
+                // ✅ 새로 추가할 때는 체크 해제
+                chkUpYn_AllUser.IsChecked = false;
                 strFlag = "UP";
                 SaveUpdateMode();
             }
@@ -1339,12 +1368,13 @@ namespace WizMes_SungShinNQ
         private void btnCancelPerson_Click(object sender, RoutedEventArgs e)
         {
             CompleteCancelMode();
-
+            chkUpYn_All.IsChecked = false;
+            chkUpYn_AllUser.IsEnabled = false;
             rowNum = 0;
             re_Search(rowNumAll, rowNumPerson);
         }
 
-        
+
 
         #endregion
 
@@ -1358,7 +1388,7 @@ namespace WizMes_SungShinNQ
             {
                 dgdAll.SelectedIndex = selectedIndexAll;
             }
-            if(dgdPerson.Items.Count > 0)
+            if (dgdPerson.Items.Count > 0)
             {
                 dgdPerson.SelectedIndex = selectedIndexPerson;
             }
@@ -1366,65 +1396,78 @@ namespace WizMes_SungShinNQ
             // 검색건수 작성
             int noticeAll_count = dgdAll.Items.Count;
             int noticePerson_count = dgdPerson.Items.Count;
-            tblNoticeCount.Text = "▶ 검색 결과 : 전체 공지 : " + noticeAll_count 
+            tblNoticeCount.Text = "▶ 검색 결과 : 전체 공지 : " + noticeAll_count
                 + "건 / 개별 공지 : " + noticePerson_count + "건";
         }
 
         // 전체 공지사항 검색
         private void FillGridAll()
         {
-            if (dgdAll.Items.Count > 0)
-            {
-                dgdAll.Items.Clear();
-            }
-
             try
             {
-
                 Dictionary<string, object> sqlParameter = new Dictionary<string, object>();
-                sqlParameter.Clear();
                 sqlParameter.Add("sCompanyID", "");
-                sqlParameter.Add("SDate", chkSearchDay.IsChecked == true ? FromDateSearch.SelectedDate.Value.ToString("yyyyMMdd") : "20000101");
-                sqlParameter.Add("EDate", chkSearchDay.IsChecked == true ? ToDateSearch.SelectedDate.Value.ToString("yyyyMMdd") : "29000101");
+                sqlParameter.Add("SDate", chkSearchDay.IsChecked == true
+                                        ? FromDateSearch.SelectedDate.Value.ToString("yyyyMMdd")
+                                        : "20000101");
+                sqlParameter.Add("EDate", chkSearchDay.IsChecked == true
+                                        ? ToDateSearch.SelectedDate.Value.ToString("yyyyMMdd")
+                                        : "29000101");
 
-                DataSet ds = DataStore.Instance.ProcedureToDataSet("xp_Info_sInfoByDate", sqlParameter, false);
+                DataSet ds = DataStore.Instance.ProcedureToDataSet_LogWrite(
+                                "xp_Info_sInfoByDate", sqlParameter, true, "R");
 
-                if ( ds != null && ds.Tables.Count > 0)
+                if (ds == null || ds.Tables.Count == 0)
+                    return;
+
+                DataTable dt = ds.Tables[0];
+                if (dt.Rows.Count == 0)
+                    return;
+
+                // ✅ 1. 리스트로 받기
+                List<Win_info_Infoset_U_CodeView_All> list =
+                    new List<Win_info_Infoset_U_CodeView_All>();
+
+                foreach (DataRow dr in dt.Rows)
                 {
-                    DataTable dt = ds.Tables[0];
-                    int i = 0;
-
-                    if (dt.Rows.Count == 0)
+                    list.Add(new Win_info_Infoset_U_CodeView_All()
                     {
-                        // MessageBox.Show("조회된 데이터가 없습니다.");
-                        return;
-                    }
-                    else
-                    {
-                        DataRowCollection drc = dt.Rows;
+                        FromDate = DateTime.ParseExact(
+                                        dr["FromDate"].ToString(),
+                                        "yyyyMMdd",
+                                        null).ToString("yyyy-MM-dd"),
 
-                        foreach (DataRow dr in drc)
-                        {
-                            var NoticeAll = new Win_info_Infoset_U_CodeView_All()
-                            {
-                                FromDate = DateTime.ParseExact(dr["FromDate"].ToString(), "yyyyMMdd", null).ToString("yyyy-MM-dd"),
-                                ToDate = DateTime.ParseExact(dr["ToDate"].ToString(), "yyyyMMdd", null).ToString("yyyy-MM-dd"),
-                                Info = dr["Info"] as string,
-                                InfoID = dr["InfoID"].ToString(),
-                                PartFile = dr["PartFile"].ToString(),
-                                PartPath = dr["PartPath"].ToString(),
-                                AttachFile1 = dr["AttachFile1"].ToString(),
-                                AttachPath1 = dr["AttachPath1"].ToString(),
-                                AttachFile2 = dr["AttachFile2"].ToString(),
-                                AttachPath2 = dr["AttachPath2"].ToString(),
-                                AttachFile3 = dr["AttachFile3"].ToString(),
-                                AttachPath3 = dr["AttachPath3"].ToString()
-                            };
+                        ToDate = DateTime.ParseExact(
+                                        dr["ToDate"].ToString(),
+                                        "yyyyMMdd",
+                                        null).ToString("yyyy-MM-dd"),
 
-                            dgdAll.Items.Add(NoticeAll);
-                        }
-                    }
+                        Info = dr["Info"] as string,
+                        InfoID = dr["InfoID"].ToString(),
+
+                        // 🔥 최상단 공지 여부 (없으면 N)
+                        UpYn = dr.Table.Columns.Contains("UpYn") && dr["UpYn"] != DBNull.Value
+                                ? dr["UpYn"].ToString()
+                                : "N",
+
+                        PartFile = dr["PartFile"].ToString(),
+                        PartPath = dr["PartPath"].ToString(),
+                        AttachFile1 = dr["AttachFile1"].ToString(),
+                        AttachPath1 = dr["AttachPath1"].ToString(),
+                        AttachFile2 = dr["AttachFile2"].ToString(),
+                        AttachPath2 = dr["AttachPath2"].ToString(),
+                        AttachFile3 = dr["AttachFile3"].ToString(),
+                        AttachPath3 = dr["AttachPath3"].ToString()
+                    });
                 }
+
+                // ✅ 2. UpYn == Y 인 것만 위로 (여러 개면 기존 순서 유지)
+                var orderedList = list
+                    .OrderByDescending(x => x.UpYn == "Y")
+                    .ToList();
+
+                // ✅ 3. 한 번에 새로 그림
+                dgdAll.ItemsSource = orderedList;
             }
             catch (Exception ex)
             {
@@ -1439,53 +1482,55 @@ namespace WizMes_SungShinNQ
         // 개별 공지사항 검색
         private void FillGridPerson()
         {
-            if (dgdPerson.Items.Count > 0)
-            {
-                dgdPerson.Items.Clear();
-            }
-
             try
             {
-
-                // 개별 공지사항 내용
                 Dictionary<string, object> sqlParameter = new Dictionary<string, object>();
-                sqlParameter.Clear();
                 sqlParameter.Add("sCompanyID", "");
-                sqlParameter.Add("FDate", chkSearchDay.IsChecked == true ? FromDateSearch.SelectedDate.Value.ToString("yyyyMMdd") : "20000101");
-                sqlParameter.Add("TDate", chkSearchDay.IsChecked == true ? ToDateSearch.SelectedDate.Value.ToString("yyyyMMdd") : "29000101");
+                sqlParameter.Add("FDate", chkSearchDay.IsChecked == true
+                                        ? FromDateSearch.SelectedDate.Value.ToString("yyyyMMdd")
+                                        : "20000101");
+                sqlParameter.Add("TDate", chkSearchDay.IsChecked == true
+                                        ? ToDateSearch.SelectedDate.Value.ToString("yyyyMMdd")
+                                        : "29000101");
                 sqlParameter.Add("PersonID", MainWindow.CurrentPersonID);
 
-                DataSet ds = DataStore.Instance.ProcedureToDataSet("xp_Info_sInfoUserByPersonID", sqlParameter, false);
+                DataSet ds = DataStore.Instance.ProcedureToDataSet(
+                                "xp_Info_sInfoUserByPersonID", sqlParameter, false);
 
-                if (ds != null && ds.Tables.Count > 0)
+                if (ds == null || ds.Tables.Count == 0)
+                    return;
+
+                DataTable dt = ds.Tables[0];
+                if (dt.Rows.Count == 0)
+                    return;
+
+                // ✅ 1. List로 담기
+                List<Win_info_Infoset_U_CodeView_Person> list =
+                    new List<Win_info_Infoset_U_CodeView_Person>();
+
+                foreach (DataRow dr in dt.Rows)
                 {
-                    DataTable dt = ds.Tables[0];
-                    int i = 0;
-
-                    if (dt.Rows.Count == 0)
+                    list.Add(new Win_info_Infoset_U_CodeView_Person()
                     {
-                        // MessageBox.Show("조회된 데이터가 없습니다.");
-                        return;
-                    }
-                    else
-                    {
-                        DataRowCollection drc = dt.Rows;
+                        per_FromDate = dr["FromDate"].ToString(),
+                        per_ToDate = dr["ToDate"].ToString(),
+                        per_Info = dr["Info"].ToString(),
+                        per_InfoID = dr["InfoID"].ToString(),
 
-                        foreach (DataRow dr in drc)
-                        {
-                            var NoticePerson = new Win_info_Infoset_U_CodeView_Person()
-                            {
-                                per_FromDate = dr["FromDate"].ToString(),
-                                per_ToDate = dr["ToDate"].ToString(),
-                                per_Info = dr["Info"].ToString(),
-                                per_InfoID = dr["InfoID"].ToString()
-                            };
-
-                            dgdPerson.Items.Add(NoticePerson);
-                        }
-                    }
+                        // 🔥 최상단 공지 여부 (없으면 N)
+                        UpYn = dr.Table.Columns.Contains("UpYn") && dr["UpYn"] != DBNull.Value
+                                ? dr["UpYn"].ToString()
+                                : "N"
+                    });
                 }
 
+                // ✅ 2. UpYn == Y 인 것만 위로 (여러 개면 기존 순서 유지)
+                var orderedList = list
+                    .OrderByDescending(x => x.UpYn == "Y")
+                    .ToList();
+
+                // ✅ 3. 한 번에 새로 그림
+                dgdPerson.ItemsSource = orderedList;
             }
             catch (Exception ex)
             {
@@ -1547,7 +1592,7 @@ namespace WizMes_SungShinNQ
                 }
 
                 string[] Confirm = new string[2];
-                Confirm = DataStore.Instance.ExecuteAllProcedureOutputNew(Prolist, ListParameter);
+                Confirm = DataStore.Instance.ExecuteAllProcedureOutputNew_NewLog(Prolist, ListParameter, "D");
                 if (Confirm[0] != "success")
                 {
                     MessageBox.Show("[삭제 실패]\r\n" + Confirm[1].ToString());
@@ -1685,7 +1730,7 @@ namespace WizMes_SungShinNQ
                 Left_Click_Person_name = string.Empty;
                 Left_Click_Person_ID = string.Empty;
             }
-                
+
         }
         // 공지대상 사원 삭제 버튼 클릭 이벤트
         private void btn_MoveDelete_Click(object sender, RoutedEventArgs e)
@@ -1730,7 +1775,7 @@ namespace WizMes_SungShinNQ
             tb.Text = "흐아ㅓㄹ나ㅣ어리ㅏㄴ";
         }
 
-      
+
     }
 
     class Win_info_Infoset_U_CodeView_All : BaseView
@@ -1756,6 +1801,8 @@ namespace WizMes_SungShinNQ
         public string AttachFile3 { get; set; }
         public string AttachPath3 { get; set; }
 
+        public string UpYn { get; set; }
+
     }
 
     class Win_info_Infoset_U_CodeView_Person : BaseView
@@ -1765,6 +1812,8 @@ namespace WizMes_SungShinNQ
         public string per_ToDate { get; set; }
         public string per_Info { get; set; }
         public string per_InfoID { get; set; }
+
+        public string UpYn { get; set; }
     }
 
     public class PersonViewModel

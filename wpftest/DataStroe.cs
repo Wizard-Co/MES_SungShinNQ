@@ -3938,7 +3938,103 @@ namespace WizMes_SungShinNQ
                 CloseConnection();
             }
         }
+        public string[] InsertLogByFormS(String form, string stDate, string stTime, string seGubun)
+        {
+            try
+            {
+                if (p_Connection.State == ConnectionState.Closed)
+                {
+                    p_Connection.Open();
+                }
 
+                int result = 0;
+                string formName = form;
+                string userid = "";
+
+                if (p_Command.Parameters.Count > 0)
+                {
+                    foreach (SqlParameter param in p_Command.Parameters)
+                    {
+                        if (param.Value == null)
+                        {
+                            param.Value = "";
+                        }
+
+                        if (param.ParameterName.ToLower().Contains("userid"))
+                        {
+                            userid = param.Value.ToString();
+                        }
+                    }
+                }
+
+                if (userid.Equals(""))
+                {
+                    userid = MainWindow.CurrentUser;
+                }
+
+                //시작이면
+                if (seGubun.Equals("S"))
+                {
+                    p_Command.CommandText = "xp_iWorkLogWPF_New_UseTime";
+                    p_Command.CommandType = CommandType.StoredProcedure;
+                    p_Command.Parameters.Clear();
+
+                    p_Command.Parameters.AddWithValue("@sCompanyID", MainWindow.CompanyID);
+                    p_Command.Parameters.AddWithValue("@sMenuID", "");
+                    p_Command.Parameters.AddWithValue("@sWorkFlag", "S"); //seGubun과 workFlag는 다름
+                    p_Command.Parameters.AddWithValue("@sWorkDate", stDate);
+                    p_Command.Parameters.AddWithValue("@sWorkTime", stTime);
+                    p_Command.Parameters.AddWithValue("@sStartDate", stDate);
+                    p_Command.Parameters.AddWithValue("@sStartTime", stTime);
+
+                    p_Command.Parameters.AddWithValue("@sUserID", userid);
+                    p_Command.Parameters.AddWithValue("@sWorkComputer", System.Environment.MachineName);
+                    p_Command.Parameters.AddWithValue("@sWorkComputerIP", lib.UserIPAddress);
+                    p_Command.Parameters.AddWithValue("@sWorkLog", "");
+                    p_Command.Parameters.AddWithValue("@sProgramID", formName);
+                }
+                else //종료이면
+                {
+                    p_Command.CommandText = "xp_uWorkLogWPF_New_UseTime";
+                    p_Command.CommandType = CommandType.StoredProcedure;
+                    p_Command.Parameters.Clear();
+
+                    p_Command.Parameters.AddWithValue("@sWorkFlag", "S"); //seGubun과 workFlag는 다름
+                    p_Command.Parameters.AddWithValue("@sStartDate", stDate);
+                    p_Command.Parameters.AddWithValue("@sStartTime", stTime);
+                    p_Command.Parameters.AddWithValue("@sEndDate", DateTime.Now.ToString("yyyyMMdd"));
+                    p_Command.Parameters.AddWithValue("@sEndTime", DateTime.Now.ToString("HHmm"));
+
+                    p_Command.Parameters.AddWithValue("@sUserID", userid);
+                    p_Command.Parameters.AddWithValue("@sWorkComputer", System.Environment.MachineName);
+                    p_Command.Parameters.AddWithValue("@sWorkComputerIP", lib.UserIPAddress);
+                    p_Command.Parameters.AddWithValue("@sProgramID", formName);
+                }
+
+
+                result = p_Command.ExecuteNonQuery();
+
+                return new String[] { "success", "success" };
+            }
+            catch (NullReferenceException ex)
+            {
+                MessageBox.Show(ex.ToString());
+                return new String[] { "success", "NullReferenceException" };
+            }
+            catch (Exception ex)
+            {
+                return new String[] { "failure", ex.Message };
+            }
+            finally
+            {
+
+                if (p_Connection.State != ConnectionState.Closed)
+                {
+                    p_Connection.Close();
+                }
+            }
+
+        }
 
         public string[] ExecuteProcedure_NewLog(string procedureName, Dictionary<string, object> sqlParameter, string crudGubn)
         {

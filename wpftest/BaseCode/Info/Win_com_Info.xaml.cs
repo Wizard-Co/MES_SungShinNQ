@@ -151,63 +151,85 @@ namespace WizMes_SungShinNQ
                 sqlParameter.Add("SDate", yyyyMMdd);
                 sqlParameter.Add("EDate", yyyyMMdd);
 
-                DataSet ds = DataStore.Instance.ProcedureToDataSet("xp_Info_sInfoByDate", sqlParameter, false);
+                DataSet ds = DataStore.Instance.ProcedureToDataSet(
+                    "xp_Info_sInfoByDate",
+                    sqlParameter,
+                    false);
 
                 if (ds != null && ds.Tables.Count > 0)
                 {
-                    DataTable dt = null;
-                    dt = ds.Tables[0];
+                    DataTable dt = ds.Tables[0];
+
+                    // ⭐ UpYn = 'Y' 인 공지 최상단
+                    dt.DefaultView.Sort = "UpYn DESC";
+                    dt = dt.DefaultView.ToTable();
+
                     if (dt.Rows.Count == 0)
                     {
                         dt.Clear();
                         return;
                     }
-                    else
+
+                    dgAttachFile.Items.Clear();
+                    txtAllNotice.Text = "";
+
+                    for (int i = 0; i < dt.Rows.Count; i++)
                     {
-                        dgAttachFile.Items.Clear();
+                        txtAllNotice.Text += "\r\n";
 
-                        for (int i = 0; i < dt.Rows.Count; i++)
+                        string ShowNotice = dt.Rows[i]["Info"].ToString();
+                        txtAllNotice.Text += ShowNotice;
+
+                        // 첨부파일 처리
+                        if (dt.Rows[i]["PartFile"].ToString() != string.Empty)
                         {
-                            txtAllNotice.Text = txtAllNotice.Text + "\r\n";
+                            dgAttachFile.Items.Add(new GetDatagridItems
+                            {
+                                ColInfoID = dt.Rows[i]["InfoID"].ToString(),
+                                ColAttachFile = dt.Rows[i]["PartFile"].ToString(),
+                                ColAttachPath = dt.Rows[i]["PartPath"].ToString()
+                            });
+                        }
 
-                            string ShowNotice = dt.Rows[i]["Info"].ToString();
-                            txtAllNotice.Text = txtAllNotice.Text + ShowNotice;
+                        if (dt.Rows[i]["AttachFile1"].ToString() != string.Empty)
+                        {
+                            dgAttachFile.Items.Add(new GetDatagridItems
+                            {
+                                ColInfoID = dt.Rows[i]["InfoID"].ToString(),
+                                ColAttachFile = dt.Rows[i]["AttachFile1"].ToString(),
+                                ColAttachPath = dt.Rows[i]["AttachPath1"].ToString()
+                            });
+                        }
 
-                            ////////////////////////////////////////////////////////////////////////////
-                            //텍스트 표시 하고, 첨부문서는 데이터그리드에 따로 add 하고,
-                            ///////////////////////////////////////////////////////////////////////////
-                            ///
+                        if (dt.Rows[i]["AttachFile2"].ToString() != string.Empty)
+                        {
+                            dgAttachFile.Items.Add(new GetDatagridItems
+                            {
+                                ColInfoID = dt.Rows[i]["InfoID"].ToString(),
+                                ColAttachFile = dt.Rows[i]["AttachFile2"].ToString(),
+                                ColAttachPath = dt.Rows[i]["AttachPath2"].ToString()
+                            });
+                        }
 
-                            if (dt.Rows[i]["PartFile"].ToString() != string.Empty)
+                        if (dt.Rows[i]["AttachFile3"].ToString() != string.Empty)
+                        {
+                            dgAttachFile.Items.Add(new GetDatagridItems
                             {
-                                var data = new GetDatagridItems { ColInfoID = dt.Rows[i]["InfoID"].ToString(), ColAttachFile = dt.Rows[i]["PartFile"].ToString(), ColAttachPath = dt.Rows[i]["PartPath"].ToString() };
-                                dgAttachFile.Items.Add(data);
-                            }
-                            if (dt.Rows[i]["AttachFile1"].ToString() != string.Empty)
-                            {
-                                var data = new GetDatagridItems { ColInfoID = dt.Rows[i]["InfoID"].ToString(), ColAttachFile = dt.Rows[i]["AttachFile1"].ToString(), ColAttachPath = dt.Rows[i]["AttachPath1"].ToString() };
-                                dgAttachFile.Items.Add(data);
-                            }
-                            if (dt.Rows[i]["AttachFile2"].ToString() != string.Empty)
-                            {
-                                var data = new GetDatagridItems { ColInfoID = dt.Rows[i]["InfoID"].ToString(), ColAttachFile = dt.Rows[i]["AttachFile2"].ToString(), ColAttachPath = dt.Rows[i]["AttachPath2"].ToString() };
-                                dgAttachFile.Items.Add(data);
-                            }
-                            if (dt.Rows[i]["AttachFile3"].ToString() != string.Empty)
-                            {
-                                var data = new GetDatagridItems { ColInfoID = dt.Rows[i]["InfoID"].ToString(), ColAttachFile = dt.Rows[i]["AttachFile3"].ToString(), ColAttachPath = dt.Rows[i]["AttachPath3"].ToString() };
-                                dgAttachFile.Items.Add(data);
-                            }
+                                ColInfoID = dt.Rows[i]["InfoID"].ToString(),
+                                ColAttachFile = dt.Rows[i]["AttachFile3"].ToString(),
+                                ColAttachPath = dt.Rows[i]["AttachPath3"].ToString()
+                            });
                         }
                     }
+
                     dt.Clear();
                 }
+
                 ds.Clear();
-                //DataStore.Instance.CloseConnection(); 2021-09-13
             }
-            catch(Exception ee)
+            catch (Exception ee)
             {
-                MessageBox.Show("오류지점 - 전체공지 조회" + ee.ToString());
+                MessageBox.Show("오류지점 - 전체공지 조회 : " + ee.ToString());
             }
             finally
             {
@@ -225,29 +247,38 @@ namespace WizMes_SungShinNQ
                 sqlParameter.Add("Date", yyyyMMdd);
                 sqlParameter.Add("UserID", MainWindow.CurrentUser);
 
-                DataSet ds = DataStore.Instance.ProcedureToDataSet("xp_Info_sInfoUserByUserID", sqlParameter, false);
+                DataSet ds = DataStore.Instance.ProcedureToDataSet(
+                    "xp_Info_sInfoUserByUserID",
+                    sqlParameter,
+                    false);
 
                 if (ds != null && ds.Tables.Count > 0)
                 {
-                    DataTable dt = null;
-                    dt = ds.Tables[0];
+                    DataTable dt = ds.Tables[0];
+
+                    // ⭐ UpYn 컬럼이 있을 때만 정렬
+                    if (dt.Columns.Contains("UpYn"))
+                    {
+                        dt.DefaultView.Sort = "UpYn DESC";
+                        dt = dt.DefaultView.ToTable();
+                    }
+
                     if (dt.Rows.Count == 0)
                     {
                         dt.Clear();
                         return;
                     }
-                    else
+
+                    txtPersonNotice.Text = "";
+
+                    for (int i = 0; i < dt.Rows.Count; i++)
                     {
-                        for (int i = 0; i < dt.Rows.Count; i++)
-                        {
-                            string ShowNotice = dt.Rows[i]["Info"].ToString();
-                            txtPersonNotice.Text = ShowNotice;
-                            txtPersonNotice.Text = txtPersonNotice.Text + "\r\n";
-                        }
+                        string ShowNotice = dt.Rows[i]["Info"].ToString();
+                        txtPersonNotice.Text += ShowNotice + "\r\n";
                     }
                 }
             }
-            catch(Exception ee)
+            catch (Exception ee)
             {
                 MessageBox.Show("오류지점 - 개별공지 조회 : " + ee.ToString());
             }
