@@ -1,4 +1,6 @@
 ﻿
+using LiveCharts;
+using LiveCharts.Wpf;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -7,10 +9,11 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using WizMes_SungShinNQ;
 using WizMes_SungShinNQ.PopUp;
 using WizMes_SungShinNQ.PopUP;
-using WizMes_SungShinNQ;
 using WPF.MDI;
+
 
 namespace WizMes_SungShinNQ
 {
@@ -679,10 +682,19 @@ namespace WizMes_SungShinNQ
                     if (dt.Rows.Count > 0)
                     {
                         DataRowCollection drc = dt.Rows;
+                        int cnt = 0;
 
                         foreach (DataRow dr in drc)
                         {
                             i++;
+
+                            var cls = dr["cls"].ToString();
+
+                            if (cls == "1")
+                            {
+                                cnt++;   
+                            }
+
                             var WinM = new Win_Prd_ProcessResultSum_Q_ByProcessMachine()
                             {
                                 cls = dr["cls"].ToString(),
@@ -699,9 +711,11 @@ namespace WizMes_SungShinNQ
                                 UnitPrice = stringFormatN0(dr["UnitPrice"]),
                                 Amount = stringFormatN0(dr["Amount"]),
                                 WorkTime = stringFormatN1(dr["WorkTime"]),
-                                Num = i
+                                Num = i,
+                                Cnt = ""   // 기본값
                             };
 
+                            
                             if (WinM.cls.Equals("2")) // 호기계
                             {
                                 WinM.BuyerModel = "호기계";
@@ -723,16 +737,22 @@ namespace WizMes_SungShinNQ
                                 WinM.QtyPerBox = "";
 
                                 dgdByProcessTotal.Items.Add(WinM);
+                                WinM.Cnt = cnt.ToString();
                             }
                             else
                             {
                                 dgdByProcess.Items.Add(WinM);
                             }
 
+       
+
 
                         }
+                        setGraphProcessMachine(dgdByProcess);
                     }
                 }
+
+                
             }
             catch (Exception ex)
             {
@@ -785,9 +805,18 @@ namespace WizMes_SungShinNQ
                     {
                         DataRowCollection drc = dt.Rows;
                         int i = 0;
+                        int cnt = 0;
+
 
                         foreach (DataRow dr in drc)
                         {
+
+                            var cls = dr["cls"].ToString().Trim();
+                            if (cls == "1")
+                            {
+                                cnt++;
+                            }
+
                             i++;
                             var WinA = new Win_Prd_ProcessResultSum_Q_ByArticle()
                             {
@@ -802,6 +831,7 @@ namespace WizMes_SungShinNQ
                                 Process = dr["Process"].ToString(),
                                 WorkQty = stringFormatN0(dr["WorkQty"]),
                                 ProdQtyPerBox = stringFormatN0(dr["ProdQtyPerBox"]),
+                                Cnt = ""
 
                             };
 
@@ -815,6 +845,7 @@ namespace WizMes_SungShinNQ
                                 WinA.Process = "총계";
                                 WinA.BuyerArticleNo = "";
                                 dgdByArticleTotal.Items.Add(WinA);
+                                WinA.Cnt = cnt.ToString();
                             }
                             else
                             {
@@ -823,6 +854,8 @@ namespace WizMes_SungShinNQ
 
 
                         }
+
+                        setGraphArticle(dgdByArticle);
                     }
                 }
             }
@@ -879,10 +912,17 @@ namespace WizMes_SungShinNQ
                     {
                         DataRowCollection drc = dt.Rows;
                         int i = 0;
+                        int cnt = 0;
 
                         foreach (DataRow dr in drc)
                         {
                             i++;
+
+                            var cls = dr["cls"].ToString().Trim();
+                            if (cls == "1")
+                            {
+                                cnt++;
+                            }
                             var WinW = new Win_Prd_ProcessResultSum_Q_ByWorker()
                             {
                                 Num = i,
@@ -907,6 +947,7 @@ namespace WizMes_SungShinNQ
                                 WorkQty = stringFormatN0(dr["WorkQty"]),
 
                                 ProdQtyPerBox = stringFormatN0(dr["ProdQtyPerBox"]),
+
                             };
 
                             if (WinW.cls.Trim().Equals("3")) // 작업자계
@@ -927,6 +968,9 @@ namespace WizMes_SungShinNQ
                             }
 
                         }
+
+                        setGraphWorker(dgdByWorker);
+
                     }
                 }
             }
@@ -1110,7 +1154,23 @@ namespace WizMes_SungShinNQ
 
                             DataGridThisMonth.Items.Add(WPPQCT);
                         }
+
+                        setGraphThisMonth(DataGridThisMonth);
                     }
+
+                    DataGridThisMonthTotal.Items.Clear();
+
+                    var tot = new Win_Prd_ProcessResultSum_Q_CodeView_ThisMonth()
+                    {
+                        Cnt = DataGridThisMonth.Items.Count.ToString(),
+                        TotalQty = DataGridThisMonth.Items
+                            .OfType<Win_Prd_ProcessResultSum_Q_CodeView_ThisMonth>()
+                            .Sum(x => x.TotalQty)
+                    };
+
+                    DataGridThisMonthTotal.Items.Add(tot);
+
+
                 }
 
             }
@@ -1310,6 +1370,294 @@ namespace WizMes_SungShinNQ
             TabItem nowTab = tabconGrid.SelectedItem as TabItem;
             btnPrint.Visibility = nowTab.Name.Equals("tabWorker") == true ? Visibility.Visible : Visibility.Hidden;
         }
+
+        public class ChartDTO
+        {
+            public SeriesCollection SeriesCollection { get; set; }
+            public string[] Labels { get; set; }
+            public Func<ChartPoint, string> Formatter { get; set; }
+        }
+
+
+        // 그래프들
+        private void setGraphProcessMachine(DataGrid dataGrid)
+        {
+            try
+            {
+                if (lvcChartProcess.Series != null)
+                {
+                    lvcChartProcess.Series.Clear();
+                }
+
+                var list = new List<Win_Prd_ProcessResultSum_Q_ByProcessMachine>();
+
+                for (int i = 0; i < dataGrid.Items.Count; i++)
+                {
+                    if (dataGrid.Items[i] is Win_Prd_ProcessResultSum_Q_ByProcessMachine row)
+                    {
+                        if (row.cls == "1" || string.IsNullOrWhiteSpace(row.cls))
+                        {
+                            list.Add(row);
+                        }
+                    }
+                }
+
+                var chart = new ChartDTO();
+                chart.SeriesCollection = new SeriesCollection();
+                chart.Labels = new string[list.Count];
+
+                var qty = new ChartValues<double>();
+
+                for (int i = 0; i < list.Count; i++)
+                {
+                    var row = list[i];
+
+                    var p = (row.Process ?? "").Trim();
+                    var m = (row.MachineNo ?? "").Trim();
+
+                    chart.Labels[i] = string.IsNullOrEmpty(m) ? p : $"{p}-{m}";
+
+                    if (!string.IsNullOrWhiteSpace(row.WorkQty))
+                    {
+                        double v;
+                        if (double.TryParse(row.WorkQty.Replace(",", "").Trim(), out v))
+                            qty.Add(v);
+                        else
+                            qty.Add(0);
+                    }
+                    else
+                    {
+                        qty.Add(0);
+                    }
+                }
+
+                chart.Formatter = value => value.Y.ToString("N0") + "(개)";
+
+                chart.SeriesCollection.Add(new LineSeries
+                {
+                    Values = qty,
+                    DataLabels = true,
+                    Title = "생산량",
+                    LabelPoint = chart.Formatter
+                });
+
+                lvcChartProcess.DataContext = chart;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        // 그래프들
+        private void setGraphArticle(DataGrid dataGrid)
+        {
+            try
+            {
+                if (lvcChartArticle.Series != null)
+                {
+                    lvcChartArticle.Series.Clear();
+                }
+
+                var list = new List<Win_Prd_ProcessResultSum_Q_ByArticle>();
+
+                for (int i = 0; i < dataGrid.Items.Count; i++)
+                {
+                    if (dataGrid.Items[i] is Win_Prd_ProcessResultSum_Q_ByArticle row)
+                    {
+                        if (row.cls == "1" || string.IsNullOrWhiteSpace(row.cls))
+                        {
+                            list.Add(row);
+                        }
+                    }
+                }
+
+                var chart = new ChartDTO();
+                chart.SeriesCollection = new SeriesCollection();
+                chart.Labels = new string[list.Count];
+
+                var qty = new ChartValues<double>();
+
+                for (int i = 0; i < list.Count; i++)
+                {
+                    var row = list[i];
+
+                    chart.Labels[i] = (row.Article ?? "").Trim();
+
+                    double v = 0;
+                    if (!string.IsNullOrWhiteSpace(row.WorkQty))
+                        double.TryParse(row.WorkQty.Replace(",", "").Trim(), out v);
+
+                    qty.Add(v);
+                }
+
+                chart.Formatter = value => value.Y.ToString("N0") + "(개)";
+
+                chart.SeriesCollection.Add(new LineSeries
+                {
+                    Values = qty,
+                    DataLabels = true,
+                    Title = "생산량",
+                    LabelPoint = chart.Formatter
+                });
+
+                lvcChartArticle.DataContext = chart;
+
+                if (list.Count == 1)
+                {
+                    lvcChartArticle.AxisX[0].MinValue = -0.5;
+                    lvcChartArticle.AxisX[0].MaxValue = 0.5;
+                }
+                else
+                {
+                    lvcChartArticle.AxisX[0].MinValue = double.NaN;
+                    lvcChartArticle.AxisX[0].MaxValue = double.NaN;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+
+        private void setGraphWorker(DataGrid dataGrid)
+        {
+            try
+            {
+                if (lvcChartWorker.Series != null)
+                {
+                    lvcChartWorker.Series.Clear();
+                }
+
+                var list = new List<Win_Prd_ProcessResultSum_Q_ByWorker>();
+
+                for (int i = 0; i < dataGrid.Items.Count; i++)
+                {
+                    if (dataGrid.Items[i] is Win_Prd_ProcessResultSum_Q_ByWorker row)
+                    {
+                        if (row.cls == "1" || string.IsNullOrWhiteSpace(row.cls))
+                        {
+                            list.Add(row);
+                        }
+                    }
+                }
+
+                var grp = list
+                    .GroupBy(x => (x.Name ?? "").Trim())
+                    .Select(g => new
+                    {
+                        Name = g.Key,
+                        Qty = g.Sum(x =>
+                        {
+                            double v = 0;
+                            if (!string.IsNullOrWhiteSpace(x.WorkQty))
+                                double.TryParse(x.WorkQty.Replace(",", "").Trim(), out v);
+                            return v;
+                        })
+                    })
+                    .OrderByDescending(x => x.Qty)
+                    .ToList();
+
+                var chart = new ChartDTO();
+                chart.SeriesCollection = new SeriesCollection();
+                chart.Labels = new string[grp.Count];
+
+                var qty = new ChartValues<double>();
+
+                for (int i = 0; i < grp.Count; i++)
+                {
+                    chart.Labels[i] = grp[i].Name;
+                    qty.Add(grp[i].Qty);
+                }
+
+                chart.Formatter = value => value.Y.ToString("N0") + "(개)";
+
+                chart.SeriesCollection.Add(new LineSeries
+                {
+                    Values = qty,
+                    DataLabels = true,
+                    Title = "생산량",
+                    LabelPoint = chart.Formatter
+                });
+
+                lvcChartWorker.DataContext = chart;
+
+                if (grp.Count == 1)
+                {
+                    lvcChartWorker.AxisX[0].MinValue = -0.5;
+                    lvcChartWorker.AxisX[0].MaxValue = 0.5;
+                }
+                else
+                {
+                    lvcChartWorker.AxisX[0].MinValue = double.NaN;
+                    lvcChartWorker.AxisX[0].MaxValue = double.NaN;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+
+        private void setGraphThisMonth(DataGrid dataGrid)
+        {
+            try
+            {
+                if (lvcChartThisMonth.Series != null)
+                {
+                    lvcChartThisMonth.Series.Clear();
+                }
+
+                double[] sums = new double[31];
+
+                for (int i = 0; i < dataGrid.Items.Count; i++)
+                {
+                    if (dataGrid.Items[i] is Win_Prd_ProcessResultSum_Q_CodeView_ThisMonth row)
+                    {
+                        sums[0] += row.SDay01; sums[1] += row.SDay02; sums[2] += row.SDay03; sums[3] += row.SDay04; sums[4] += row.SDay05;
+                        sums[5] += row.SDay06; sums[6] += row.SDay07; sums[7] += row.SDay08; sums[8] += row.SDay09; sums[9] += row.SDay10;
+                        sums[10] += row.SDay11; sums[11] += row.SDay12; sums[12] += row.SDay13; sums[13] += row.SDay14; sums[14] += row.SDay15;
+                        sums[15] += row.SDay16; sums[16] += row.SDay17; sums[17] += row.SDay18; sums[18] += row.SDay19; sums[19] += row.SDay20;
+                        sums[20] += row.SDay21; sums[21] += row.SDay22; sums[22] += row.SDay23; sums[23] += row.SDay24; sums[24] += row.SDay25;
+                        sums[25] += row.SDay26; sums[26] += row.SDay27; sums[27] += row.SDay28; sums[28] += row.SDay29; sums[29] += row.SDay30;
+                        sums[30] += row.SDay31;
+                    }
+                }
+
+                var chart = new ChartDTO();
+                chart.SeriesCollection = new SeriesCollection();
+                chart.Labels = new string[31];
+
+                var qty = new ChartValues<double>();
+
+                for (int d = 0; d < 31; d++)
+                {
+                    chart.Labels[d] = (d + 1).ToString();
+                    qty.Add(sums[d]);
+                }
+
+                chart.Formatter = value => value.Y.ToString("N0");
+
+                chart.SeriesCollection.Add(new LineSeries
+                {
+                    Values = qty,
+                    DataLabels = true,
+                    Title = "생산량",
+                    LabelPoint = chart.Formatter
+                });
+
+                lvcChartThisMonth.DataContext = chart;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+
+
 
         #region 개인작업일보 인쇄
         private void btnPrint_Click(object sender, RoutedEventArgs e)
@@ -1547,6 +1895,8 @@ namespace WizMes_SungShinNQ
         #endregion 개인작업일보 인쇄
     }
 
+
+
     class Win_Prd_ProcessResultSum_Q_ByProcessMachine : BaseView
     {
         public override string ToString()
@@ -1572,6 +1922,8 @@ namespace WizMes_SungShinNQ
         //public string OutQtyPerBox { get; set; }
         public string QtyPerBox { get; set; }
         public string BuyerArticleNo { get; set; }
+        public string Cnt { get; set; }
+
     }
 
     class Win_Prd_ProcessResultSum_Q_ByArticle : BaseView
@@ -1598,6 +1950,8 @@ namespace WizMes_SungShinNQ
         public string ProdQtyPerBox { get; set; }
 
         public int Num { get; set; }
+        public string Cnt { get; set; }
+
     }
 
     class Win_Prd_ProcessResultSum_Q_ByWorker : BaseView
@@ -1632,6 +1986,8 @@ namespace WizMes_SungShinNQ
         public string BuyerModel { get; set; }
 
         public string WorkTime { get; set; }
+        public string Cnt { get; set; }
+
     }
 
     class Win_Prd_ProcessResultSum_Q_CodeView_ThisMonth : BaseView
@@ -1678,5 +2034,9 @@ namespace WizMes_SungShinNQ
         public double SDay29 { get; set; }
         public double SDay30 { get; set; }
         public double SDay31 { get; set; }
+        public string Cnt { get; set; }
+
     }
+
+
 }

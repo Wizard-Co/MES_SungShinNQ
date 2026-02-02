@@ -559,7 +559,7 @@ namespace WizMes_SungShinNQ
 
         #endregion
 
-        
+
 
         #region 주요 메서드 - 조회 FillGrid
 
@@ -578,7 +578,7 @@ namespace WizMes_SungShinNQ
                 // 공정 호기 세팅
                 string ProcessID = "";
                 string MachineID = "";
-                
+
                 // 공정을 전체나 선택하지 않았을시 → 호기는 공정 + 호기로 출력 → 공정과 호기를 검색하기 위해서
                 if (chkMachine.IsChecked == true
                     && cboMachine.SelectedValue != null
@@ -600,11 +600,11 @@ namespace WizMes_SungShinNQ
                 sqlParameter.Add("sMachineID", MachineID);
                 sqlParameter.Add("ArticleID", chkArticle.IsChecked == true && txtArticle.Tag != null ? txtArticle.Tag.ToString() : "");
 
-                sqlParameter.Add("CustomID", ((chkCustom.IsChecked == true) ? 
+                sqlParameter.Add("CustomID", ((chkCustom.IsChecked == true) ?
                     (txtCustom.Tag == null ? "" : txtCustom.Tag.ToString()) : ""));
                 sqlParameter.Add("nOrderID", ((chkOrder.IsChecked == true) ? (tbkOrder.Text.Equals("관리번호") ? 1 : 2) : 0));
                 sqlParameter.Add("sOrderID", ((chkOrder.IsChecked == true) ? txtOrder.Text : ""));
-                sqlParameter.Add("nJobGbn", chkGubun.IsChecked == true ? 1: 0);
+                sqlParameter.Add("nJobGbn", chkGubun.IsChecked == true ? 1 : 0);
                 sqlParameter.Add("sJobGubun", chkGubun.IsChecked == true && cboGubun.SelectedValue != null && !cboGubun.SelectedValue.ToString().Trim().Equals("0") ? cboGubun.SelectedValue.ToString() : "");
 
                 sqlParameter.Add("nBuyerModel", 0);
@@ -691,6 +691,9 @@ namespace WizMes_SungShinNQ
                                 ScanDate_CV = ConvertTimeFormat(dr["ScanDate"].ToString()),
 
                                 MachineNo = dr["MachineNo"].ToString(),
+
+                                DefectQty = stringFormatN0(dr["DefectQty"]),   
+                                Total = stringFormatN0(dr["WorkCnt"]),       
                             };
 
                             if (WinR.cls.Equals("1"))
@@ -763,7 +766,7 @@ namespace WizMes_SungShinNQ
         private string StartTimeAndEndTime(string SDate, string STime, string EDate, string ETime)
         {
             string STandET = string.Empty;
-            
+
             STandET += STime.Substring(0, 2) + ":" + STime.Substring(2, 2) + " ~ ";
             STandET += ETime.Substring(0, 2) + ":" + ETime.Substring(2, 2);
 
@@ -917,91 +920,180 @@ namespace WizMes_SungShinNQ
         }
 
 
-    }
-
-    class Win_Prd_ProcessResult_Q_CodeView : BaseView
-    {
-        public override string ToString()
+        private void dgdResult_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            return (this.ReportAllProperties());
+            try
+            {
+                var ProcessResultInfo = dgdResult.SelectedItem as Win_Prd_ProcessResult_Q_CodeView;
+
+                if (ProcessResultInfo != null)
+                {
+                    FillGrid_Defect(ProcessResultInfo.JobID);
+                }
+
+            }
+            catch (Exception ee)
+            {
+                MessageBox.Show("오류지점 - " + ee.ToString());
+            }
         }
 
-        public string cls { get; set; }
-        public string WorkDate { get; set; }
-        public string WorkDate_CV { get; set; }
-        public string ProcessID { get; set; }
-        public string Process { get; set; }
+        private void FillGrid_Defect(string JobID)
+        {
+            DataGridDefect.Items.Clear();
 
-        public string OrderID { get; set; }
-        public string OrderNo { get; set; }
-        public string AcptDate { get; set; }
-        public string AcptDate_CV { get; set; }
-        public string OrderQty { get; set; }
+            try
+            {
+                Dictionary<string, object> sqlParameter = new Dictionary<string, object>();
+                sqlParameter.Clear();
+                sqlParameter.Add("JobID", JobID);
 
-        public string MachineID { get; set; }
-        public string InstDate { get; set; }
-        public string InstDate_CV { get; set; }
-        public string InstQty { get; set; }
-        public string WorkQty { get; set; }
+                DataSet ds = DataStore.Instance.ProcedureToDataSet("xp_prd_sWKResultDaily_Defect", sqlParameter, false);
 
-        public string WorkPersonID { get; set; }
-        public string ScanTime { get; set; }
-        public string ScanTime_CV { get; set; }
-        public string BuyerModelID { get; set; }
-        public string BuyerModel { get; set; }
+                if (ds != null && ds.Tables.Count > 0)
+                {
+                    DataTable dt = ds.Tables[0];
 
-        public string CustomID { get; set; }
-        public string KCustom { get; set; }
-        public string Worker { get; set; }
-        public string Article { get; set; }       
-        public string LabelID { get; set; }
+                    if (dt.Rows.Count == 0)
+                    {
+                        //MessageBox.Show("조회된 데이터가 없습니다.");
+                    }
+                    else
+                    {
+                        DataRowCollection drc = dt.Rows;
+                        int i = 0;
 
-        public string JobGbn { get; set; }
-        public string JobGbnname { get; set; }
-        public string WorkStartDate { get; set; }
-        public string WorkStartDate_CV { get; set; }
-        public string WorkStartTime { get; set; }
+                        foreach (DataRow dr in drc)
+                        {
+                            i++;
+                            var WPPRQDC = new Win_Prd_ProcessResult_Q_Defect_CodeView()
+                            {
+                                Num = i,
+                                DefectID = dr["DefectID"].ToString(),
+                                KDefect = dr["KDefect"].ToString(),
+                                DefectQty = dr["DefectQty"].ToString(),
+                            };
 
-        public string WorkStartTime_CV { get; set; }
-        public string WorkEndDate { get; set; }
-        public string WorkEndDate_CV { get; set; }
-        public string WorkEndTime { get; set; }
-        public string WorkEndTime_CV { get; set; }
+                            DataGridDefect.Items.Add(WPPRQDC);
 
-        public string WorkHour { get; set; }
-        public string WorkMinute { get; set; }
-        public string JobID { get; set; }
-        public string Articleid { get; set; }
-        public string WorkCnt { get; set; }
+                        }
+                    }
+                }
 
-        public string NoReworkCode { get; set; }
-        public string NoReworkName { get; set; }        
-        public string FourMID { get; set; }
-        public string FourMSubject { get; set; }
-        public int Num { get; set; }
+            }
+            catch (Exception ee)
+            {
+                MessageBox.Show("오류지점 - " + ee.ToString());
+            }
+            finally
+            {
+                DataStore.Instance.CloseConnection();
+            }
 
-        public string Time { get; set; }
-        public string BuyerArticleNo { get; set; }
 
-        public string ScanDate { get; set; }
-        public string ScanDate_CV { get; set; }
-        public string MachineNo { get; set; }
+        }
+
+        class Win_Prd_ProcessResult_Q_CodeView : BaseView
+        {
+            public override string ToString()
+            {
+                return (this.ReportAllProperties());
+            }
+
+            public string cls { get; set; }
+            public string WorkDate { get; set; }
+            public string WorkDate_CV { get; set; }
+            public string ProcessID { get; set; }
+            public string Process { get; set; }
+
+            public string OrderID { get; set; }
+            public string OrderNo { get; set; }
+            public string AcptDate { get; set; }
+            public string AcptDate_CV { get; set; }
+            public string OrderQty { get; set; }
+
+            public string MachineID { get; set; }
+            public string InstDate { get; set; }
+            public string InstDate_CV { get; set; }
+            public string InstQty { get; set; }
+            public string WorkQty { get; set; }
+
+            public string WorkPersonID { get; set; }
+            public string ScanTime { get; set; }
+            public string ScanTime_CV { get; set; }
+            public string BuyerModelID { get; set; }
+            public string BuyerModel { get; set; }
+
+            public string CustomID { get; set; }
+            public string KCustom { get; set; }
+            public string Worker { get; set; }
+            public string Article { get; set; }
+            public string LabelID { get; set; }
+
+            public string JobGbn { get; set; }
+            public string JobGbnname { get; set; }
+            public string WorkStartDate { get; set; }
+            public string WorkStartDate_CV { get; set; }
+            public string WorkStartTime { get; set; }
+
+            public string WorkStartTime_CV { get; set; }
+            public string WorkEndDate { get; set; }
+            public string WorkEndDate_CV { get; set; }
+            public string WorkEndTime { get; set; }
+            public string WorkEndTime_CV { get; set; }
+
+            public string WorkHour { get; set; }
+            public string WorkMinute { get; set; }
+            public string JobID { get; set; }
+            public string Articleid { get; set; }
+            public string WorkCnt { get; set; }
+
+            public string NoReworkCode { get; set; }
+            public string NoReworkName { get; set; }
+            public string FourMID { get; set; }
+            public string FourMSubject { get; set; }
+            public int Num { get; set; }
+
+            public string Time { get; set; }
+            public string BuyerArticleNo { get; set; }
+
+            public string ScanDate { get; set; }
+            public string ScanDate_CV { get; set; }
+            public string MachineNo { get; set; }
+            public string DefectQty { get; set; }   
+            public string Total { get; set; }     
+
+        }
+
+        class ProcessList
+        {
+            public string Process { get; set; }
+            public string ProcessID { get; set; }
+            public string ScanDate { get; set; }
+        }
+
+
+        class Win_Prd_ProcessResult_Q_Defect_CodeView : BaseView
+        {
+            public override string ToString()
+            {
+                return (this.ReportAllProperties());
+            }
+
+            public int Num { get; set; }
+
+            public string DefectID { get; set; }
+            public string KDefect { get; set; }
+            public string DefectQty { get; set; }
+        }
+        //class Win_Prd_ProcessResult_Q_Process : BaseView
+        //{
+
+        //}
+
+        //class Win_Prd_ProcessResult_Q_Child : BaseView
+        //{
+
+        //}
     }
-
-    class ProcessList
-    {
-        public string Process { get; set; }
-        public string ProcessID { get; set; }
-        public string ScanDate { get; set; }
-    }
-
-    //class Win_Prd_ProcessResult_Q_Process : BaseView
-    //{
-
-    //}
-
-    //class Win_Prd_ProcessResult_Q_Child : BaseView
-    //{
-
-    //}
 }

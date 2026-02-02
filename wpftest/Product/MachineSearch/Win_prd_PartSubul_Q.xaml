@@ -39,203 +39,15 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="160*" />
-                <ColumnDefinition Width="20*" />
-                <ColumnDefinition Width="160*" />
-                <ColumnDefinition Width="230*" />
-                <ColumnDefinition Width="150*" />
                 <ColumnDefinition Width="100*" />
+                <ColumnDefinition Width="160*" />
+                <ColumnDefinition Width="180*" />
+                <ColumnDefinition Width="180*" />
+                <ColumnDefinition Width="85*" />
             </Grid.ColumnDefinitions>
 
 
-
-            <Grid
-                x:Name="grdSrh1"
-                Grid.Row="0"
-                Grid.RowSpan="4"
-                Grid.Column="0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-
-                <Border
-                    Grid.Row="0"
-                    Background="White"
-                    BorderBrush="#424242"
-                    BorderThickness="0.9"
-                    CornerRadius="0 0 0 0">
-                    <ToggleButton
-                        x:Name="tgnCommon"
-                        Margin="1"
-                        Checked="tgnCommon_Checked"
-                        FontWeight="Normal"
-                        PreviewMouseDown="tgnCommon_PreviewMouseDown"
-                        Unchecked="tgnCommon_Unchecked">
-                        <ToggleButton.Style>
-                            <Style TargetType="{x:Type ToggleButton}">
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="ToggleButton">
-                                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding Background}">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                                <Style.Triggers>
-                                    <Trigger Property="IsChecked" Value="True">
-                                        <Setter Property="Background" Value="#6C757D" />
-                                        <Setter Property="Foreground" Value="White" />
-                                    </Trigger>
-                                    <Trigger Property="IsChecked" Value="False">
-                                        <Setter Property="Background" Value="#F3F7FF" />
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ToggleButton.Style>
-                        <StackPanel Orientation="Horizontal">
-                            <Viewbox Margin="4">
-                                <TextBlock Text="공용" />
-                            </Viewbox>
-                        </StackPanel>
-                    </ToggleButton>
-                </Border>
-
-                <Border
-                    Grid.Row="1"
-                    Background="White"
-                    BorderBrush="#424242"
-                    BorderThickness="0.9"
-                    CornerRadius="0 0 0 0">
-                    <ToggleButton
-                        x:Name="tgnSpare"
-                        Margin="1"
-                        Checked="tgnSpare_Checked"
-                        FontWeight="Normal"
-                        PreviewMouseDown="tgnSpare_PreviewMouseDown"
-                        Unchecked="tgnSpare_Unchecked">
-                        <ToggleButton.Style>
-                            <Style TargetType="{x:Type ToggleButton}">
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="ToggleButton">
-                                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding Background}">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                                <Style.Triggers>
-                                    <Trigger Property="IsChecked" Value="True">
-                                        <Setter Property="Background" Value="#6C757D" />
-                                        <Setter Property="Foreground" Value="White" />
-                                    </Trigger>
-                                    <Trigger Property="IsChecked" Value="False">
-                                        <Setter Property="Background" Value="#F3F7FF" />
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ToggleButton.Style>
-                        <Viewbox Margin="4">
-                            <TextBlock Text="설비예비품" />
-                        </Viewbox>
-                    </ToggleButton>
-                </Border>
-
-                <Border
-                    Grid.Row="2"
-                    Background="White"
-                    BorderBrush="#424242"
-                    BorderThickness="0.9"
-                    CornerRadius="0 0 0 0">
-                    <ToggleButton
-                        x:Name="tgnTool"
-                        Margin="1"
-                        Checked="tgnTool_Checked"
-                        FontWeight="Normal"
-                        PreviewMouseDown="tgnTool_PreviewMouseDown"
-                        Unchecked="tgnTool_Unchecked">
-                        <ToggleButton.Style>
-                            <Style TargetType="{x:Type ToggleButton}">
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="ToggleButton">
-                                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding Background}">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                                <Style.Triggers>
-                                    <Trigger Property="IsChecked" Value="True">
-                                        <Setter Property="Background" Value="#6C757D" />
-                                        <Setter Property="Foreground" Value="White" />
-                                    </Trigger>
-                                    <Trigger Property="IsChecked" Value="False">
-                                        <Setter Property="Background" Value="#F3F7FF" />
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ToggleButton.Style>
-                        <Viewbox Margin="4">
-                            <TextBlock Text="Tool" />
-                        </Viewbox>
-                    </ToggleButton>
-                </Border>
-
-                <Border
-                    Grid.Row="1"
-                    Grid.Column="1"
-                    Margin="-0.5"
-                    Background="White"
-                    BorderBrush="#424242"
-                    BorderThickness="0.9,1.4,1.4,1.4"
-                    CornerRadius="0 0 0 0">
-                    <ToggleButton
-                        x:Name="tgnAll"
-                        Margin="1"
-                        Checked="tgnAll_Checked"
-                        FontWeight="Normal"
-                        PreviewMouseDown="tgnAll_PreviewMouseDown"
-                        Unchecked="tgnAll_Unchecked">
-                        <ToggleButton.Style>
-                            <Style TargetType="{x:Type ToggleButton}">
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="ToggleButton">
-                                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding Background}">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                                <Style.Triggers>
-                                    <Trigger Property="IsChecked" Value="True">
-                                        <Setter Property="Background" Value="#6C757D" />
-                                        <Setter Property="Foreground" Value="White" />
-                                    </Trigger>
-                                    <Trigger Property="IsChecked" Value="False">
-                                        <Setter Property="Background" Value="#F3F7FF" />
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ToggleButton.Style>
-                        <StackPanel Orientation="Horizontal">
-                            <Viewbox Margin="4">
-                                <TextBlock Text="전체" />
-                            </Viewbox>
-                        </StackPanel>
-                    </ToggleButton>
-                </Border>
-            </Grid>
-
-            <Grid Grid.Row="0" Grid.Column="2">
+            <Grid Grid.Row="0" Grid.Column="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="65*" />
                     <ColumnDefinition Width="85*" />
@@ -263,18 +75,20 @@
                     Padding="0"
                     IsEnabled="False" />
             </Grid>
-            <Grid Grid.Row="1" Grid.Column="2">
+            <Grid Grid.Row="1" Grid.Column="1">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="65*" />
-                    <ColumnDefinition Width="85*" />
+                    <ColumnDefinition Width="35*" />
+                    <ColumnDefinition Width="24*"/>
+                    <ColumnDefinition Width="19*"/>
+                    <ColumnDefinition Width="102*" />
                 </Grid.ColumnDefinitions>
                 <DatePicker
                     x:Name="dtpEDate"
-                    Grid.Column="1"
+                    Grid.Column="3"
                     Padding="0"
                     IsEnabled="False" />
             </Grid>
-            <Grid Grid.Row="2" Grid.Column="2">
+            <Grid Grid.Row="2" Grid.Column="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
@@ -347,8 +161,8 @@
                     Padding="0"
                     IsEnabled="False" />
             </Grid>
-           
-            <Grid Grid.Row="1" Grid.Column="3">
+
+            <Grid Grid.Row="1" Grid.Column="2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="95*" />
                     <ColumnDefinition Width="95*" />
@@ -514,7 +328,7 @@
                     <DataGridTextColumn
                         Width="auto"
                         Binding="{Binding RemainQty}"
-                        Header="이전재고량">
+                        Header="이전재고량" Visibility="Hidden">
                         <DataGridTextColumn.CellStyle>
                             <Style TargetType="DataGridCell">
                                 <Style.Triggers>

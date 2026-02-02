@@ -408,8 +408,37 @@ namespace WizMes_SungShinNQ
                 FillGridWorkData(WinBoxData.LabelID.Replace(" ", ""));
                 FillGridChildData(WinBoxData.LabelID.Replace(" ", ""));
                 FillText(WinBoxData.LabelID.Replace(" ", ""));
+                FillGridDefectData(WinBoxData.LabelID.Replace(" ", ""));
+
+
             }
         }
+
+        private void FillGridDefectData(string labelId)
+        {
+            try
+            {
+                var sqlParameter = new Dictionary<string, object>();
+                sqlParameter.Add("@sLabelID", labelId);
+
+                DataSet ds = DataStore.Instance.ProcedureToDataSet("xp_prd_sLabelIDOneProcess_Defect", sqlParameter, false);
+
+                if (ds != null && ds.Tables.Count > 0)
+                {
+                    dgdDefect.ItemsSource = ds.Tables[0].DefaultView;
+                }
+                else
+                {
+                    dgdDefect.ItemsSource = null;
+                }
+            }
+            catch
+            {
+                dgdDefect.ItemsSource = null;
+                throw;
+            }
+        }
+
 
         #endregion
 

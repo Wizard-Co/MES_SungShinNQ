@@ -234,7 +234,7 @@
                                 <ColumnDefinition Width="10*" />
                             </Grid.ColumnDefinitions>
                             <Label Grid.Column="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="1" Content="라     벨" />
-                            <TextBox Grid.Column="1" Grid.ColumnSpan="4" Margin="1" Background="GreenYellow" Text="{Binding LabelID}" IsReadOnly="True"/>
+                            <TextBox Grid.Column="1" Grid.ColumnSpan="4" Margin="1" Text="{Binding LabelID}" IsReadOnly="True"/>
                         </Grid>
 
                         <Grid Grid.Row="2" Grid.Column="0">
@@ -267,7 +267,7 @@
                             <TextBox Grid.Column="1" Margin="1" IsReadOnly="True" Text="{Binding Spec}"/>
                         </Grid>
 
-                        <Grid Grid.Row="1" Grid.Column="2" >
+                        <Grid Grid.Row="1" Grid.Column="2" Visibility="Hidden">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="65*" />
                                 <ColumnDefinition Width="95*" />
@@ -296,15 +296,6 @@
                                 <TextBlock x:Name="tbkOrder" Text="Order No." VerticalAlignment="Center"/>
                             </Label>
                             <TextBox Grid.Column="1" Margin="1" IsReadOnly="True" Text="{Binding OrderNo}"/>
-                        </Grid>
-                        <Grid Grid.Row="2" Grid.Column="2">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="65*" />
-                                <ColumnDefinition Width="95*" />
-                                <ColumnDefinition Width="10*" />
-                            </Grid.ColumnDefinitions>
-                            <Label Grid.Column="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="1" Content="고객라벨" />
-                            <TextBox Grid.Column="1" Margin="1" IsReadOnly="True" Text="{Binding CustomBoxID}"/>
                         </Grid>
 
                         <Grid Grid.Row="3" Grid.Column="0" Visibility="Hidden">
@@ -355,21 +346,42 @@
                 </Border>
                 
                 <!--작업정보 데이터그리드-->
-                <GroupBox Grid.Row="1" Margin="1" Header="작업정보">
-                    <DataGrid x:Name="dgdWork" IsReadOnly="True" Style="{DynamicResource DataGridSet1}">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="순" Binding="{Binding Num}" />
-                            <DataGridTextColumn Header="일자" Width="auto" Binding="{Binding WorkDate}"/>
-                            <DataGridTextColumn Header="시간" Width="auto" Binding="{Binding WorkTime}"/>
-                            <DataGridTextColumn Header="공정" Width="auto" Binding="{Binding Process}"/>
-                            <DataGridTextColumn Header="호기" Width="auto" Binding="{Binding Machine}"/>
-                            <DataGridTextColumn Header="수량" Width="auto" Binding="{Binding WorkQty}" CellStyle="{StaticResource NumericDataGridCell}"/>
-                            <DataGridTextColumn Header="작업자" Width="auto" Binding="{Binding WorkManName}"/>
-                            <DataGridTextColumn Header="비고" Width="auto" Binding="{Binding Remark}"/>
-                            <DataGridTextColumn Header="필요자격" Width="auto" Binding="{Binding HrLicence}"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </GroupBox>
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3*" />
+                        <ColumnDefinition Width="2*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!--작업정보 데이터그리드-->
+                    <GroupBox Grid.Column="0" Margin="1" Header="작업정보">
+                        <DataGrid x:Name="dgdWork" IsReadOnly="True" Style="{DynamicResource DataGridSet1}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="순" Binding="{Binding Num}" />
+                                <DataGridTextColumn Header="일자" Width="auto" Binding="{Binding WorkDate}"/>
+                                <DataGridTextColumn Header="시간" Width="auto" Binding="{Binding WorkTime}"/>
+                                <DataGridTextColumn Header="공정" Width="auto" Binding="{Binding Process}"/>
+                                <DataGridTextColumn Header="호기" Width="auto" Binding="{Binding Machine}"/>
+                                <DataGridTextColumn Header="수량" Width="auto" Binding="{Binding WorkQty}" CellStyle="{StaticResource NumericDataGridCell}"/>
+                                <DataGridTextColumn Header="작업자" Width="auto" Binding="{Binding WorkManName}"/>
+                                <DataGridTextColumn Header="비고" Width="auto" Binding="{Binding Remark}"/>
+                                <DataGridTextColumn Header="필요자격" Width="auto" Binding="{Binding HrLicence}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </GroupBox>
+
+                    <!--불량정보 데이터그리드-->
+                    <GroupBox Grid.Column="1" Margin="1" Header="불량정보">
+                        <DataGrid x:Name="dgdDefect" IsReadOnly="True" Style="{DynamicResource DataGridSet1}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="순" Binding="{Binding Num}" />
+                                <DataGridTextColumn Header="공정" Width="auto" Binding="{Binding Process}"/>
+                                <DataGridTextColumn Header="불량유형" Width="auto" Binding="{Binding DefectName}"/>
+                                <DataGridTextColumn Header="불량수량" Width="auto" Binding="{Binding DefectQty}" CellStyle="{StaticResource NumericDataGridCell}"/>
+                                <DataGridTextColumn Header="비고" Width="auto" Binding="{Binding Remark}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </GroupBox>
+                </Grid>
                 
                 <!--하위결합정보 데이터그리드-->
                 <GroupBox Grid.Row="2" Margin="1" Header="하위결합정보">

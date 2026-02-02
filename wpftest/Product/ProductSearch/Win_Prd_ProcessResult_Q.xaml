@@ -289,11 +289,18 @@
         <!-- 전체 중 하단 -->
         <Border Grid.Row="1" BorderBrush="Gray" BorderThickness="1">
             <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="16*" />
+                    <ColumnDefinition Width="4*" />
+                </Grid.ColumnDefinitions>
+
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="52" />
+                    <RowDefinition Height="466*" />
+                    <RowDefinition Height="66" />
                 </Grid.RowDefinitions>
-                <DataGrid x:Name="dgdResult" Style="{DynamicResource DataGridSet1}" Margin="-5 0 0 0">
+
+                <DataGrid x:Name="dgdResult" Style="{DynamicResource DataGridSet1}" Margin="-5 0 0 0"
+                          SelectionChanged="dgdResult_SelectionChanged">
                     <DataGrid.Resources>
                         <Style TargetType="DataGridRow">
                             <Style.Triggers>
@@ -504,17 +511,63 @@
                     </DataGrid.Columns>
                 </DataGrid>
 
-                <DataGrid x:Name="dgdTotal" Grid.Row="1" HeadersVisibility="All" ScrollViewer.HorizontalScrollBarVisibility="Hidden" IsReadOnly="True" Style="{DynamicResource TotalGridSet1}">
+                <DataGrid
+                    x:Name="DataGridDefect"
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    IsHitTestVisible="True"
+                    IsReadOnly="True"
+                    Style="{DynamicResource DataGridSet1}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn
+                            Width="auto"
+                            Binding="{Binding Num}"
+                            ElementStyle="{StaticResource DataGridCellCenter}"
+                            Header="순번" />  
+                        <DataGridTextColumn
+                            Width="auto"
+                            Binding="{Binding DefectID}"
+                            Header="불량코드"
+                            Visibility="Hidden" />
+                        <DataGridTextColumn
+                            Width="auto"
+                            Binding="{Binding KDefect}"
+                            Header="불량명" />
+                        <DataGridTextColumn
+                            Width="auto"
+                            Binding="{Binding DefectQty}"
+                            ElementStyle="{StaticResource DataGridCellRight}"
+                            Header="불량수량" />
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <DataGrid x:Name="dgdTotal" Grid.Row="1" Grid.ColumnSpan="2" HeadersVisibility="All" ScrollViewer.HorizontalScrollBarVisibility="Hidden" IsReadOnly="True" Style="{DynamicResource TotalGridSet1}">
 
                     <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="건수" Width="*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBox Text="{Binding Total}" TextAlignment="Center" Padding="3 0 5 0" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                         <DataGridTemplateColumn Header="총 생산량" Width="*">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBox Text="{Binding WorkQty}" TextAlignment="Right" Padding="3 0 5 0" />
+                                    <TextBox Text="{Binding WorkQty}" TextAlignment="Center" Padding="3 0 5 0" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="불량수량" Width="*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBox Text="{Binding DefectQty}" TextAlignment="Center" Padding="3 0 5 0" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                     </DataGrid.Columns>
+                    
+                    
                 </DataGrid>
             </Grid>
 

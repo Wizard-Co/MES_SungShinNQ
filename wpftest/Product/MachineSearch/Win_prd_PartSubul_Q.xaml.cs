@@ -55,7 +55,9 @@ namespace WizMes_SungShinNQ
 
             SetComboBox();
 
-            tgnAll.IsChecked = true;
+            
+
+            //tgnAll.IsChecked = true;
         }
 
         private void SetComboBox()
@@ -136,108 +138,108 @@ namespace WizMes_SungShinNQ
         #region 토글 버튼 이벤트 모음
 
         // 공용 버튼
-        private void tgnCommon_Checked(object sender, RoutedEventArgs e)
-        {
-            tgnCommon.IsChecked = true;
-            tgnSpare.IsChecked = false;
-            tgnTool.IsChecked = false;
-            tgnAll.IsChecked = false;
+        //private void tgnCommon_Checked(object sender, RoutedEventArgs e)
+        //{
+        //    tgnCommon.IsChecked = true;
+        //    tgnSpare.IsChecked = false;
+        //    tgnTool.IsChecked = false;
+        //    tgnAll.IsChecked = false;
 
-            //dgtc_MCPartName.Header = "설비(부품)명";
-            dgtc_MCPartName.Header = "공용(예비품)명";
-            re_Search(0);
-        }
+        //    //dgtc_MCPartName.Header = "설비(부품)명";
+        //    dgtc_MCPartName.Header = "공용(예비품)명";
+        //    re_Search(0);
+        //}
 
-        private void tgnCommon_Unchecked(object sender, RoutedEventArgs e)
-        {
-            e.Handled = true;
-        }
+        //private void tgnCommon_Unchecked(object sender, RoutedEventArgs e)
+        //{
+        //    e.Handled = true;
+        //}
 
-        private void tgnCommon_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (tgnCommon.IsChecked == true)
-            {
-                e.Handled = true;
-            }
-        }
+        //private void tgnCommon_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        //{
+        //    if (tgnCommon.IsChecked == true)
+        //    {
+        //        e.Handled = true;
+        //    }
+        //}
 
         // 설비예비품
-        private void tgnSpare_Checked(object sender, RoutedEventArgs e)
-        {
-            tgnCommon.IsChecked = false;
-            tgnSpare.IsChecked = true;
-            tgnTool.IsChecked = false;
-            tgnAll.IsChecked = false;
+        //private void tgnSpare_Checked(object sender, RoutedEventArgs e)
+        //{
+        //    tgnCommon.IsChecked = false;
+        //    tgnSpare.IsChecked = true;
+        //    tgnTool.IsChecked = false;
+        //    tgnAll.IsChecked = false;
 
-            dgtc_MCPartName.Header = "설비(부품)명";
+        //    dgtc_MCPartName.Header = "설비(부품)명";
             
-            re_Search(0);
-        }
+        //    re_Search(0);
+        //}
 
         private void tgnSpare_Unchecked(object sender, RoutedEventArgs e)
         {
             e.Handled = true;
         }
 
-        private void tgnSpare_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (tgnSpare.IsChecked == true)
-            {
-                e.Handled = true;
-            }
-        }
+        //private void tgnSpare_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        //{
+        //    if (tgnSpare.IsChecked == true)
+        //    {
+        //        e.Handled = true;
+        //    }
+        //}
 
         // 툴
-        private void tgnTool_Checked(object sender, RoutedEventArgs e)
-        {
-            tgnCommon.IsChecked = false;
-            tgnSpare.IsChecked = false;
-            tgnTool.IsChecked = true;
-            tgnAll.IsChecked = false;
+        //private void tgnTool_Checked(object sender, RoutedEventArgs e)
+        //{
+        //    tgnCommon.IsChecked = false;
+        //    tgnSpare.IsChecked = false;
+        //    tgnTool.IsChecked = true;
+        //    tgnAll.IsChecked = false;
 
-            dgtc_MCPartName.Header = "Tool 명";
+        //    dgtc_MCPartName.Header = "Tool 명";
 
-            re_Search(0);
-        }
+        //    re_Search(0);
+        //}
 
         private void tgnTool_Unchecked(object sender, RoutedEventArgs e)
         {
             e.Handled = true;
         }
 
-        private void tgnTool_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (tgnTool.IsChecked == true)
-            {
-                e.Handled = true;
-            }
-        }
+        //private void tgnTool_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        //{
+        //    if (tgnTool.IsChecked == true)
+        //    {
+        //        e.Handled = true;
+        //    }
+        //}
 
         // 전체
-        private void tgnAll_Checked(object sender, RoutedEventArgs e)
-        {
-            tgnCommon.IsChecked = false;
-            tgnSpare.IsChecked = false;
-            tgnTool.IsChecked = false;
-            tgnAll.IsChecked = true;
+        //private void tgnAll_Checked(object sender, RoutedEventArgs e)
+        //{
+        //    tgnCommon.IsChecked = false;
+        //    tgnSpare.IsChecked = false;
+        //    tgnTool.IsChecked = false;
+        //    tgnAll.IsChecked = true;
 
-            dgtc_MCPartName.Header = "설비(부품)명";
+        //    dgtc_MCPartName.Header = "설비(부품)명";
 
-            re_Search(0);
-        }
+        //    re_Search(0);
+        //}
 
         private void tgnAll_Unchecked(object sender, RoutedEventArgs e)
         {
             e.Handled = true;
         }
 
-        private void tgnAll_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (tgnAll.IsChecked == true)
-            {
-                e.Handled = true;
-            }
-        }
+        //private void tgnAll_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        //{
+        //    if (tgnAll.IsChecked == true)
+        //    {
+        //        e.Handled = true;
+        //    }
+        //}
 
 
         #endregion
@@ -392,9 +394,10 @@ namespace WizMes_SungShinNQ
                 dgdTotal.Items.Clear();
 
                 string sForUse = "";
-                if (tgnCommon.IsChecked == true) { sForUse = "1"; }
-                if (tgnSpare.IsChecked == true) { sForUse = "2"; }
-                if (tgnTool.IsChecked == true) { sForUse = "3"; }
+                //if (tgnCommon.IsChecked == true) { sForUse = "1"; }
+                //if (tgnSpare.IsChecked == true) { sForUse = "2"; }
+                //if (tgnTool.IsChecked == true) { sForUse = "3"; }
+
 
                 Dictionary<string, object> sqlParameter = new Dictionary<string, object>();
                 sqlParameter.Add("nChkDate", chkMcInOutDate.IsChecked == true ? 1 : 0);
