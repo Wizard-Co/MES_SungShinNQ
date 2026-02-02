@@ -894,7 +894,7 @@ namespace WizMes_SungShinNQ
                 FillBaseInfo(worksheet, setcompanyData);
 
                 //그 다음 원본시트를 복사시트에 복사하며 값을 넣습니다.
-                FillDataIntoPasteSheet(worksheet, pastesheet, 4, 15, workSheetX, workSheetY, startColumnLetter, endColumnLetter, columnCount, rowsCount, startRow, lstOutwarePrint, lstMultiOutWareSub);
+                FillDataIntoPasteSheet(worksheet, pastesheet, 10, 15, workSheetX, workSheetY, startColumnLetter, endColumnLetter, columnCount, rowsCount, startRow, lstOutwarePrint, lstMultiOutWareSub);
 
                 //복사시트 선택
                 pastesheet.Select();
