@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:WizMes_SungShinNQ"
+              xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
              mc:Ignorable="d" 
              Loaded="UserControl_Loaded"
              d:DesignHeight="620" d:DesignWidth="820">
@@ -77,46 +78,46 @@
             </Grid>
 
 
-            <Grid Grid.Column="2" Grid.Row="0" Visibility="Visible">
+            <Grid Grid.Column="2" Grid.Row="0" Visibility="Hidden">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="75*" />
                     <ColumnDefinition Width="90*" />
                     <ColumnDefinition Width="15*" />
                 </Grid.ColumnDefinitions>
-                <Label x:Name="lblBuyerArticleNoSrh" Grid.Column="0" 
+                <Label x:Name="lblBuyerArticleNo" Grid.Column="0" 
                        Style="{DynamicResource LabelSearch}"
-                       MouseLeftButtonUp="lblBuyerArticleNoSrh_MouseLeftButtonUp">
+                       MouseLeftButtonUp="lblBuyerArticleNo_MouseLeftButtonUp">
                     <StackPanel Style="{DynamicResource StackPanelInLabel}">
                         <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}">
-                            <CheckBox x:Name="chkBuyerArticleNoSrh" Checked="chkBuyerArticleNoSrh_Checked" Unchecked="chkBuyerArticleNoSrh_UnChecked" VerticalAlignment="Center" />
+                            <CheckBox x:Name="chkBuyerArticleNo" Checked="chkBuyerArticleNo_Checked" Unchecked="chkBuyerArticleNo_UnChecked" VerticalAlignment="Center" />
                         </Viewbox>
                         <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}">
                             <TextBlock Text="품    번" Style="{DynamicResource TextBlockInViewBoxSearch}"/>
                         </Viewbox>
                     </StackPanel>
                 </Label>
-                <TextBox x:Name="txtBuyerArticleNoSrh" Grid.Column="1" 
+                <TextBox x:Name="txtBuyerArticleNoSearch" Grid.Column="1" 
                          Style="{DynamicResource TextBoxSearch}" IsEnabled="False" 
-                         KeyDown="txtBuyerArticleNoSrh_KeyDown" />
-                <Button x:Name="btnBuyerArticleNoSrh" Grid.Column="2" IsEnabled="False" 
-                        Click="btnBuyerArticleNoSrh_Click"  >
+                         KeyDown="txtBuyerArticleNoSearch_KeyDown" />
+                <Button x:Name="btnBuyerArticleNoSearch" Grid.Column="2" IsEnabled="False" 
+                        Click="btnBuyerArticleNoSearch_Click"  >
                     <Image Source="{DynamicResource btiPlusFind}" Style="{DynamicResource imgPlusFind}" />
                 </Button>
             </Grid>
 
-            <Grid Grid.Column="2" Grid.Row="1" Visibility="Visible" >
+            <Grid Grid.Column="2" Grid.Row="1" Visibility="Hidden" >
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="75*" />
                     <ColumnDefinition Width="90*" />
                     <ColumnDefinition Width="15*" />
                 </Grid.ColumnDefinitions>
-                <Label x:Name="lblArticleIDSrh" Grid.Column="0"
+                <Label x:Name="LabelArticleSearch" Grid.Column="0"
                        Style="{DynamicResource LabelSearch}"
-                       MouseLeftButtonUp="lblArticleIDSrh_MouseLeftButtonUp">
+                       MouseLeftButtonUp="LabelArticleSearch_MouseLeftButtonUp">
                     <StackPanel Style="{DynamicResource StackPanelInLabel}">
                         <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}" >
-                            <CheckBox x:Name="ChkArticleIDSrh" 
-                                      Checked="ChkArticleIDSrh_Checked" Unchecked="ChkArticleIDSrh_Unchecked" />
+                            <CheckBox x:Name="CheckBoxArticleSearch" 
+                                      Checked="CheckBoxArticleSearch_Checked" Unchecked="CheckBoxArticleSearch_Unchecked" />
                         </Viewbox>
                         <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}" >
                             <TextBlock Text="품    명"
@@ -125,11 +126,11 @@
                         </Viewbox>
                     </StackPanel>
                 </Label>
-                <TextBox x:Name="txtArticleIDSrh" Grid.Column="1" 
+                <TextBox x:Name="TextBoxArticleSearch" Grid.Column="1" 
                          Style="{DynamicResource TextBoxSearch}" 
-                         KeyDown="txtArticleIDSrh_KeyDown" />
-                <Button x:Name="btnArticleIDSrh" Grid.Column="2" IsEnabled="False"
-                        Click="btnArticleIDSrh_Click" >
+                         KeyDown="TextBoxArticleSearch_KeyDown" />
+                <Button x:Name="ButtonArticleSearch" Grid.Column="2" IsEnabled="False"
+                        Click="ButtonArticleSearch_Click" >
                     <Image Source="{DynamicResource btiPlusFind}" Style="{DynamicResource imgPlusFind}" />
                 </Button>
 
@@ -182,73 +183,63 @@
 
         <Grid Grid.Row="1" >
             <Grid.RowDefinitions>
+                <RowDefinition Height="13*" />
                 <RowDefinition Height="10*" />
+                <RowDefinition Height="13*" />
                 <RowDefinition Height="10*" />
-                <RowDefinition Height="*" />
+
             </Grid.RowDefinitions>
-            <GroupBox Header="[시간당 생산량]" Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <GroupBox Header="[P 시간당 생산량 (증가)]" Grid.Row="0" Grid.ColumnSpan="2">
                 <DataGrid x:Name="dgdGonsu" IsReadOnly="True"
                       Style="{DynamicResource DataGridSet1}">
-                    <DataGrid.RowStyle>
-                        <Style TargetType="DataGridRow">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Path=SetColor}" Value="true">
-                                    <Setter Property="Background" Value="Gray" />
-                                    <Setter Property="FontWeight" Value="Bold" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </DataGrid.RowStyle>
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="날짜" Width="*" MinWidth="0" Binding="{Binding WorkMonth}" FontSize="20"  ElementStyle="{StaticResource DataGridCellLeft}"/>
-                        <DataGridTextColumn Header="생산수량(EA)" Width="*" MinWidth="150" Binding="{Binding WorkQty, StringFormat='#,##0'}" 
-                                        ElementStyle="{StaticResource DataGridCellRight}" FontSize="20" />
-                        <!--<DataGridTextColumn Header="작업일수(Day)" Width="*" MinWidth="150" Binding="{Binding WorkDays, StringFormat='#,##0'}" 
-                              ElementStyle="{StaticResource DataGridCellRight}" FontSize="20" />-->
-                        <DataGridTextColumn Header="작업시간(Hr)" MinWidth="150" Width="*" Binding="{Binding WorkTime, StringFormat='#,##0'}" 
-                                        ElementStyle="{StaticResource DataGridCellRight}" FontSize="20" />
-                        <DataGridTextColumn Header="시간당생산량(EA/Hr)" MinWidth="150" Width="*" Binding="{Binding PerDayWorkQty, StringFormat='#,##0'}" 
-                                        ElementStyle="{StaticResource DataGridCellRight}" FontSize="20" />
-                        <DataGridTextColumn Header="목표(EA/Hr)" MinWidth="150" Width="*" Binding="{Binding Goal, StringFormat='#,##0'}" 
-                                        ElementStyle="{StaticResource DataGridCellRight}" FontSize="20" />
-                        <DataGridTextColumn Header="달성률(%)" MinWidth="150" Width="*" Binding="{Binding WorkGoalRate, StringFormat='#,##0'}" 
-                                        ElementStyle="{StaticResource DataGridCellRight}" FontSize="20" />
-                        <DataGridTextColumn Header="개선율(%)" MinWidth="150" Width="*" Binding="{Binding WorkUpRate, StringFormat='#,##0'}" 
-                                        ElementStyle="{StaticResource DataGridCellRight}" FontSize="20" />
-
+                        <DataGridTextColumn Header="년월" Width="auto"  Binding="{Binding WorkDate}"  ElementStyle="{StaticResource DataGridCellCenter}"  />
+                        <DataGridTextColumn Header="생산량(EA)" Width="auto" Binding="{Binding WorkQty, StringFormat='#,##0'}" ElementStyle="{StaticResource DataGridCellRight}" />
+                        <DataGridTextColumn Header="작업시간(Hr)" Width="auto" Binding="{Binding WorkTime, StringFormat='#,##0'}" ElementStyle="{StaticResource DataGridCellRight}" />
+                        <DataGridTextColumn Header="시간당 생산량(EA)" Width="auto" Binding="{Binding WorkQtyPerHour, StringFormat='#,##0'}" ElementStyle="{StaticResource DataGridCellRight}" />
+                        <!--<DataGridTextColumn Header="시간당 생산량(EA)" Width="auto" Binding="{Binding Daily_WorkQty, StringFormat='#,##0'}" ElementStyle="{StaticResource DataGridCellRight}" />-->
+                        <DataGridTextColumn Header="향상률(%)" Width="auto" Binding="{Binding WorkUpRate, StringFormat='#,##0'}"  ElementStyle="{StaticResource DataGridCellRight}"  />
+                        <DataGridTextColumn Header="목표달성률(%)" Width="auto" Binding="{Binding WorkGoalRate, StringFormat='#,##0'}" ElementStyle="{StaticResource DataGridCellRight}" />
                     </DataGrid.Columns>
                 </DataGrid>
             </GroupBox>
+            <GroupBox Grid.Row="1" Header="[시간당 생산량 그래프]" Grid.ColumnSpan="2">
+                <lvc:CartesianChart x:Name="lvcChartP" Series="{Binding seriesCollection}" LegendLocation="Bottom">
+                    <lvc:CartesianChart.AxisX>
+                        <lvc:Axis Title="년월" Labels="{Binding Labels}" Separator="{x:Static lvc:DefaultAxes.CleanSeparator}"/>
+                    </lvc:CartesianChart.AxisX>
+                    <lvc:CartesianChart.AxisY>
+                        <lvc:Axis Title="시간당 생산량" LabelFormatter="{Binding Formatter}"/>
+                    </lvc:CartesianChart.AxisY>
+                </lvc:CartesianChart>
+            </GroupBox>
 
-            <GroupBox Header="[공정불량률 감소]" Grid.Row="1" >
+            <GroupBox Header="[Q 공정 불량률 (감소)]" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
                 <DataGrid x:Name="dgdOut" Grid.Row="1" IsReadOnly="True" 
                       Style="{DynamicResource DataGridSet1}">
-                    <DataGrid.RowStyle>
-                        <Style TargetType="DataGridRow">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Path=SetColor}" Value="true">
-                                    <Setter Property="Background" Value="Gray" />
-                                    <Setter Property="FontWeight" Value="Bold" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </DataGrid.RowStyle>
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="날짜" Width="*" MinWidth="0" Binding="{Binding WorkMonth}" FontSize="20"  ElementStyle="{StaticResource DataGridCellLeft}"/>
-                        <DataGridTextColumn Header="생산량(EA)" Width="*" MinWidth="150" Binding="{Binding WorkQty, StringFormat='#,##0'}" 
-                                        ElementStyle="{StaticResource DataGridCellRight}" FontSize="20" />
-                        <DataGridTextColumn Header="불량량(EA)" Width="*" MinWidth="150" Binding="{Binding DefectQty, StringFormat='#,##0'}" 
-                                        ElementStyle="{StaticResource DataGridCellRight}" FontSize="20" />
-                        <DataGridTextColumn Header="불량률(%)" Width="*" MinWidth="150" Binding="{Binding DefectRate, StringFormat='#,##0'}" 
-                                        ElementStyle="{StaticResource DataGridCellRight}" FontSize="20" />
-                        <DataGridTextColumn Header="목표(%)" Width="*" MinWidth="150" Binding="{Binding Goal}" 
-                                        ElementStyle="{StaticResource DataGridCellRight}" FontSize="20" />
-                        <DataGridTextColumn Header="달성률(%)" MinWidth="150" Width="*" Binding="{Binding WorkGoalRate, StringFormat='#,##0'}" 
-                                        ElementStyle="{StaticResource DataGridCellRight}" FontSize="20" />
-                        <DataGridTextColumn Header="개선율(%)" MinWidth="150" Width="*" Binding="{Binding WorkUpRate, StringFormat='#,##0'}" 
-                                        ElementStyle="{StaticResource DataGridCellRight}" FontSize="20" />
+                        <DataGridTextColumn Header="년월" Width="auto" Binding="{Binding WorkDate}" ElementStyle="{StaticResource DataGridCellCenter}"  />
+                        <DataGridTextColumn Header="검사수량" Width="auto" Binding="{Binding DefectWorkQty, StringFormat='#,##0'}" ElementStyle="{StaticResource DataGridCellRight}"  />
+                        <DataGridTextColumn Header="불량수량" Width="auto" Binding="{Binding DefectQty, StringFormat='#,##0'}" ElementStyle="{StaticResource DataGridCellRight}"  />
+                        <DataGridTextColumn Header="불량률(%)" Width="auto"  Binding="{Binding DefectRate, StringFormat='#,##0'}" ElementStyle="{StaticResource DataGridCellRight}" />
+                        <DataGridTextColumn Header="목표달성률(%)" Width="auto" Binding="{Binding DefectGoalRate, StringFormat='#,##0'}" ElementStyle="{StaticResource DataGridCellRight}" />
+                        <DataGridTextColumn Header="개선률(%)" Width="auto" Binding="{Binding DefectUpRate, StringFormat='#,##0'}" ElementStyle="{StaticResource DataGridCellRight}"  />
                     </DataGrid.Columns>
                 </DataGrid>
+            </GroupBox>
+            <GroupBox Grid.Row="3" Grid.Column="0"  Header="[공정 불량률 그래프]" Grid.ColumnSpan="2">
+                <lvc:CartesianChart x:Name="lvcChartQ" Series="{Binding seriesCollection}" LegendLocation="Bottom">
+                    <lvc:CartesianChart.AxisX>
+                        <lvc:Axis Title="월" Labels="{Binding Labels}" Separator="{x:Static lvc:DefaultAxes.CleanSeparator}"/>
+                    </lvc:CartesianChart.AxisX>
+                    <lvc:CartesianChart.AxisY>
+                        <lvc:Axis Title="일 불량량" LabelFormatter="{Binding Formatter}" MinValue="0"/>
+                    </lvc:CartesianChart.AxisY>
+                </lvc:CartesianChart>
             </GroupBox>
 
         </Grid>
