@@ -51,7 +51,7 @@ namespace WizMes_SungShinNQ
 
         private ToolTip toolTip = new ToolTip();
         private DispatcherTimer _toolTipTimer;
-        private Point _startPoint; 
+        private Point _startPoint;
         private bool _isTracking = false;
 
         // FTP 활용모음.
@@ -85,7 +85,7 @@ namespace WizMes_SungShinNQ
             SetComboBox();
 
             GetProcess();
-            ImageOnlySeeMode();       
+            ImageOnlySeeMode();
 
         }
 
@@ -509,8 +509,8 @@ namespace WizMes_SungShinNQ
         //추가
         private void btnAdd_Click(object sender, RoutedEventArgs e)
         {
-         
-            rowNum = 0;            
+
+            rowNum = 0;
             CantBtnControl();
             tbkMsg.Text = "자료 입력 중";
             strFlag = "I";
@@ -774,13 +774,14 @@ namespace WizMes_SungShinNQ
                     }
                 }
 
-                for(int i =1; i < 7; i++)
+                for (int i = 1; i < 7; i++)
                 {
 
                     TextBox currentTextBox = (TextBox)FindName("txtSketch" + i);
-                    if(!lstFilesName.Contains(currentTextBox.Text))
+                    if (!lstFilesName.Contains(currentTextBox.Text))
                         lstFilesName.Add(currentTextBox.Text);
-                };
+                }
+                ;
 
                 // 보기 버튼체크
                 btnImgSeeCheckAndSetting();
@@ -903,7 +904,7 @@ namespace WizMes_SungShinNQ
                             cboSupplyType.SelectedItem = targetItem;
                             toolTip.IsOpen = false;
                         }), DispatcherPriority.Render);
-                    }   
+                    }
                 }
                 else
                 {
@@ -913,18 +914,18 @@ namespace WizMes_SungShinNQ
                     {
                         Dispatcher.BeginInvoke(new Action(() =>
                         {
-                            cboSupplyType.SelectedItem = targetItem;                                           
+                            cboSupplyType.SelectedItem = targetItem;
                         }), DispatcherPriority.Render);
-                   
+
                     }
                 }
                 //cboProductGrpID.IsDropDownOpen = true;
-            }        
+            }
         }
 
         private void SetupTooltip()
         {
-                  //단순 한줄
+            //단순 한줄
             //toolTip.Content = "⚠️ 자재류가 아닌 경우, 공정을 선택 하여야 작업지시를 내릴 수 있습니다. ⚠️";
             //toolTip.FontSize = 50;
             //toolTip.Foreground = Brushes.Red;
@@ -932,15 +933,15 @@ namespace WizMes_SungShinNQ
             //toolTip.Placement = PlacementMode.Center;
             //cboArticleGrp.ToolTip = toolTip;
 
-                 //스택패널로 여러줄 작성
+            //스택패널로 여러줄 작성
             var stackPanel = new StackPanel();
             stackPanel.Children.Add(new TextBlock
             {
                 //Text = "⚠️ 注意 ⚠️",
-                Text = "⚠️ 주의 ⚠️", 
+                Text = "⚠️ 주의 ⚠️",
                 FontSize = 80,
-                Foreground = Brushes.Red,         
-                HorizontalAlignment = HorizontalAlignment.Center,             
+                Foreground = Brushes.Red,
+                HorizontalAlignment = HorizontalAlignment.Center,
             });
 
             stackPanel.Children.Add(new TextBlock
@@ -974,7 +975,7 @@ namespace WizMes_SungShinNQ
             }
 
             // Grid 마우스 이동 이벤트 (입력란에서 이동했을때 5초뒤 꺼짐)
-            grdInput1.MouseMove += (mouseSender, mouseArgs) => 
+            grdInput1.MouseMove += (mouseSender, mouseArgs) =>
             {
                 if (_toolTipTimer != null)
                 {
@@ -1198,18 +1199,22 @@ namespace WizMes_SungShinNQ
                                 PART_ATTR = dr["PART_ATTR"].ToString(),
                                 PatternID = dr["PatternID"].ToString(),
 
-                                UnitPriceClss = dr["UnitPriceClss"].ToString(),
-                                Exdiameter = stringFormatN2(dr["Exdiameter"]), // 외경 2020-01-02 추가 // 외경을 폭으로 
-                                InDiameter = stringFormatN2(dr["InDiameter"]), // 내경
-                                Length = stringFormatN1(dr["Length"]), // 길이
+                                Exdiameter = stringFormatN2(dr["Exdiameter"]),
+                                InDiameter = stringFormatN2(dr["InDiameter"]),
+                                Length = stringFormatN2(dr["Length"]),
+
+                                Width = stringFormatN2(dr["Width"]),
+                                Height = stringFormatN2(dr["Height"]),
+                                Depth = stringFormatN2(dr["Depth"]),
+                                Thickness = stringFormatN2(dr["Thickness"]),
 
                                 // 삼주 소재 정보 → 입고에 쓰임
-                                DrawingLength = stringFormatN1(dr["DrawingLength"]),
-                                CuttingLength = stringFormatN1(dr["CuttingLength"]),
-                                DregsFront = stringFormatN1(dr["DregsFront"]),
-                                DregsBack = stringFormatN1(dr["DregsBack"]),
-                                SawBladeLoss = stringFormatN1(dr["SawBladeLoss"]),
-                                BonCuttingQty = stringFormatN1(dr["BonCuttingQty"]),
+                                //DrawingLength = stringFormatN1(dr["DrawingLength"]),
+                                //CuttingLength = stringFormatN1(dr["CuttingLength"]),
+                                //DregsFront = stringFormatN1(dr["DregsFront"]),
+                                //DregsBack = stringFormatN1(dr["DregsBack"]),
+                                //SawBladeLoss = stringFormatN1(dr["SawBladeLoss"]),
+                                //BonCuttingQty = stringFormatN1(dr["BonCuttingQty"]),
 
                                 ProdDiffiLevel = stringFormatN2(dr["ProdDiffiLevel"])
 
@@ -1350,7 +1355,7 @@ namespace WizMes_SungShinNQ
                     sqlParameter.Add("sPartGBNID", cboPartGBNID.SelectedValue != null ? cboPartGBNID.SelectedValue.ToString() : "");
                     sqlParameter.Add("sUseingType", "");
 
-                    sqlParameter.Add("Weight", ConvertDouble(txtWeight.Text)); // 입력란 없음 → 0으로 세팅
+
                     sqlParameter.Add("sUseClss", chkNotUse.IsChecked == true ? "*" : "");
                     //sqlParameter.Add("sSpec", txtSpec.Text);
                     sqlParameter.Add("sSpec", txtSpec.Text != null ? txtSpec.Text.Trim() : "");
@@ -1378,19 +1383,20 @@ namespace WizMes_SungShinNQ
                     sqlParameter.Add("sComments", txtComments.Text);
                     sqlParameter.Add("sPART_ATTR", cboPART_ATTR.SelectedIndex == -1 || cboPART_ATTR.SelectedValue == null ? "" : cboPART_ATTR.SelectedValue.ToString());
                     sqlParameter.Add("sPatternID", cboPattern.SelectedIndex == -1 || cboPattern.SelectedValue == null ? "" : cboPattern.SelectedValue.ToString());
-                    sqlParameter.Add("Exdiameter", ConvertDouble(txtExdiameter.Text)); //외경임 이걸 폭으로 고쳐야함
-                    sqlParameter.Add("Length", ConvertDouble(txtLength.Text)); // 길이
+                    //sqlParameter.Add("Exdiameter", ConvertDouble(txtExdiameter.Text)); //외경임 이걸 폭으로 고쳐야함
+                    //sqlParameter.Add("Length", ConvertDouble(txtLength.Text)); // 길이
 
                     sqlParameter.Add("ProdDiffiLevel", ConvertDouble(stringFormatN2(TextProdDiffiLevel.Text))); // 난이도
-                    //sqlParameter.Add("InDiameter", ConvertDouble(txtInDiameter.Text)); 
 
-                    // 소재 정보 - 삼주 추가
-                    //sqlParameter.Add("DrawingLength", ConvertDouble(txtDrawingLength.Text));
-                    //sqlParameter.Add("CuttingLength", ConvertDouble(txtCuttingLength.Text));
-                    //sqlParameter.Add("DregsFront", ConvertDouble(txtDregsFront.Text));
-                    //sqlParameter.Add("DregsBack", ConvertDouble(txtDregsBack.Text));
-                    //sqlParameter.Add("SawBladeLoss", ConvertDouble(txtSawBladeLoss.Text));
-                    //sqlParameter.Add("BonCuttingQty", ConvertDouble(txtBonCuttingQty.Text)); // 얘는 무조건 필수로 들어가야함!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    sqlParameter.Add("sExDiameter", txtExdiameter.Text != null && !txtExdiameter.Text.Trim().Equals("") ? ConvertDouble(txtExdiameter.Text) : 0); //외경
+                    sqlParameter.Add("sInDiameter", txtInDiameter.Text != null && !txtInDiameter.Text.Trim().Equals("") ? ConvertDouble(txtInDiameter.Text) : 0); //내경
+                    sqlParameter.Add("sWeight", txtWeight.Text != null && !txtWeight.Text.Trim().Equals("") ? ConvertDouble(txtWeight.Text) : 0);   //중량
+                    sqlParameter.Add("sLength", txtLength.Text != null && !txtLength.Text.Trim().Equals("") ? ConvertDouble(txtLength.Text) : 0);   //길이
+
+                    sqlParameter.Add("sWidth", txtWidth.Text != null && !txtWidth.Text.Trim().Equals("") ? ConvertDouble(txtWidth.Text) : 0);       //가로
+                    sqlParameter.Add("sHeight", txtHeight.Text != null && !txtHeight.Text.Trim().Equals("") ? ConvertDouble(txtHeight.Text) : 0);   //세로
+                    sqlParameter.Add("sDepth", txtDepth.Text != null && !txtDepth.Text.Trim().Equals("") ? ConvertDouble(txtDepth.Text) : 0);       //깊이
+                    sqlParameter.Add("sThickness", txtThickness.Text != null && !txtThickness.Text.Trim().Equals("") ? ConvertDouble(txtThickness.Text) : 0); //두께
 
                     #region 추가
                     if (strFlag.Equals("I"))
@@ -1539,8 +1545,8 @@ namespace WizMes_SungShinNQ
                         {
                             FTP_Save_File(listFtpFile, GetKey);
                         }
-                        
-                       
+
+
                         UpdateDBFtp(GetKey); // 리스트 갯수가 0개 이상일때 해버리면, 수정시에 저장이 안됨
                     }
 
@@ -1683,7 +1689,7 @@ namespace WizMes_SungShinNQ
                 return flag;
             }
 
-            if(dgdProcess.Items.Count > 0)
+            if (dgdProcess.Items.Count > 0)
             {
                 var checkedItems = dgdProcess.Items.Cast<Process_CodeView>().Count(item => item.CheckFlag == true);
 
@@ -1694,7 +1700,8 @@ namespace WizMes_SungShinNQ
                     {
                         MessageBoxResult msgresult = MessageBox.Show("품명 그룹이 원자재가 아닙니다. 지금은 공정선택을 건너뛰시겠습니까?", "공정 선택", MessageBoxButton.YesNo);
                         if (msgresult == MessageBoxResult.No)
-                        { flag = false;
+                        {
+                            flag = false;
 
                             #region 필수가 아닌 부분, 유저 사용경험 향상을 위한 UI디자인                                        
                             ////if (dgdProcess.Items.Count > 0)
@@ -1708,10 +1715,11 @@ namespace WizMes_SungShinNQ
                             ////}
                             #endregion
 
-                        return flag; }
+                            return flag;
+                        }
                     }
                 }
-            
+
             }
 
 
@@ -2346,7 +2354,7 @@ namespace WizMes_SungShinNQ
             if (lstFilesName.Contains(fileName))
             {
                 lstFilesName.Remove(fileName);
-            }      
+            }
         }
 
         #region FTP_Upload_TextBox - 파일 경로, 이름 텍스트박스에 올림 + 리스트에 ADD
@@ -3002,6 +3010,12 @@ namespace WizMes_SungShinNQ
         public string BonCuttingQty { get; set; } // 내경
 
         public string ProdDiffiLevel { get; set; } // 난이도 
+
+
+        public string Width { get; set; }
+        public string Height { get; set; }
+        public string Depth { get; set; }
+        public string Thickness { get; set; }
 
         public BitmapImage ImageView { get; set; }
 

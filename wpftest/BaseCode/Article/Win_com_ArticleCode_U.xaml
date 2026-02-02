@@ -210,7 +210,7 @@
                         <DataGridTextColumn Header="사용여부" Binding="{Binding UseClssName}" />
                         <DataGridTextColumn Header="품명그룹" Binding="{Binding ArticleGrp}" />
                         <DataGridTextColumn Header="품명그룹ID" Binding="{Binding ArticleGrpID}"  Visibility="Hidden"/>
-                        
+
                         <DataGridTextColumn Header="공급유형" Binding="{Binding SupplyTypeName}" />
                         <DataGridTextColumn Header="공급유형ID" Binding="{Binding SupplyType}"  Visibility="Hidden"/>
                         <DataGridTextColumn Header="용도" Binding="{Binding UseingTypeName}" />
@@ -236,7 +236,7 @@
                         <DataGridTextColumn Header="비고" Binding="{Binding Comments}" />
                     </DataGrid.Columns>
                 </DataGrid>
-                
+
                 <Grid Grid.Row="1" Grid.ColumnSpan="2">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="auto" />
@@ -256,7 +256,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="15*" />
                     <RowDefinition Height="*" />
-                    <RowDefinition Height="7.3*" />
+                    <RowDefinition Height="4.3*" />
                 </Grid.RowDefinitions>
                 <Grid x:Name="grdInput1" Grid.Row="0" Grid.Column="0" IsHitTestVisible="False">
                     <Grid.ColumnDefinitions>
@@ -273,19 +273,21 @@
                         <RowDefinition Height="1*" />
                         <RowDefinition Height="*" />
                         <RowDefinition Height="*" />
-                        
-                        <RowDefinition Height="0*" />
+
                         <RowDefinition Height="*" />
                         <RowDefinition Height="*" />
                         <RowDefinition Height="*" />
                         <RowDefinition Height="*" />
-                        
                         <RowDefinition Height="*" />
                         <RowDefinition Height="*" />
-                        <RowDefinition Height="1.1*" />
                         <RowDefinition Height="*" />
                         <RowDefinition Height="*" />
-                        
+
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
@@ -328,13 +330,13 @@
                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
                     <TextBox x:Name="txtBuyerArticleNo" Grid.Column="1" Grid.Row="1" Margin="1" 
                              Text="{Binding BuyerArticleNo}" Grid.ColumnSpan="4" KeyDown="txtBuyerArticleNo_KeyDown" Background="#fff2d2"/>
-                    
+
                     <!-- 2 Row -->
                     <!-- 2 Row -->
                     <Label Grid.Column="0" Grid.Row="2" Content="품   명" Margin="1"
                         HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
-                    <TextBox x:Name="txtName" Grid.Column="1" Grid.Row="2" Margin="1" 
-                        Text="{Binding Article}" KeyDown="txtName_KeyDown"/>       
+                    <TextBox x:Name="txtName" Grid.Column="1" Grid.Row="2" Margin="1" Grid.ColumnSpan="4"
+                        Text="{Binding Article}" KeyDown="txtName_KeyDown"/>
 
                     <Label Grid.Column="3" Grid.Row="2" Content="난이도" Margin="1" Visibility="Hidden"
                         HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
@@ -342,53 +344,53 @@
                              Text="{Binding ProdDiffiLevel }" TextAlignment="Right" KeyDown="TextProdDiffiLevel_KeyDown" PreviewTextInput="TextProdDiffiLevel_PreviewTextInput"/>
 
                     <!-- 3-4 Row-->
-                    <Label Grid.Column="0" Grid.Row="3" Content="세부내역(규격)" Margin="1" 
+                    <Label Grid.Column="0" Grid.Row="9" Content="세부내역(규격)" Margin="1" 
                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
-                    <TextBox x:Name="txtSpec" Grid.Column="1" Grid.Row="3" Margin="1" Grid.ColumnSpan="4" Grid.RowSpan="2"
+                    <TextBox x:Name="txtSpec" Grid.Column="1" Grid.Row="9" Margin="1" Grid.ColumnSpan="4"
                              AcceptsReturn="True" Text="{Binding Spec}" KeyDown="txtSpec_KeyDown"/>
 
                     <!-- 5 Row-->
-                    <Label Grid.Column="0" Grid.Row="5" Content="품명그룹" Margin="1"
+                    <Label Grid.Column="0" Grid.Row="3" Content="품명그룹" Margin="1"
                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
-                    <ComboBox x:Name="cboArticleGrp" Grid.Column="1" Grid.Row="5" Margin="1" Background="#fff2d2"
+                    <ComboBox x:Name="cboArticleGrp" Grid.Column="1" Grid.Row="3" Margin="1" Background="#fff2d2"
                               SelectedValue="{Binding ArticleGrpID}" DisplayMemberPath="code_name" 
                               SelectedValuePath="code_id" 
                               SelectionChanged="cboArticleGrp_SelectionChanged"/>
 
-                    <Label Grid.Column="3" Grid.Row="5" Content="제품군" Margin="1"
+                    <Label Grid.Column="3" Grid.Row="4" Content="제품군" Margin="1"
                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Visibility="Visible"/>
-                    <ComboBox x:Name="cboProductGrpID" Grid.Row="5" Grid.Column="4" Margin="1" Background="#fff2d2"
+                    <ComboBox x:Name="cboProductGrpID" Grid.Row="4" Grid.Column="4" Margin="1" Background="#fff2d2"
                               SelectedValue="{Binding ProductGrpID}" DropDownClosed="cboProductGrpID_DropDownClosed" Visibility="Visible"/>
 
 
 
                     <!-- 6 Row -->
-                    <Label Grid.Column="0" Grid.Row="12" Content="공급유형" Margin="1"
+                    <Label Grid.Column="3" Grid.Row="3" Content="공급유형" Margin="1"
                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
-                    <ComboBox x:Name="cboSupplyType" Grid.Column="1" Grid.Row="12" Margin="1" Background="#fff2d2"
+                    <ComboBox x:Name="cboSupplyType" Grid.Column="4" Grid.Row="3" Margin="1" Background="#fff2d2"
                               SelectedValue="{Binding SupplyType}" DropDownClosed="cboSupplyType_DropDownClosed"/>
 
-                    <Label Grid.Column="3" Grid.Row="7" Content="부품분류" Margin="1"
+                    <Label Grid.Column="0" Grid.Row="14" Content="부품분류" Margin="1"
                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Visibility="Visible"/>
-                    <ComboBox x:Name="cboPartGBNID" Grid.Row="7" Grid.Column="4" Margin="1" Background="#fff2d2"
+                    <ComboBox x:Name="cboPartGBNID" Grid.Row="14" Grid.Column="1" Margin="1" Background="#fff2d2"
                               SelectedValue="{Binding PartGBNID}" DropDownClosed="cboPartGBNID_DropDownClosed" Visibility="Visible"/>
 
                     <!-- 7 Row -->
-                    <Label Grid.Column="0" Grid.Row="7" Content="단  위" Margin="1" 
+                    <Label Grid.Column="0" Grid.Row="4" Content="단  위" Margin="1" 
                                HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
-                    <ComboBox x:Name="cboUnitClss" Grid.Column="1" Grid.Row="7" Margin="1" Background="#fff2d2"
+                    <ComboBox x:Name="cboUnitClss" Grid.Column="1" Grid.Row="4" Margin="1" Background="#fff2d2"
                                   SelectedValue="{Binding UnitClss}" DropDownClosed="cboUnitClss_DropDownClosed"/>
 
-                    <Label Grid.Column="3" Grid.Row="8" Content="라벨관리" Margin="1"
+                    <Label Grid.Column="3" Grid.Row="10" Content="라벨관리" Margin="1"
                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
-                    <ComboBox x:Name="cboLabelPrintYN" Grid.Column="4" Grid.Row="8" Margin="1" Background="#fff2d2"
+                    <ComboBox x:Name="cboLabelPrintYN" Grid.Column="4" Grid.Row="10" Margin="1" Background="#fff2d2"
                               SelectedValue="{Binding LabelPrintYN}" DropDownClosed="cboLabelPrintYN_DropDownClosed"/>
 
                     <!-- 8 Row -->
-                    <Label Grid.Column="0" Grid.Row="8" Content="적정재고량" Margin="1"
+                    <Label Grid.Column="0" Grid.Row="10" Content="적정재고량" Margin="1"
                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
 
-                    <Grid Grid.Column="1" Grid.Row="8">
+                    <Grid Grid.Column="1" Grid.Row="10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2.7*" />
                             <ColumnDefinition Width="*" />
@@ -399,34 +401,34 @@
                             Click="btnCalNeedStockQty_Click"/>-->
                     </Grid>
 
-                    <Label Grid.Column="3" Grid.Row="9" Content="FTA중점관리품" Margin="1"
+                    <Label Grid.Column="3" Grid.Row="11" Content="FTA중점관리품" Margin="1"
                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
-                    <ComboBox x:Name="cboFTAMgrYN" Grid.Column="4" Grid.Row="9" Margin="1" Background="#fff2d2"
+                    <ComboBox x:Name="cboFTAMgrYN" Grid.Column="4" Grid.Row="11" Margin="1" Background="#fff2d2"
                               SelectedValue="{Binding FTAMgrYN}" DropDownClosed="cboFTAMgrYN_DropDownClosed"/>
 
 
                     <!-- 9 Row -->
-                    <Label Grid.Column="0" Grid.Row="9" Content="출하용박스 수량" Margin="1"
+                    <Label Grid.Column="0" Grid.Row="11" Content="출하용박스 수량" Margin="1"
                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
-                    <TextBox x:Name="TextBoxOutQtyPerBox" Grid.Column="1" Grid.Row="9" Margin="1" 
-                             Text="{Binding OutQtyPerBox}" TextAlignment="Right" Padding="0 0 3 0" KeyDown="TextBoxOutQtyPerBox_KeyDown" PreviewTextInput="TextBoxOutQtyPerBox_PreviewTextInput"/>
+                    <TextBox x:Name="TextBoxOutQtyPerBox" Grid.Column="1" Grid.Row="11" Margin="1" 
+                             Text="{Binding OutQtyPerBox}" TextAlignment="Right"  KeyDown="TextBoxOutQtyPerBox_KeyDown" PreviewTextInput="TextBoxOutQtyPerBox_PreviewTextInput"/>
 
-                    <Label Grid.Column="3" Grid.Row="10" Margin="1" Content="원재료속성" 
+                    <Label Grid.Column="3" Grid.Row="12" Margin="1" Content="원재료속성" 
                                HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
-                    <ComboBox x:Name="cboPART_ATTR" Grid.Column="4" Grid.Row="10" Margin="1" Background="White"
+                    <ComboBox x:Name="cboPART_ATTR" Grid.Column="4" Grid.Row="12" Margin="1" Background="White"
                                   SelectedValue="{Binding PART_ATTR}" DropDownClosed="cboPART_ATTR_DropDownClosed"/>
 
                     <!-- 10 Row -->
-                    <Label Grid.Column="0" Grid.Row="10" Content="생산박스당 수량" Margin="1"
+                    <Label Grid.Column="0" Grid.Row="12" Content="(입고)생산박스당 수량" Margin="1"
                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
-                    <TextBox x:Name="TextBoxProdQtyPerBox" Grid.Column="1" Grid.Row="10" Margin="1" 
+                    <TextBox x:Name="TextBoxProdQtyPerBox" Grid.Column="1" Grid.Row="12" Margin="1" 
                              Text="{Binding ProdQtyPerBox}" TextAlignment="Right" Padding="0 0 3 0" KeyDown="TextBoxProdQtyPerBox_KeyDown" PreviewTextInput="TextBoxProdQtyPerBox_PreviewTextInput"/>
 
 
                     <!-- 10 Row -->
-                    <Label Grid.Column="3" Grid.Row="11" Content="출고/가공 단가" Margin="1" 
+                    <Label Grid.Column="3" Grid.Row="13" Content="출고/가공 단가" Margin="1" 
                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
-                    <Grid Grid.Row="11" Grid.Column="4">
+                    <Grid Grid.Row="13" Grid.Column="4">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2.8*" />
                             <ColumnDefinition Width="*" />
@@ -442,9 +444,9 @@
                     <TextBox x:Name="txtInDiameter" Grid.Column="4" Grid.Row="10" Margin="1" 
                              Text="{Binding InDiameter}" TextAlignment="Right" Padding="0 0 3 0" />-->
                     <!-- 11 Row -->
-                    <Label Grid.Column="0" Grid.Row="11" Content="매입 단가" Margin="1"
+                    <Label Grid.Column="0" Grid.Row="13" Content="매입 단가" Margin="1"
                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
-                    <Grid Grid.Row="11" Grid.Column="1">
+                    <Grid Grid.Row="13" Grid.Column="1">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2.8*" />
                             <ColumnDefinition Width="*" />
@@ -456,7 +458,7 @@
                     </Grid>
 
 
-                    <GroupBox Grid.Row="13" Grid.ColumnSpan="5" Grid.RowSpan="2" Header="제품스펙" FontSize="12">
+                    <GroupBox Grid.Row="5" Grid.ColumnSpan="5" Grid.RowSpan="4" Header="제품스펙" FontSize="12">
                         <Grid x:Name="Spec" Margin="1">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -465,34 +467,101 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
- 
-                            <!--10 Row--> <!--외경으로 되어있구나-->
-                            <Label Grid.Column="2" Grid.Row="0" Content="폭" Margin="1"
-                           HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
-                            <TextBox x:Name="txtExdiameter" Grid.Column="3" Grid.Row="0" Margin="1" Text="{Binding Exdiameter}"
-                                     TextAlignment="Right" Padding="0 0 3 0" PreviewTextInput="txtExdiameter_PreviewTextInput" />
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="2*"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="2*"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <Label Grid.Column="0" Grid.Row="0"  Style="{DynamicResource LabelInputArea}" >
+                                <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}">
+                                    <TextBlock  Text="내   경" Style="{DynamicResource TextBlockInViewBoxInput}"/>
+                                </Viewbox>
+                            </Label>
+
+                            <TextBox x:Name="txtInDiameter" Grid.Column="1" Grid.Row="0"
+                            Text="{Binding InDiameter}" Style="{DynamicResource TextBoxInput_Number_Right}"  />
+
+                            <!--10 Row-->
+                            <!--외경으로 되어있구나-->
+                            <Label Grid.Column="2" Grid.Row="0"  Style="{DynamicResource LabelInputArea}">
+                                <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}">
+                                    <TextBlock Text="외  경" Style="{DynamicResource TextBlockInViewBoxInput}"/>
+                                </Viewbox>
+                            </Label>
+                            <TextBox x:Name="txtExdiameter" Grid.Column="3" Grid.Row="0" 
+         Style="{DynamicResource TextBoxInput_Number_Right}" Text="{Binding Exdiameter}" />
 
                             <!-- 12 Row -->
-                            <Label Grid.Column="0" Grid.Row="0" Content="중   량" Margin="1"
-                           HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                            <Label Grid.Column="6" Grid.Row="2"  Style="{DynamicResource LabelInputArea}">
+                                <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}">
+                                    <TextBlock Text="중   량" Style="{DynamicResource TextBlockInViewBoxInput}"/>
+                                </Viewbox>
+                            </Label>
 
-                            <Grid Grid.Row="0" Grid.Column="1">
+                            <Grid Grid.Row="2" Grid.Column="7">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="2.8*" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <TextBox x:Name="txtWeight" Grid.Column="0" Grid.Row="0" Margin="1" Text="{Binding Weight}"
-                                         TextAlignment="Right" Padding="0 0 3 0" PreviewTextInput="txtWeight_PreviewTextInput" />
-                                <Label Grid.Column="1" Grid.Row="0" Content="Kg" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" 
-                               Margin="1"/>
+                                <TextBox x:Name="txtWeight" Grid.Column="0" Grid.Row="0" 
+             Style="{DynamicResource TextBoxInput_Number_Right}" Text="{Binding Weight}"/>
+                                <Label Grid.Column="1" Grid.Row="0"  Style="{DynamicResource LabelInputArea}">
+                                    <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}">
+                                        <TextBlock Text="Kg" Style="{DynamicResource TextBlockInViewBoxInput}"/>
+                                    </Viewbox>
+                                </Label>
                             </Grid>
 
-                            <Label Grid.Column="4" Grid.Row="0" Content="길   이" Margin="1"
-                           HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
-                            <TextBox x:Name="txtLength" Grid.Column="5" Grid.Row="0" Margin="1" Text="{Binding Length}"
-                                     TextAlignment="Right" Padding="0 0 3 0" PreviewTextInput="txtLength_PreviewTextInput" />
-                            
+                            <Label Grid.Column="4" Grid.Row="0" Style="{DynamicResource LabelInputArea}">
+                                <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}">
+                                    <TextBlock  Text="길   이" Style="{DynamicResource TextBlockInViewBoxInput}"  />
+                                </Viewbox>
+                            </Label>
+                            <TextBox x:Name="txtLength" Grid.Column="5" Grid.Row="0" Style="{DynamicResource TextBoxInput_Number_Right}"
+         Text="{Binding Length}"   />
+
+                            <Label Grid.Column="6" Grid.Row="0"  Style="{DynamicResource LabelInputArea}" >
+                                <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}">
+                                    <TextBlock  Text="두   께" Style="{DynamicResource TextBlockInViewBoxInput}"/>
+                                </Viewbox>
+                            </Label>
+
+                            <TextBox x:Name="txtThickness" Grid.Column="7" Grid.Row="0"
+ Text="{Binding Thickness}" Style="{DynamicResource TextBoxInput_Number_Right}" 
+         />
+
+                            <Label Grid.Column="0" Grid.Row="2"  Style="{DynamicResource LabelInputArea}">
+                                <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}">
+                                    <TextBlock Text="가  로" Style="{DynamicResource TextBlockInViewBoxInput}"/>
+                                </Viewbox>
+                            </Label>
+                            <TextBox x:Name="txtWidth" Grid.Column="1" Grid.Row="2" 
+                         Style="{DynamicResource TextBoxInput_Number_Right}" Text="{Binding Width}" 
+                         />
+
+                            <Label Grid.Column="2" Grid.Row="2"  Style="{DynamicResource LabelInputArea}">
+                                <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}">
+                                    <TextBlock Text="세  로" Style="{DynamicResource TextBlockInViewBoxInput}"/>
+                                </Viewbox>
+                            </Label>
+                            <TextBox x:Name="txtHeight" Grid.Column="3" Grid.Row="2" 
+                             Style="{DynamicResource TextBoxInput_Number_Right}" Text="{Binding Height}" 
+                             />
+
+                            <Label Grid.Column="4" Grid.Row="2"  Style="{DynamicResource LabelInputArea}">
+                                <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}">
+                                    <TextBlock Text="깊  이" Style="{DynamicResource TextBlockInViewBoxInput}"/>
+                                </Viewbox>
+                            </Label>
+                            <TextBox x:Name="txtDepth" Grid.Column="5" Grid.Row="2" 
+                         Style="{DynamicResource TextBoxInput_Number_Right}" Text="{Binding Depth}" 
+                         />
+
                         </Grid>
                     </GroupBox>
                     <!--<Label Grid.Column="3" Grid.Row="11" Content="보관위치" Margin="1"
@@ -500,10 +569,10 @@
                     <TextBox x:Name="txtStockLocName" Grid.Column="4" Grid.Row="11" Margin="1"
                              Text="{Binding StockLocName}" Grid.ColumnSpan="1" KeyDown="txtStockLocName_KeyDown"/>-->
 
-                    <Label Grid.Column="3" Grid.Row="12" Content="H.S Code" Margin="1"
-                           HorizontalContentAlignment="Center" VerticalContentAlignment="Center"  Visibility="Hidden"/>
+                    <Label Grid.Column="3" Grid.Row="14" Content="H.S Code" Margin="1"
+                           HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
 
-                    <Grid Grid.Column="4" Grid.Row="12" Visibility="Hidden">
+                    <Grid Grid.Column="4" Grid.Row="14">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="4*" />
                             <ColumnDefinition Width="*" />
@@ -517,24 +586,24 @@
                         </Button>
                     </Grid>
 
-                    <Label Grid.Column="3" Grid.Row="12" Content="무검사 구분" Margin="1"
+                    <Label Grid.Column="0" Grid.Row="15" Content="무검사 구분" Margin="1"
                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
-                    <ComboBox x:Name="cboAutoInspectYN" Grid.Column="4" Grid.Row="12" Margin="1" Background="White"
+                    <ComboBox x:Name="cboAutoInspectYN" Grid.Column="1" Grid.Row="15" Margin="1" Background="White"
                                   SelectedValue="{Binding AutoInspectYN}"/>
 
 
 
 
                     <!-- 14 Row -->
-                    <Label Grid.Column="0" Grid.Row="15" Content="도금사양" Margin="1"
+                    <Label Grid.Column="0" Grid.Row="16" Content="도금사양" Margin="1"
                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
-                    <TextBox x:Name="txtCoatingSpec" Grid.Column="1" Grid.Row="15" Grid.ColumnSpan="4" Margin="1" 
+                    <TextBox x:Name="txtCoatingSpec" Grid.Column="1" Grid.Row="16" Grid.ColumnSpan="4" Margin="1" 
                              Text="{Binding CoatingSpec}" KeyDown="txtCoatingSpec_KeyDown"/>
 
                     <!-- 15 Row -->
-                    <Label Grid.Column="0" Grid.Row="16" Content="비   고" Margin="1"
+                    <Label Grid.Column="0" Grid.Row="17" Content="비   고" Margin="1"
                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
-                    <TextBox x:Name="txtComments" Grid.Column="1" Grid.Row="16" Grid.ColumnSpan="4" Margin="1"
+                    <TextBox x:Name="txtComments" Grid.Column="1" Grid.Row="17" Grid.ColumnSpan="4" Margin="1"
                              Text="{Binding Comments}" KeyDown="txtComments_KeyDown"/>
                 </Grid>
 
@@ -735,7 +804,7 @@
                                             <RowDefinition Height="*" />
                                             <RowDefinition Height="*" />
                                             <RowDefinition Height="*" />
-              
+
                                             <RowDefinition Height="*" />
                                             <RowDefinition Height="*" />
                                             <!--<RowDefinition Height="0.2*" />-->
@@ -794,7 +863,7 @@
                                             Text="{Binding Sketch7File}" Tag="{Binding Sketch7Path}" IsHitTestVisible="False"/>
                                         <Button x:Name="btnFileDelete7" Grid.Column="2" Grid.Row="6" Content="삭제" Margin="1" Tag="07" Click="btnFileDelete_Click"/>
                                         <Button x:Name="btnFileSee7" Grid.Column="3" Grid.Row="6" Content="보기" Margin="1" Tag="07" Click="btnFileSee_Click"/>-->
-                                        
+
                                     </Grid>
                                 </Grid>
                                 <Grid Grid.Column="1" >
