@@ -324,6 +324,14 @@ namespace WizMes_SungShinNQ
                                 Machine = dr["Machine"].ToString(),
                                 MachineNo = dr["MachineNo"].ToString(),
                                 Comments = dr["Comments"].ToString(),
+
+                                // 2026.02.02 
+                                M1DayWorkQty = Convert.ToDouble(dr["M1DayWorkQty"]),
+                                M1NightWorkQty = Convert.ToDouble(dr["M1NightWorkQty"]),
+                                M2DayWorkQty = Convert.ToDouble(dr["M2DayWorkQty"]),
+                                M2NightWorkQty = Convert.ToDouble(dr["M2NightWorkQty"]),
+                                M3DayWorkQty = Convert.ToDouble(dr["M3DayWorkQty"]),
+                                M3NightWorkQty = Convert.ToDouble(dr["M3NightWorkQty"]),
                             };
 
                             dgdMain.Items.Add(WinR);
@@ -518,6 +526,12 @@ namespace WizMes_SungShinNQ
         public string StationNO { get; set; }
         public string Comments { get; set; }
 
+        public double M1DayWorkQty { get; set; }
+        public double M1NightWorkQty { get; set; }
+        public double M2DayWorkQty { get; set; }
+        public double M2NightWorkQty { get; set; }
+        public double M3DayWorkQty { get; set; }
+        public double M3NightWorkQty { get; set; }
 
 
     }

@@ -292,11 +292,39 @@
                     <DataGridTextColumn
                         Binding="{Binding DefectQty, StringFormat=N0}"
                         ElementStyle="{StaticResource DataGridCellRight}"
-                        Header="불량량" />
+                        Header="불량량" Visibility="Hidden"/>
                     <DataGridTextColumn
                         Binding="{Binding CT}"
                         ElementStyle="{StaticResource DataGridCellRight}"
-                        Header="Cycle Time" />
+                        Header="Cycle Time" Visibility="Hidden"/>
+                    <DataGridTextColumn
+                        Binding="{Binding M1DayWorkQty, StringFormat=N0}"
+                        ElementStyle="{StaticResource DataGridCellRight}"
+                        Header="모뎀1 주간생산량" />
+                    <DataGridTextColumn
+                        Binding="{Binding M1NightWorkQty, StringFormat=N0}"
+                        ElementStyle="{StaticResource DataGridCellRight}"
+                        Header="모뎀1 야간생산량" />
+                    <DataGridTextColumn
+                        Binding="{Binding M2DayWorkQty, StringFormat=N0}"
+                        ElementStyle="{StaticResource DataGridCellRight}"
+                        Header="모뎀2 주간생산량" />   
+                    <DataGridTextColumn
+                        Binding="{Binding M2NightWorkQty, StringFormat=N0}"
+                        ElementStyle="{StaticResource DataGridCellRight}"
+                        Header="모뎀2 야간생산량" />
+                    <DataGridTextColumn
+                        Binding="{Binding M3DayWorkQty, StringFormat=N0}"
+                        ElementStyle="{StaticResource DataGridCellRight}"
+                        Header="모뎀3 주간생산량" />
+                    <DataGridTextColumn
+                        Binding="{Binding M3NightWorkQty, StringFormat=N0}"
+                        ElementStyle="{StaticResource DataGridCellRight}"
+                        Header="모뎀3 야간생산량" />
+                    <DataGridTextColumn
+                        Binding="{Binding Comments}"
+                        ElementStyle="{StaticResource DataGridCellLeft}"
+                        Header="비고" />
                 </DataGrid.Columns>
             </DataGrid>
 
