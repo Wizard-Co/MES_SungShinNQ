@@ -269,6 +269,41 @@ namespace WizMes_SungShinNQ
             //}
         }
 
+        public DataSet QueryToDataSetWithParam(string queryString, Dictionary<string, object> parameters = null)
+        {
+            try
+            {
+                if (p_Connection.State == ConnectionState.Closed)
+                {
+                    p_Connection.Open();
+                }
+
+                p_Command.CommandText = queryString;
+                p_Command.CommandType = CommandType.Text;
+                p_Command.Parameters.Clear();
+
+                // 매개변수 추가
+                if (parameters != null)
+                {
+                    foreach (var param in parameters)
+                    {
+                        p_Command.Parameters.AddWithValue(param.Key, param.Value ?? DBNull.Value);
+                    }
+                }
+
+                SqlDataAdapter adapter = new SqlDataAdapter(p_Command);
+                DataSet dataset = new DataSet();
+                adapter.Fill(dataset);
+                adapter.Dispose();
+                return dataset;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Database Error: {ex.Message}");
+                throw;
+            }
+        }
+
         public int QueryToInt32(string queryString)
         {
             try
@@ -1149,6 +1184,221 @@ namespace WizMes_SungShinNQ
             }
         }
 
+        public List<KeyValue> ExecuteAllProcedureOutputGetCS_NewLog(List<Procedure> AllProcedure, List<Dictionary<string, object>> sqlParameterall, string crudGubn)
+        {
+            // Output 결과 값을 넣을 List
+            List<KeyValue> outputVal = new List<KeyValue>();
+            SqlTransaction transaction = null;
+            string value = "";
+            bool complete = false;
+            List<KeyValue> Success_List = new List<KeyValue>();//추가/180427
+
+            try
+            {
+                if (p_Connection.State == ConnectionState.Closed)
+                {
+                    p_Connection.Open();
+                }
+
+                transaction = p_Connection.BeginTransaction();
+                p_Command.Transaction = transaction;
+
+                //로그 메서드
+                InsertLogByForm(new System.Diagnostics.StackTrace(1, false).GetFrame(0).GetMethod().ReflectedType.Name, crudGubn);
+
+                foreach (Procedure Procedure in AllProcedure)
+                {
+                    if (sqlParameterall[AllProcedure.IndexOf(Procedure)] != null)
+                    {
+                        Dictionary<string, object> sqlParameter = sqlParameterall[AllProcedure.IndexOf(Procedure)];
+
+                        if (Procedure.OutputUseYN == "Y")//리턴받는 output값이 있을때
+                        {
+                            if (outputVal.Count > 0)
+                            {
+                                //해당 프로시저의 output으로 리턴받는 값과 동일한 값이 있을 경우 output값 리스트에서 삭제
+                                for (int i = outputVal.Count - 1; i >= 0; i--)
+                                {
+                                    KeyValue kvp = outputVal[i];
+                                    if (kvp.key.ToLower().ToString() == Procedure.OutputName.ToLower().ToString())
+                                    {
+                                        outputVal.Remove(kvp);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                //output값 리스트에 추가
+                                KeyValue kvp = new KeyValue();
+                                kvp.key = Procedure.OutputName;
+                                kvp.value = "";
+                                outputVal.Add(kvp);
+                            }
+                        }
+
+                        ///2018.02.02 로그용 파라미터 값 세팅
+                        p_Command.CommandText = Procedure.Name;               //프로시저명 입력
+                        p_Command.CommandType = CommandType.StoredProcedure;    //명령타입 입력
+                        p_Command.Parameters.Clear();                           //이전 파라미터 클리어]
+
+                        foreach (KeyValuePair<string, object> kvp in sqlParameter)
+                        {
+                            complete = false;
+
+                            foreach (KeyValue mKeyValue in outputVal)   //outputVal list에 KeyValue 클래스가 1개이상 있을때
+                            {
+                                if (kvp.Key == mKeyValue.key)           //KeyValue 객체의 key값(output값의 컬럼명)과 sql파라미터의 key값이 같을때
+                                {
+                                    if (mKeyValue.value != "")          //KeyValue 객체의 value값이 빈 값이 아닐때 
+                                    {
+                                        p_Command.Parameters.AddWithValue(kvp.Key, mKeyValue.value);//해당 KeyValue객체의 Value값을 sql 파라미터의 value에 넣어준다.
+                                        complete = true;
+                                    }
+                                }
+                            }
+
+                            if (!complete)
+                            {
+                                p_Command.Parameters.AddWithValue(kvp.Key, kvp.Value);
+                            }
+                        }
+                        //로그 메서드
+                        InsertTrxLogByUserID(new System.Diagnostics.StackTrace(1, false).GetFrame(0).GetMethod());
+
+
+                        p_Command.CommandText = Procedure.Name;                 //프로시저 이름 셋팅
+                        p_Command.CommandType = CommandType.StoredProcedure;    //명령타입 입력
+                        p_Command.Parameters.Clear();                           //로그용 파라미터 클리어
+
+                        //입력할 데이터 파라미터 셋팅
+                        foreach (KeyValuePair<string, object> kvp in sqlParameter)
+                        {
+                            complete = false;
+
+                            foreach (KeyValue mKeyValue in outputVal)   //outputVal list에 KeyValue 클래스가 1개이상 있을때
+                            {
+                                if (kvp.Key == mKeyValue.key)           //KeyValue 객체의 key값(output값의 컬럼명)과 sql파라미터의 key값이 같을때
+                                {
+                                    if (mKeyValue.value != "")          //KeyValue 객체의 value값이 빈 값이 아닐때 
+                                    {
+                                        p_Command.Parameters.AddWithValue(kvp.Key, mKeyValue.value);//해당 KeyValue객체의 Value값을 sql 파라미터의 value에 넣어준다.
+                                        complete = true;
+                                    }
+                                }
+                            }
+
+                            if (!complete)
+                            {
+                                p_Command.Parameters.AddWithValue(kvp.Key, kvp.Value);
+                            }
+                        }
+
+                        if (Procedure.OutputUseYN == "Y")
+                        {
+                            p_Command.Parameters[Procedure.OutputName].Direction = ParameterDirection.Output;
+                            p_Command.Parameters[Procedure.OutputName].Size = int.Parse(Procedure.OutputLength);
+                        }
+                    }
+
+                    value = Convert.ToString(p_Command.ExecuteScalar());
+
+                    if (Procedure.OutputUseYN == "Y")
+                    {
+                        complete = false;                                                                       //완료여부
+
+                        foreach (KeyValue mKeyValue in outputVal)                                               //output값 리스트중에서
+                        {
+                            if (mKeyValue.key == Procedure.OutputName)                                              //같은 이름을 가진 Key값이 리스트에 있을경우
+                            {
+                                mKeyValue.value = p_Command.Parameters[Procedure.OutputName].Value.ToString();      //해당 리스트에 값 추가
+                                complete = true;
+                                Success_List.Add(mKeyValue);//추가/180427
+                                break;
+                            }
+                        }
+                        if (!complete)
+                        {
+                            KeyValue kvp = new KeyValue();
+                            kvp.key = Procedure.OutputName;                                                     //새로운 output값 이름의 리스트 생성
+                            kvp.value = p_Command.Parameters[Procedure.OutputName].Value.ToString();            //새로운 output값 밸류 추가
+                            outputVal.Add(kvp);                                                             //output값 리스트에 추가
+                            Success_List.Add(kvp);//추가/180427
+                        }
+                    }
+                }
+                //추가 /180427
+                KeyValue suc_kv = new KeyValue();
+                suc_kv.key = "Success";
+                suc_kv.value = "";
+                Success_List.Insert(0, suc_kv);
+
+                transaction.Commit();
+
+                return Success_List; //추가 /180427
+                //return new String[] { "success", value };   //성공! 쿼리에서 리턴값이 있을경우
+            }
+            catch (NullReferenceException)  //성공! 쿼리에서 리턴값이 없을경우
+            {
+                if (transaction != null)
+                {
+                    transaction.Commit();
+                }
+
+                //추가 /180427
+                KeyValue suc_kv = new KeyValue();
+                suc_kv.key = "Success";
+                suc_kv.value = "NullReferenceException";
+                Success_List.Add(suc_kv);
+                //Success_List.AddRange(outputVal);
+
+                return Success_List;
+
+
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    if (transaction != null)
+                    {
+                        transaction.Rollback();
+                    }
+                    //exception용 로그 메서드
+                    InsertTrxLogByUserIDErrLog(new System.Diagnostics.StackTrace(1, false).GetFrame(0).GetMethod(), ex.Message);
+
+                    KeyValue suc_kv = new KeyValue();
+                    suc_kv.key = "failure";
+                    suc_kv.value = ex.Message;
+                    Success_List.Add(suc_kv);
+
+                    return Success_List;
+                }
+                catch (Exception ex1)
+                {
+                    if (transaction != null)
+                    {
+                        transaction.Rollback();
+                    }
+                    //exception용 로그 메서드2
+                    InsertTrxLogByUserIDErrLog(new System.Diagnostics.StackTrace(1, false).GetFrame(0).GetMethod(), ex1.Message);
+
+                    KeyValue suc_kv = new KeyValue();
+                    suc_kv.key = "failure";
+                    suc_kv.value = ex1.Message;
+                    Success_List.Add(suc_kv);
+
+                    return Success_List;
+                }
+            }
+            finally
+            {
+                if (p_Connection.State != ConnectionState.Closed)
+                {
+                    p_Connection.Close();
+                }
+                CloseConnection();
+            }
+        }
 
         public List<KeyValue> ExecuteAllProcedureOutputGetCS(List<Procedure> AllProcedure, List<Dictionary<string, object>> sqlParameterall)
         {
@@ -2159,6 +2409,80 @@ namespace WizMes_SungShinNQ
             //        p_Connection.Close();
             //    }
             //}
+
+        }
+
+        public string[] InsertLogByForm(string form, string crudGubun)
+        {
+            try
+            {
+                if (p_Connection.State == ConnectionState.Closed)
+                {
+                    p_Connection.Open();
+                }
+
+                int result = 0;
+                string formName = form;
+                string userid = "";
+
+                if (p_Command.Parameters.Count > 0)
+                {
+                    foreach (SqlParameter param in p_Command.Parameters)
+                    {
+                        if (param.Value == null)
+                        {
+                            param.Value = "";
+                        }
+
+                        if (param.ParameterName.ToLower().Contains("userid"))
+                        {
+                            userid = param.Value.ToString();
+                        }
+                    }
+                }
+
+                if (userid.Equals(""))
+                {
+                    userid = MainWindow.CurrentUser;
+                }
+
+                p_Command.CommandText = "xp_iWorkLogWPF_New";
+                p_Command.CommandType = CommandType.StoredProcedure;
+                p_Command.Parameters.Clear();
+
+                p_Command.Parameters.AddWithValue("@sCompanyID", MainWindow.CompanyID);
+                p_Command.Parameters.AddWithValue("@sMenuID", "");
+                p_Command.Parameters.AddWithValue("@sWorkFlag", crudGubun);
+                p_Command.Parameters.AddWithValue("@sWorkDate", DateTime.Now.ToString("yyyyMMdd"));
+                p_Command.Parameters.AddWithValue("@sWorkTime", DateTime.Now.ToString("HHmm"));
+
+                p_Command.Parameters.AddWithValue("@sUserID", userid);
+                p_Command.Parameters.AddWithValue("@sWorkComputer", System.Environment.MachineName);
+                p_Command.Parameters.AddWithValue("@sWorkComputerIP", lib.UserIPAddress);
+                p_Command.Parameters.AddWithValue("@sWorkLog", "");
+                p_Command.Parameters.AddWithValue("@sProgramID", formName);
+
+                result = p_Command.ExecuteNonQuery();
+
+                return new String[] { "success", "success" };
+            }
+            catch (NullReferenceException ex)
+            {
+                MessageBox.Show(ex.ToString());
+                return new String[] { "success", "NullReferenceException" };
+            }
+            catch (Exception ex)
+            {
+                return new String[] { "failure", ex.Message };
+            }
+            finally
+            {
+
+                //if (p_Connection.State != ConnectionState.Closed)
+                //{
+                //    p_Connection.Close();
+                //}
+            }
 
         }
 
