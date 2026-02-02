@@ -178,7 +178,8 @@ namespace WizMes_SungShinNQ
                 sqlParameter.Add("FromDate", dtpSDate.SelectedDate == null ? "" : dtpSDate.SelectedDate.Value.ToString().Replace("-", ""));
                 sqlParameter.Add("ToDate", dtpEDate.SelectedDate == null ? "" : dtpEDate.SelectedDate.Value.ToString().Replace("-", ""));
                 sqlParameter.Add("ArticleNo", ArticleID != null ? ArticleID : ""); //품번
-                ds = DataStore.Instance.ProcedureToDataSet("xp_prd_sKPI_KPI", sqlParameter, false);
+                ds = DataStore.Instance.ProcedureToDataSet("xp_prd_sKPI_KPI_test2", sqlParameter, false);
+                //ds = DataStore.Instance.ProcedureToDataSet("xp_prd_sKPI_KPI", sqlParameter, false);
 
                 if (ds != null && ds.Tables.Count > 0)
                 {
@@ -204,7 +205,7 @@ namespace WizMes_SungShinNQ
 
                                 WorkQty = stringFormatN0(dr["WorkQty"]),
                                 WorkTime = stringFormatN1(dr["WorkTime"]),
-                                WorkQtyPerHour = stringFormatN0(dr["WorkQtyPerHour"]),
+                                WorkQtyPerHour = stringFormatN1(dr["WorkQtyPerHour"]),
                                 //Daily_WorkQty = stringFormatN0(dr["Daily_WorkQty"]),
                                 DefectQty = stringFormatN0(dr["DefectQty"]),
                                 DefectWorkQty = stringFormatN0(dr["DefectWorkQty"]),
@@ -219,6 +220,7 @@ namespace WizMes_SungShinNQ
                             };
                             if (WPKQC.gbn == "P")
                             {
+                                WPKQC.sMan = 0.5;
                                 dgdGonsu.Items.Add(WPKQC);
                             }
                             if (WPKQC.gbn == "Q")
@@ -267,7 +269,7 @@ namespace WizMes_SungShinNQ
 
                         if (Rating.WorkQtyPerHour != null)
                         {
-                            chart.lineQty.Add(Convert.ToInt32(Rating.WorkQtyPerHour.Replace(",", "")));
+                            chart.lineQty.Add(Convert.ToDouble(Rating.WorkQtyPerHour.Replace(",", "")));
                             //chart.lineQty.Add(Convert.ToInt32(Rating.Daily_WorkQty.Replace("," , "")));
                         }
                         else
@@ -663,6 +665,7 @@ namespace WizMes_SungShinNQ
         public string DefectUpRate { get; set; }
         public string DefectGoalRate { get; set; }
         public string Sort { get; set; }
+        public double sMan { get; set; }
 
     }
 

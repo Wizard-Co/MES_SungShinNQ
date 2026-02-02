@@ -200,8 +200,9 @@
                         <DataGridTextColumn Header="년월" Width="auto"  Binding="{Binding WorkDate}"  ElementStyle="{StaticResource DataGridCellCenter}"  />
                         <DataGridTextColumn Header="생산량(EA)" Width="auto" Binding="{Binding WorkQty, StringFormat='#,##0'}" ElementStyle="{StaticResource DataGridCellRight}" />
                         <DataGridTextColumn Header="작업시간(Hr)" Width="auto" Binding="{Binding WorkTime, StringFormat='#,##0'}" ElementStyle="{StaticResource DataGridCellRight}" />
-                        <DataGridTextColumn Header="시간당 생산량(EA)" Width="auto" Binding="{Binding WorkQtyPerHour, StringFormat='#,##0'}" ElementStyle="{StaticResource DataGridCellRight}" />
-                        <!--<DataGridTextColumn Header="시간당 생산량(EA)" Width="auto" Binding="{Binding Daily_WorkQty, StringFormat='#,##0'}" ElementStyle="{StaticResource DataGridCellRight}" />-->
+                        <DataGridTextColumn Header="작업인원 (Man)" Width="auto" Binding="{Binding sMan}" ElementStyle="{StaticResource DataGridCellRight}" />
+                        <DataGridTextColumn Header="시간당 생산량(EA/Hr/Man)" Width="auto" Binding="{Binding WorkQtyPerHour, StringFormat='#,##0'}" ElementStyle="{StaticResource DataGridCellRight}" />
+                        <!--<DataGridTextColumn Header="시간당 생산`량(EA)" Width="auto" Binding="{Binding Daily_WorkQty, StringFormat='#,##0'}" ElementStyle="{StaticResource DataGridCellRight}" />-->
                         <DataGridTextColumn Header="향상률(%)" Width="auto" Binding="{Binding WorkUpRate, StringFormat='#,##0'}"  ElementStyle="{StaticResource DataGridCellRight}"  />
                         <DataGridTextColumn Header="목표달성률(%)" Width="auto" Binding="{Binding WorkGoalRate, StringFormat='#,##0'}" ElementStyle="{StaticResource DataGridCellRight}" />
                     </DataGrid.Columns>
