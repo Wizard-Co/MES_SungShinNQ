@@ -150,6 +150,7 @@
     <BitmapImage x:Key="btiAFT_CopyLogo" UriSource="/images/logo_copy.png" />
     <BitmapImage x:Key="btiGLS_Logo" UriSource="/images/icon_MES1.jpg" />
     <BitmapImage x:Key="btiAFT_Company" UriSource="/images/notice_img.jpg" />
+    <BitmapImage x:Key="imgScanner" UriSource="/images/barcode_scanner.png" />
     <BitmapImage x:Key="btiCheck" UriSource="/images/ok.bmp" />
     <TextBlock x:Key="tblCheck" Text="선택(C)" />
     <TextBlock x:Key="tblRefresh" Text="새로고침" />

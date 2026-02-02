@@ -158,6 +158,24 @@ namespace WizMes_SungShinNQ
             this.cboVAT_YN.ItemsSource = cboVAT_YN;
             this.cboVAT_YN.DisplayMemberPath = "code_name";
             this.cboVAT_YN.SelectedValuePath = "code_name";
+
+            ObservableCollection<CodeView> ovcReworkOrderYN = ComboBoxUtil.Instance.Direct_SetComboBox(strAutoProductInspectYN);
+            cboReworkOrderYN.ItemsSource = ovcReworkOrderYN;
+            cboReworkOrderYN.DisplayMemberPath = "code_name";
+            cboReworkOrderYN.SelectedValuePath = "code_id";
+
+
+            ObservableCollection<CodeView> ovcReworkOrderYnSrh = ComboBoxUtil.Instance.Direct_SetComboBox(strAutoProductInspectYN);
+            cboReworkOrderYnSrh.ItemsSource = ovcReworkOrderYnSrh;
+            cboReworkOrderYnSrh.DisplayMemberPath = "code_name";
+            cboReworkOrderYnSrh.SelectedValuePath = "code_id";
+            cboReworkOrderYnSrh.SelectedIndex = 0;
+
+            ObservableCollection<CodeView> ovcUrgentOrderYN = ComboBoxUtil.Instance.Direct_SetComboBox(strAutoProductInspectYN);
+            cboUrgentOrderYN.ItemsSource = ovcUrgentOrderYN;
+            cboUrgentOrderYN.DisplayMemberPath = "code_name";
+            cboUrgentOrderYN.SelectedValuePath = "code_id";
+
         }
 
         #region 체크박스 연동동작(상단)
@@ -624,6 +642,8 @@ namespace WizMes_SungShinNQ
 
             //자동검사여부는 기본값 N으로
             cboAutoInspect.SelectedIndex = 0;
+            cboReworkOrderYN.SelectedIndex = 0;
+            cboUrgentOrderYN.SelectedIndex = 0;
 
             //혹시 모르니까 납기일자의 체크박스가 체크되어 있을 수도 있으니까 해제
             chkDvlyDate.IsChecked = false;
@@ -964,6 +984,9 @@ namespace WizMes_SungShinNQ
                 sqlParameter.Add("ChkCloseClss", chkCloseClssSrh.IsChecked == true ? 1 : 0);
                 sqlParameter.Add("CloseClss", chkCloseClssSrh.IsChecked == true ? (cboCloseClssSrh.SelectedValue != null ? cboCloseClssSrh.SelectedValue.ToString() : "") : "");
 
+                sqlParameter.Add("ChkReworkOrderYN", chkReworkOrderYN.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("ReworkOrderYN", chkReworkOrderYN.IsChecked == true ? cboReworkOrderYnSrh.SelectedValue?.ToString() ?? string.Empty : string.Empty);
+
 
                 DataSet ds = DataStore.Instance.ProcedureToDataSet("xp_Order_sDraftOrder", sqlParameter, false);
 
@@ -1024,6 +1047,8 @@ namespace WizMes_SungShinNQ
                                 Remark = dr["Remark"].ToString(),
                                 OrderFlag = dr["OrderFlag"].ToString(),
                                 OrderSpec = dr["OrderSpec"].ToString(),
+                                ReworkOrderYN = dr["ReworkOrderYN"].ToString(),
+                                UrgentOrderYN = dr["UrgentOrderYN"].ToString()
 
                             };
 
@@ -1288,6 +1313,9 @@ namespace WizMes_SungShinNQ
                     sqlParameter.Add("BuyerModelID", txtModel.Tag != null ? txtModel.Tag.ToString() : "");
                     sqlParameter.Add("ProductAutoInspectYN", cboAutoInspect.SelectedValue != null ? cboAutoInspect.SelectedValue.ToString() : "N");
                     sqlParameter.Add("UnitPrice", lib.returnRoundDownNumStringOne(txtUnitPrice.Text));
+
+                    sqlParameter.Add("ReworkOrderYN", cboReworkOrderYN.SelectedValue?.ToString() ?? string.Empty);
+                    sqlParameter.Add("UrgentOrderYN", cboUrgentOrderYN.SelectedValue?.ToString() ?? string.Empty);
 
                     #region 추가
 
@@ -2419,6 +2447,15 @@ namespace WizMes_SungShinNQ
             }
         }
 
+        private void CommonControl_Click(object sender, MouseButtonEventArgs e)
+        {
+            Lib.Instance.CommonControl_Click(sender, e);
+        }
+         
+        private void CommonControl_Click(object sender, RoutedEventArgs e)
+        {
+            Lib.Instance.CommonControl_Click(sender, e);
+        }
     }
 
     #endregion keydown 이벤트
@@ -2548,6 +2585,8 @@ namespace WizMes_SungShinNQ
         public string AcptDate_CV { get; set; }
         public string DvlyDate_CV { get; set; }
         public string Amount_CV { get; set; }
+        public string ReworkOrderYN { get; set; }
+        public string UrgentOrderYN { get; set; } 
     }
 
     public class OrderArticle : BaseView

@@ -313,6 +313,9 @@
     <Compile Include="Order_Gabin\Win_ord_OutWare_Product_Q.xaml.cs">
       <DependentUpon>Win_ord_OutWare_Product_Q.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Outware\Win_ord_OutWare_Multi_U.xaml.cs">
+      <DependentUpon>Win_ord_OutWare_Multi_U.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Outware\Win_ord_OutWare_Scan.xaml.cs">
       <DependentUpon>Win_ord_OutWare_Scan.xaml</DependentUpon>
     </Compile>
@@ -801,6 +804,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Outware\Win_ord_OutWare_Multi_U.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Outware\Win_ord_OutWare_Scan.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -1181,6 +1188,7 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="MrpplusV2.0_TemporaryKey.pfx" />
+    <EmbeddedResource Include="Org_거래명세표.xlsx" />
     <None Include="packages.config" />
     <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
@@ -1361,6 +1369,7 @@
     <Resource Include="Images\icon_MES.JPG" />
     <Resource Include="Images\icon_MES1.JPG" />
     <Resource Include="Images\wizMes1.jpg" />
+    <Resource Include="Images\barcode_scanner.png" />
     <Content Include="liblept172.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

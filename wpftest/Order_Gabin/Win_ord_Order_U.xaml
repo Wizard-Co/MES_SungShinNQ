@@ -158,6 +158,26 @@
                         <Image Source="{DynamicResource btiPlusFind}" Margin="-2" />
                     </Button>
                 </Grid>
+
+                <Grid Grid.Row="3" Grid.Column="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="95*" />
+                        <ColumnDefinition Width="95*" />
+                        <ColumnDefinition Width="20*" />
+                    </Grid.ColumnDefinitions>
+                    <Label  Grid.Column="0"
+                           MouseLeftButtonUp="CommonControl_Click">
+                        <StackPanel Orientation="Horizontal" Margin="-2">
+                            <Viewbox VerticalAlignment="Center">
+                                <CheckBox x:Name="chkReworkOrderYN"  VerticalAlignment="Center" Click="CommonControl_Click"/>
+                            </Viewbox>
+                            <TextBlock Text=" 재작업" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Label>
+                    <ComboBox x:Name="cboReworkOrderYnSrh" Grid.Column="1" Padding="0" Style="{StaticResource ComboBoxSearchString}"
+                             IsEnabled="False" />
+                </Grid>
+
                 <Grid Grid.Row="3" Grid.Column="2">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="95*" />
@@ -457,11 +477,11 @@
                                           SelectedValue="{Binding OrderFlag}" KeyDown="CboOrderNO_KeyDown" DropDownClosed="CboOrderNO_DropDownClosed" Grid.ColumnSpan="2"/>
                             </Grid>
 
-                            <Label Grid.Row="3" Grid.Column="3" 
+                            <Label Grid.Row="1" Grid.Column="3" 
                                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center" >
                                 <TextBlock Text="주문 형태" Margin="-2"/>
                             </Label>
-                            <ComboBox x:Name="cboOrderForm" Grid.Row="3" Grid.Column="4" 
+                            <ComboBox x:Name="cboOrderForm" Grid.Row="1" Grid.Column="4" 
                                       Padding="10,0,0,0" Background="#fff2d2" SelectedValue="{Binding OrderForm}" KeyDown="CboOrderForm_KeyDown" DropDownClosed="CboOrderForm_DropDownClosed"/>
 
                             <Label Grid.Row="2" Grid.Column="0" Visibility="Hidden"
@@ -478,11 +498,11 @@
                                 <ComboBox x:Name="cboOrderNO" Grid.Column="1" Padding="0" Background="White"
                                           SelectedValue="{Binding OrderFlag}"/>
                                 </Grid>-->
-                            <Label Grid.Row="4" Grid.Column="3"  
+                            <Label Grid.Row="2" Grid.Column="3"  
                                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
                                 <TextBlock Text="주문 구분" Margin="-2"/>
                             </Label>
-                            <ComboBox x:Name="cboOrderClss" Grid.Row="4" Grid.Column="4"
+                            <ComboBox x:Name="cboOrderClss" Grid.Row="2" Grid.Column="4"
                                       Padding="10,0,0,0" Background="#fff2d2" SelectedValue="{Binding OrderClss}" KeyDown="CboOrderClss_KeyDown" DropDownClosed="CboOrderClss_DropDownClosed" />
 
                             <Label Grid.Row="3" Grid.Column="0" 
@@ -494,11 +514,11 @@
                             <Button x:Name="btnPfCustom" Grid.Row="3" Grid.Column="2" Click="btnPfCustom_Click">
                                 <Image Source="{DynamicResource btiPlusFind}" Margin="-2" />
                             </Button>
-                            <Label Grid.Row="5" Grid.Column="3" 
+                            <Label Grid.Row="3" Grid.Column="3" 
                                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
                                 <TextBlock Text="총 주문량" Margin="-2" />
                             </Label>
-                            <TextBox x:Name="txtAmount" Grid.Row="5" Grid.Column="4" 
+                            <TextBox x:Name="txtAmount" Grid.Row="3" Grid.Column="4" 
                                      Style="{DynamicResource InputCommaTwoAndEssentialTextBox}" VerticalContentAlignment="Center"
                                      Background="#fff2d2" Text="{Binding OrderQty}" PreviewTextInput="TxtAmount_PreviewTextInput" PreviewKeyDown="TxtAmount_PreviewKeyDown"/>
 
@@ -508,11 +528,12 @@
                             </Label>
                             <TextBox x:Name="txtDylvLoc" Grid.Row="4" Grid.Column="1" VerticalContentAlignment="Center"
                                      Text="{Binding DvlyPlace}" KeyDown="TxtDylvLoc_KeyDown"/>
-                            <Label Grid.Row="6" Grid.Column="3" 
+                            
+                            <Label Grid.Row="4" Grid.Column="3" 
                                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
                                 <TextBlock Text="주문 기준" Margin="-2"/>
                             </Label>
-                            <ComboBox x:Name="cboUnitClss" Grid.Row="6" Grid.Column="4" 
+                            <ComboBox x:Name="cboUnitClss" Grid.Row="4" Grid.Column="4" 
                                       Padding="10,0,0,0" Background="#fff2d2" SelectedValue="{Binding UnitClss}" KeyDown="CboUnitClss_KeyDown" DropDownClosed="CboUnitClss_DropDownClosed"/>
 
                             <Label Grid.Row="5" Grid.Column="0" 
@@ -542,24 +563,27 @@
                                 <TextBlock Text="규   격" Margin="-2"/>
                             </Label>
                             <TextBox x:Name="txtSpec" Grid.Row="7" Grid.Column="1" Padding="0" Text="{Binding OrderSpec}" KeyDown="TxtSpec_KeyDown"/>
-                            <Label Grid.Row="7" Grid.Column="3" 
+                            
+                            <Label Grid.Row="5" Grid.Column="3" 
                                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
                                 <TextBlock Text="품명 종류" Margin="-2"/>
                             </Label>
-                            <ComboBox x:Name="cboArticleGroup" Grid.Row="7" Grid.Column="4" 
+                            <ComboBox x:Name="cboArticleGroup" Grid.Row="5" Grid.Column="4" 
                                       Padding="10,0,0,0" Background="#fff2d2" SelectedValue="{Binding ArticleGrpID}" KeyDown="CboArticleGroup_KeyDown" DropDownClosed="CboArticleGroup_DropDownClosed"/>
-                            <Label Grid.Row="8" Grid.Column="3" 
+                            
+                            <Label Grid.Row="6" Grid.Column="3" 
                                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
                                 <TextBlock Text="단가" Margin="-2"/>
                             </Label>
-                            <TextBox x:Name="txtUnitPrice" Grid.Row="8" Grid.Column="4" VerticalContentAlignment="Center"
+                            <TextBox x:Name="txtUnitPrice" Grid.Row="6" Grid.Column="4" VerticalContentAlignment="Center"
                                       Background="#fff2d2" Text="{Binding UnitPrice}" TextInput="TxtUnitPrice_TextInput" 
                                      Style="{DynamicResource InputCommaTwoAndEssentialTextBox}" PreviewKeyDown="TxtUnitPrice_PreviewKeyDown"/>
-                            <Label Grid.Row="9" Grid.Column="3" 
+                            
+                            <Label Grid.Row="7" Grid.Column="3" 
                                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
                                 <TextBlock Text="부가세별도" Margin="-2"/>
                             </Label>
-                            <ComboBox x:Name="cboVAT_YN" Grid.Row="9" Grid.Column="4" 
+                            <ComboBox x:Name="cboVAT_YN" Grid.Row="7" Grid.Column="4" 
                                       Padding="10,0,0,0" Background="#fff2d2" SelectedValue="{Binding Vat_IND_YN}" KeyDown="CboVAT_YN_KeyDown" DropDownClosed="CboVAT_YN_DropDownClosed" />
 
                             <Label Grid.Row="8" Grid.Column="0" 
@@ -587,11 +611,11 @@
                             <ComboBox x:Name="cboWork" Grid.Row="10" Grid.Column="1" 
                                       Padding="10,0,0,0" Background="#fff2d2" SelectedValue="{Binding WorkID}" KeyDown="CboWork_KeyDown" DropDownClosed="CboWork_DropDownClosed"/>
 
-                            <Label Grid.Row="10" Grid.Column="3" 
+                            <Label Grid.Row="8" Grid.Column="3" 
                                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
                                 <TextBlock Text="P/O NO." Margin="-2"/>
                             </Label>
-                            <TextBox x:Name="txtPONO" Grid.Row="10" Grid.Column="4" Padding="0,10,0,0"
+                            <TextBox x:Name="txtPONO" Grid.Row="8" Grid.Column="4" Padding="0,10,0,0"
                                      Text="{Binding PONO}" KeyDown="TxtPONO_KeyDown"/>
 
                             <Label Grid.Row="11" Grid.Column="0" 
@@ -604,7 +628,7 @@
                                 <Image Source="{DynamicResource btiPlusFind}" Margin="-2"/>
                             </Button>
 
-                            <Grid Grid.Row="11" Grid.Column="3" Grid.ColumnSpan="3">
+                            <Grid Grid.Row="9" Grid.Column="3" Grid.ColumnSpan="3">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="95*" />
                                     <ColumnDefinition Width="95*" />
@@ -617,6 +641,32 @@
                                 <ComboBox x:Name="cboAutoInspect" Grid.Column="1" 
                                           Style="{DynamicResource ComboBoxInputString_Q}"
                                           SelectedValue="{Binding ProductAutoInspectYN}" />
+                            </Grid>
+
+                            <!--재작업주문여부-->
+                            <Grid Grid.Row="10" Grid.Column="3" Grid.ColumnSpan="3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="95*" />
+                                    <ColumnDefinition Width="95*" />
+                                    <ColumnDefinition Width="10*" />
+                                </Grid.ColumnDefinitions>
+                                <Label HorizontalContentAlignment="Center" VerticalContentAlignment="Center" >
+                                    <TextBlock Text="재작업주문여부" Margin="-2"/>
+                                </Label>
+                                <ComboBox x:Name="cboReworkOrderYN" SelectedValue="{Binding ReworkOrderYN}" Style="{StaticResource ComboBoxInputString}" Grid.Column="1"/>
+                            </Grid>
+
+                            <!--긴급주문건여부-->
+                            <Grid Grid.Row="11" Grid.Column="3" Grid.ColumnSpan="3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="95*" />
+                                    <ColumnDefinition Width="95*" />
+                                    <ColumnDefinition Width="10*" />
+                                </Grid.ColumnDefinitions>
+                                <Label HorizontalContentAlignment="Center" VerticalContentAlignment="Center" >
+                                    <TextBlock Text="긴급주문건여부" Margin="-2"/>
+                                </Label>
+                                <ComboBox x:Name="cboUrgentOrderYN" SelectedValue="{Binding UrgentOrderYN}" Style="{StaticResource ComboBoxInputString}" Grid.Column="1"/>
                             </Grid>
 
                             <Label Grid.Row="13" Grid.Column="0" 
@@ -677,7 +727,7 @@
                             </Grid.ColumnDefinitions>
                             <Button x:Name="btnNeedStuff" Grid.Row="0" Grid.Column="1" Margin="1" 
                                     Content="자재 필요량 조회" Click="btnNeedStuff_Click" IsEnabled="False"/>
-                            <DataGrid x:Name="dgdNeedStuff" Grid.Row="1" Grid.Column="1" 
+                            <DataGrid x:Name="dgdNeedStuff" Grid.Row="1" Grid.Column="1" HeadersVisibility="Column"
                                       Grid.ColumnSpan="3" Style="{DynamicResource DataGridSet1}">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="품 번" Binding="{Binding BuyerArticleNo}" Width="auto"/>

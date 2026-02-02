@@ -496,13 +496,13 @@
                         <TextBox x:Name="txtOutCustom" Grid.Column="1" Grid.Row="6" Padding="0" IsReadOnly="True"
                                  Text="{Binding Path=OutCustom}" Tag="{Binding Path=OutCustomID}" TabIndex="19" />
 
-                        <Grid x:Name="grdAutoPackingLoad" Grid.Row="7" Grid.ColumnSpan="3">
+                        <Grid x:Name="grdAutoPackingLoad" Grid.Row="7" Grid.ColumnSpan="3" Visibility="Hidden">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="0.5*"/>
                                 <ColumnDefinition Width="8*"/>
                             </Grid.ColumnDefinitions>
                             <Grid>
-                                <CheckBox x:Name="chkAutoPackingLoad" Grid.Row="7" VerticalContentAlignment="Center"  HorizontalAlignment="Center" IsChecked="True"/>
+                                <CheckBox x:Name="chkAutoPackingLoad" Grid.Row="7" VerticalContentAlignment="Center"  HorizontalAlignment="Center"/>
                             </Grid>
                             <TextBlock Grid.Column="1" Text="검사/포장 자동 불러오기" VerticalAlignment="Center" TextAlignment="Left" MouseLeftButtonDown="CommonControl_Click"/>
                         </Grid>

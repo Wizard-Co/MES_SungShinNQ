@@ -8,6 +8,7 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -24,6 +25,8 @@ namespace WizMes_SungShinNQ
     public class Lib
     {
         private static Lib mLib = null;
+        private static ToolTip currentToolTip;
+        private static System.Windows.Threading.DispatcherTimer currentTimer;
 
         public static Lib Instance
         {
@@ -2943,147 +2946,6 @@ namespace WizMes_SungShinNQ
 
         #endregion
 
-        #region 콤마 제거 오버로딩 함수들
-
-
-        // 문자열 반환 (콤마 제거만)
-        public string RemoveComma(object obj)
-        {
-            if (obj == null) return "0";
-
-            string result = obj.ToString().Trim().Replace(",", "");
-            return string.IsNullOrEmpty(result) ? "0" : result;
-        }
-
-        // int 반환
-        public int RemoveComma(object obj, int defaultValue, bool showErrorMessage = true)
-        {
-            if (obj == null) return defaultValue;
-
-            string digits = obj.ToString().Trim().Replace(",", "");
-            if (string.IsNullOrEmpty(digits)) return defaultValue;
-
-            if (!decimal.TryParse(digits, out decimal parsedValue))
-            {
-                if (showErrorMessage)
-                    MessageBox.Show($"'{obj}'는 올바른 숫자 형식이 아닙니다.", "입력 오류");
-                return defaultValue;
-            }
-
-            if (parsedValue > int.MaxValue || parsedValue < int.MinValue)
-            {
-                if (showErrorMessage)
-                    ShowRangeError("정수", int.MinValue, int.MaxValue);
-                return defaultValue;
-            }
-
-            return (int)parsedValue;
-        }
-
-        // long 반환
-        public long RemoveComma(object obj, long defaultValue, bool showErrorMessage = true)
-        {
-            if (obj == null) return defaultValue;
-
-            string digits = obj.ToString().Trim().Replace(",", "");
-            if (string.IsNullOrEmpty(digits)) return defaultValue;
-
-            if (!decimal.TryParse(digits, out decimal parsedValue))
-            {
-                if (showErrorMessage)
-                    MessageBox.Show($"'{obj}'는 올바른 숫자 형식이 아닙니다.", "입력 오류");
-                return defaultValue;
-            }
-
-            if (parsedValue > long.MaxValue || parsedValue < long.MinValue)
-            {
-                if (showErrorMessage)
-                    ShowRangeError("정수", long.MinValue, long.MaxValue);
-                return defaultValue;
-            }
-
-            return (long)parsedValue;
-        }
-
-        // decimal 반환
-        public decimal RemoveComma(object obj, decimal defaultValue, bool showErrorMessage = true)
-        {
-            if (obj == null) return defaultValue;
-
-            string digits = obj.ToString().Trim().Replace(",", "");
-            if (string.IsNullOrEmpty(digits)) return defaultValue;
-
-            if (!decimal.TryParse(digits, out decimal parsedValue))
-            {
-                if (showErrorMessage)
-                    MessageBox.Show($"'{obj}'는 올바른 숫자 형식이 아닙니다.", "입력 오류");
-                return defaultValue;
-            }
-
-            return parsedValue;
-        }
-
-        // double 반환
-        public double RemoveComma(object obj, double defaultValue, bool showErrorMessage = true)
-        {
-            if (obj == null) return defaultValue;
-
-            string digits = obj.ToString().Trim().Replace(",", "");
-            if (string.IsNullOrEmpty(digits)) return defaultValue;
-
-            if (!decimal.TryParse(digits, out decimal parsedValue))
-            {
-                if (showErrorMessage)
-                    MessageBox.Show($"'{obj}'는 올바른 숫자 형식이 아닙니다.", "입력 오류");
-                return defaultValue;
-            }
-
-            double doubleVal = (double)parsedValue;
-            if (double.IsInfinity(doubleVal))
-            {
-                if (showErrorMessage)
-                    MessageBox.Show("입력한 값이 너무 큽니다.", "범위 초과");
-                return defaultValue;
-            }
-
-            return doubleVal;
-        }
-
-        // float 반환
-        public float RemoveComma(object obj, float defaultValue, bool showErrorMessage = true)
-        {
-            if (obj == null) return defaultValue;
-
-            string digits = obj.ToString().Trim().Replace(",", "");
-            if (string.IsNullOrEmpty(digits)) return defaultValue;
-
-            if (!decimal.TryParse(digits, out decimal parsedValue))
-            {
-                if (showErrorMessage)
-                    MessageBox.Show($"'{obj}'는 올바른 숫자 형식이 아닙니다.", "입력 오류");
-                return defaultValue;
-            }
-
-            float floatVal = (float)parsedValue;
-            if (float.IsInfinity(floatVal))
-            {
-                if (showErrorMessage)
-                    MessageBox.Show("입력한 값이 너무 큽니다.", "범위 초과");
-                return defaultValue;
-            }
-
-            return floatVal;
-        }
-
-        public void ShowRangeError(string type, object min, object max)
-        {
-            MessageBox.Show($"입력한 값이 {type} 처리 가능한 범위를 벗어났습니다.\n(범위: {min:N0} ~ {max:N0})",
-                            "범위 초과");
-        }
-
-
-        #endregion
-
         public int reTrunIndex(DataGrid dgd, List<string> lstTargetString)
         {
             bool flag = true;
@@ -3523,7 +3385,6 @@ namespace WizMes_SungShinNQ
         public void CommonControl_Click(object sender, EventArgs e)
         {
             CheckBox checkBox = null;
-            TextBlock textBlock = null;
             DependencyObject parentGrid = null;
 
             if (sender is Label label)
@@ -3547,19 +3408,6 @@ namespace WizMes_SungShinNQ
                 checkBox = clickedCheckBox;
                 parentGrid = FindVisualParent<Grid>(checkBox);
             }
-            else if(sender is TextBlock clickedTextBlock)
-            {
-                textBlock = clickedTextBlock;
-                parentGrid =FindVisualParent<Grid>(textBlock);
-                if(parentGrid != null)
-                {
-                    checkBox = FindChild<CheckBox>(parentGrid);
-                    if (checkBox != null)
-                    {
-                        checkBox.IsChecked =! checkBox.IsChecked;
-                    }
-                }
-            }
 
             // 체크박스와 부모 그리드가 있으면 컨트롤 활성화/비활성화 처리
             if (checkBox != null && parentGrid != null)
@@ -3567,8 +3415,7 @@ namespace WizMes_SungShinNQ
                 List<Control> controlsToToggle = new List<Control>();
 
                 // 그리드 내 모든 Control 찾기 (체크박스 제외)
-                FindUiObject(parentGrid, obj =>
-                {
+                FindUiObject(parentGrid, obj => {
                     if (obj is Control control && obj != checkBox && !(obj is Label) && !(obj is CheckBox))
                     {
                         controlsToToggle.Add(control);
@@ -3576,6 +3423,65 @@ namespace WizMes_SungShinNQ
                 });
 
                 // 컨트롤 활성화/비활성화
+                foreach (var control in controlsToToggle)
+                {
+                    control.IsEnabled = checkBox.IsChecked == true;
+                }
+            }
+        }
+
+        //날짜 데이트피커
+
+        public void CommonSearchDatePicker_Click(object sender, EventArgs e)
+        {
+            CheckBox checkBox = null;
+            DependencyObject parentGrid = null;
+            DependencyObject grandParentGrid = null;
+
+            if (sender is Label label)
+            {
+                parentGrid = FindVisualParent<Grid>(label);
+                if (parentGrid != null)
+                {
+                    grandParentGrid = FindVisualParent<Grid>((UIElement)parentGrid);
+                    checkBox = FindChild<CheckBox>(parentGrid);
+
+                    if (checkBox != null)
+                    {
+                        checkBox.IsChecked = !checkBox.IsChecked;
+                    }
+                }
+            }
+            else if (sender is CheckBox clickedCheckBox)
+            {
+                checkBox = clickedCheckBox;
+                parentGrid = FindVisualParent<Grid>(checkBox);
+                grandParentGrid = FindVisualParent<Grid>((UIElement)parentGrid);
+            }
+
+            if (checkBox != null && parentGrid != null)
+            {
+                List<Control> controlsToToggle = new List<Control>();
+
+                //부모 그리드에서 찾기
+                FindUiObject(parentGrid, obj => {
+                    if (obj is Control control && obj != checkBox && !(obj is Label) && !(obj is CheckBox))
+                    {
+                        controlsToToggle.Add(control);
+                    }
+                });
+
+                // 부모의 상위그리드에서 모든 데이터피커찾기
+                if (grandParentGrid != null)
+                {
+                    FindUiObject(grandParentGrid, obj => {
+                        if (obj is DatePicker dp && !controlsToToggle.Contains(dp))
+                        {
+                            controlsToToggle.Add(dp);
+                        }
+                    });
+                }
+
                 foreach (var control in controlsToToggle)
                 {
                     control.IsEnabled = checkBox.IsChecked == true;
@@ -3693,6 +3599,53 @@ namespace WizMes_SungShinNQ
             }
         }
 
+        /// <summary>
+        /// DataGrid에서 마우스 휠로 가로 스크롤 기능을 처리합니다.
+        /// </summary>
+        /// <param name="sender">이벤트를 발생시킨 DataGrid</param>
+        /// <param name="e">마우스 휠 이벤트 arguments</param>
+        /// <param name="scrollSpeed">스크롤 속도 (기본값: 50)</param>
+        /// <returns>가로 스크롤이 처리되었으면 true, 아니면 false</returns>
+        public bool ScrollBar_HScroll(object sender, MouseWheelEventArgs e, double scrollSpeed = 50)
+        {
+            if (!(sender is DataGrid dataGrid)) return false;
+
+            // 마우스 위치 가져오기
+            System.Windows.Point mousePosition = e.GetPosition(dataGrid);
+
+            // ScrollViewer 찾기
+            ScrollViewer scrollViewer = FindVisualChild<ScrollViewer>(dataGrid);
+            if (scrollViewer == null) return false;
+
+            // 가로 스크롤바가 표시되는지 확인
+            if (scrollViewer.ComputedHorizontalScrollBarVisibility != Visibility.Visible) return false;
+
+            // 가로 스크롤바 영역 계산
+            double dataGridHeight = dataGrid.ActualHeight;
+            double scrollBarHeight = SystemParameters.HorizontalScrollBarHeight;
+            double scrollBarTop = dataGridHeight - scrollBarHeight;
+
+            // 마우스가 가로 스크롤바 영역에 있는지 확인
+            bool isMouseOverHorizontalScrollBar = mousePosition.Y >= scrollBarTop &&
+                                                mousePosition.Y <= dataGridHeight &&
+                                                mousePosition.X >= 0 &&
+                                                mousePosition.X <= dataGrid.ActualWidth;
+
+            if (isMouseOverHorizontalScrollBar)
+            {
+                // 휠 방향에 따라 가로 스크롤
+                double scrollAmount = e.Delta > 0 ? -scrollSpeed : scrollSpeed;
+                scrollViewer.ScrollToHorizontalOffset(scrollViewer.HorizontalOffset + scrollAmount);
+
+                // 이벤트 처리 완료 표시
+                e.Handled = true;
+                return true;
+            }
+
+            return false;
+        }
+
+
         //같은 그리드안에 이웃한 요소 한개를 반환(현재 선택값과 비교가능) 
         public T FindSiblingControl<T>(UIElement currentElement) where T : UIElement
         {
@@ -3746,6 +3699,515 @@ namespace WizMes_SungShinNQ
             return siblings;
         }
 
+        #endregion
+
+        #region 콤마 제거 오버로딩 함수들
+
+
+        // 문자열 반환 (콤마 제거만)
+        public string RemoveComma(object obj)
+        {
+            if (obj == null) return "0";
+
+            string result = obj.ToString().Trim().Replace(",", "");
+            return string.IsNullOrEmpty(result) ? "0" : result;
+        }
+
+        // int 반환
+        public int RemoveComma(object obj, int defaultValue, bool showErrorMessage = true)
+        {
+            if (obj == null) return defaultValue;
+
+            string digits = obj.ToString().Trim().Replace(",", "");
+            if (string.IsNullOrEmpty(digits)) return defaultValue;
+
+            if (!decimal.TryParse(digits, out decimal parsedValue))
+            {
+                if (showErrorMessage)
+                    MessageBox.Show($"'{obj}'는 올바른 숫자 형식이 아닙니다.", "입력 오류");
+                return defaultValue;
+            }
+
+            if (parsedValue > int.MaxValue || parsedValue < int.MinValue)
+            {
+                if (showErrorMessage)
+                    ShowRangeError("정수", int.MinValue, int.MaxValue);
+                return defaultValue;
+            }
+
+            return (int)parsedValue;
+        }
+
+        // long 반환
+        public long RemoveComma(object obj, long defaultValue, bool showErrorMessage = true)
+        {
+            if (obj == null) return defaultValue;
+
+            string digits = obj.ToString().Trim().Replace(",", "");
+            if (string.IsNullOrEmpty(digits)) return defaultValue;
+
+            if (!decimal.TryParse(digits, out decimal parsedValue))
+            {
+                if (showErrorMessage)
+                    MessageBox.Show($"'{obj}'는 올바른 숫자 형식이 아닙니다.", "입력 오류");
+                return defaultValue;
+            }
+
+            if (parsedValue > long.MaxValue || parsedValue < long.MinValue)
+            {
+                if (showErrorMessage)
+                    ShowRangeError("정수", long.MinValue, long.MaxValue);
+                return defaultValue;
+            }
+
+            return (long)parsedValue;
+        }
+
+        // decimal 반환
+        public decimal RemoveComma(object obj, decimal defaultValue, bool showErrorMessage = true)
+        {
+            if (obj == null) return defaultValue;
+
+            string digits = obj.ToString().Trim().Replace(",", "");
+            if (string.IsNullOrEmpty(digits)) return defaultValue;
+
+            if (!decimal.TryParse(digits, out decimal parsedValue))
+            {
+                if (showErrorMessage)
+                    MessageBox.Show($"'{obj}'는 올바른 숫자 형식이 아닙니다.", "입력 오류");
+                return defaultValue;
+            }
+
+            return parsedValue;
+        }
+
+        // double 반환
+        public double RemoveComma(object obj, double defaultValue, bool showErrorMessage = true)
+        {
+            if (obj == null) return defaultValue;
+
+            string digits = obj.ToString().Trim().Replace(",", "");
+            if (string.IsNullOrEmpty(digits)) return defaultValue;
+
+            if (!decimal.TryParse(digits, out decimal parsedValue))
+            {
+                if (showErrorMessage)
+                    MessageBox.Show($"'{obj}'는 올바른 숫자 형식이 아닙니다.", "입력 오류");
+                return defaultValue;
+            }
+
+            double doubleVal = (double)parsedValue;
+            if (double.IsInfinity(doubleVal))
+            {
+                if (showErrorMessage)
+                    MessageBox.Show("입력한 값이 너무 큽니다.", "범위 초과");
+                return defaultValue;
+            }
+
+            return doubleVal;
+        }
+
+        // float 반환
+        public float RemoveComma(object obj, float defaultValue, bool showErrorMessage = true)
+        {
+            if (obj == null) return defaultValue;
+
+            string digits = obj.ToString().Trim().Replace(",", "");
+            if (string.IsNullOrEmpty(digits)) return defaultValue;
+
+            if (!decimal.TryParse(digits, out decimal parsedValue))
+            {
+                if (showErrorMessage)
+                    MessageBox.Show($"'{obj}'는 올바른 숫자 형식이 아닙니다.", "입력 오류");
+                return defaultValue;
+            }
+
+            float floatVal = (float)parsedValue;
+            if (float.IsInfinity(floatVal))
+            {
+                if (showErrorMessage)
+                    MessageBox.Show("입력한 값이 너무 큽니다.", "범위 초과");
+                return defaultValue;
+            }
+
+            return floatVal;
+        }
+
+        // decimal? 반환
+        public decimal? ToDecimal(object obj, int? decimalPlaces = null)
+        {
+            if (obj == null || obj == DBNull.Value) return null;
+
+            string value = obj.ToString().Trim().Replace(",", "");
+            if (string.IsNullOrEmpty(value)) return null;
+
+            if (!decimal.TryParse(value, out decimal result)) return null;
+
+            if (decimalPlaces.HasValue)
+                result = Math.Round(result, decimalPlaces.Value);
+
+            return result;
+        }
+
+        // decimal 반환 (기본값 지정)
+        public decimal ToDecimal(object obj, decimal defaultValue, int? decimalPlaces = null)
+        {
+            return ToDecimal(obj, decimalPlaces) ?? defaultValue;
+        }
+
+        // int? 반환
+        public int? ToInt(object obj)
+        {
+            if (obj == null || obj == DBNull.Value) return null;
+
+            string value = obj.ToString().Trim().Replace(",", "");
+            if (string.IsNullOrEmpty(value)) return null;
+
+            if (!int.TryParse(value, out int result)) return null;
+
+            return result;
+        }
+
+        // int 반환 (기본값 지정)
+        public int ToInt(object obj, int defaultValue)
+        {
+            return ToInt(obj) ?? defaultValue;
+        }
+
+        // long? 반환
+        public long? ToLong(object obj)
+        {
+            if (obj == null || obj == DBNull.Value) return null;
+
+            string value = obj.ToString().Trim().Replace(",", "");
+            if (string.IsNullOrEmpty(value)) return null;
+
+            if (!long.TryParse(value, out long result)) return null;
+
+            return result;
+        }
+
+        // long 반환 (기본값 지정)
+        public long ToLong(object obj, long defaultValue)
+        {
+            return ToLong(obj) ?? defaultValue;
+        }
+
+        // double? 반환
+        public double? ToDouble(object obj, int? decimalPlaces = null)
+        {
+            if (obj == null || obj == DBNull.Value) return null;
+
+            string value = obj.ToString().Trim().Replace(",", "");
+            if (string.IsNullOrEmpty(value)) return null;
+
+            if (!double.TryParse(value, out double result)) return null;
+
+            if (decimalPlaces.HasValue)
+                result = Math.Round(result, decimalPlaces.Value);
+
+            return result;
+        }
+
+        // double 반환 (기본값 지정)
+        public double ToDouble(object obj, double defaultValue, int? decimalPlaces = null)
+        {
+            return ToDouble(obj, decimalPlaces) ?? defaultValue;
+        }
+
+        public void ShowRangeError(string type, object min, object max)
+        {
+            MessageBox.Show($"입력한 값이 {type} 처리 가능한 범위를 벗어났습니다.\n(범위: {min:N0} ~ {max:N0})",
+                            "범위 초과");
+        }
+
+
+        #endregion
+
+        #region 날짜변환
+
+        public bool DatePickerCheck(DatePicker sDatePicker, DatePicker eDatePicker, CheckBox chkDatePicker = null)
+        {
+            try
+            {
+                if (chkDatePicker != null)
+                {
+                    if (chkDatePicker.IsChecked == false)
+                        return true;
+                }
+
+                if ((sDatePicker == null && eDatePicker == null) || sDatePicker.SelectedDate == null || eDatePicker.SelectedDate == null)
+                {
+                    MessageBox.Show("검색기간 시작일과 종료일이 지정되었는지 확인하세요", "확인");
+                    return false;
+                }
+                else
+                {
+                    if (sDatePicker.SelectedDate > eDatePicker.SelectedDate)
+                    {
+                        MessageBox.Show("검색기간 시작일이 종료일보다 앞설 수 없습니다.", "확인");
+                        return false;
+                    }
+
+                }
+
+            }
+            catch
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        //8자리 char형태 날짜 년도-월-일 하이픈 삽입
+        //16자리 일경우 8자리 사이에 ~ 삽입
+        public string DateTypeHyphen(string DigitsDate)
+        {
+            string pattern1 = @"(\d{4})(\d{2})(\d{2})";
+            string pattern2 = @"(\d{4})(\d{2})(\d{2})(\d{4})(\d{2})(\d{2})";
+            string pattern3 = @"(\d{4})(\d{2})";
+
+            if (DigitsDate.Length == 8)
+            {
+                DigitsDate = Regex.Replace(DigitsDate, pattern1, "$1-$2-$3");
+            }
+            else if (DigitsDate.Length == 6)
+            {
+                DigitsDate = Regex.Replace(DigitsDate, pattern3, "$1-$2");
+            }
+            else if (DigitsDate.Length == 16)
+            {
+                DigitsDate = Regex.Replace(DigitsDate, pattern2, "$1-$2-$3 ~ $4-$5-$6");
+            }
+            else if (DigitsDate.Length == 0)
+            {
+                DigitsDate = string.Empty;
+            }
+
+            return DigitsDate;
+        }
+
+        public DateTime? ToDateTime(string dbDate, DateTime? defaultValue = null)
+        {
+            if (string.IsNullOrWhiteSpace(dbDate))
+                return null;
+
+            string trimmed = dbDate.Trim();
+
+            try
+            {
+                switch (trimmed.Length)
+                {
+                    case 6:  // yyyyMM
+                        return DateTime.ParseExact(trimmed + "01", "yyyyMMdd", null);
+                    case 8:  // yyyyMMdd
+                        return DateTime.ParseExact(trimmed, "yyyyMMdd", null);
+                    default:
+                        return defaultValue ?? null;
+                }
+            }
+            catch
+            {
+                return defaultValue ?? null;
+            }
+        }
+
+        public object RemoveHyphen(object obj)
+        {
+            if (obj == null)
+                return string.Empty;
+
+            if (obj.ToString() == string.Empty)
+                return string.Empty;
+
+            if (obj.ToString().Contains("-"))
+            {
+                return obj.ToString().Replace("-", "");
+            }
+
+
+            return obj;
+        }
+
+        public string SetToDate(object obj)
+        {
+            if (DateTime.TryParse(obj.ToString(), out DateTime date))
+            {
+                return date.ToString("yyyyMMdd");
+            }
+            return obj.ToString();
+        }
+
+
+        public string ConvertDate(DatePicker datePicker)
+        {
+            if (datePicker.SelectedDate != null)
+                return datePicker.SelectedDate.Value.ToString("yyyyMMdd");
+            else
+                return string.Empty;
+        }
+
+        public bool IsDatePickerNull(DatePicker datePicker)
+        {
+            if (datePicker.SelectedDate == null)
+                return true;
+            else
+                return false;
+        }
+
+
+        public string TimeTypeColon(string DigitsTime)
+        {
+            string pattern1 = @"(\d{2})(\d{2})";
+
+            if (DigitsTime.Length == 4)
+            {
+                DigitsTime = Regex.Replace(DigitsTime, pattern1, "$1:$2");
+            }
+
+            return DigitsTime;
+        }
+        #endregion
+
+        #region UI컨트롤에 툴팁띄우기
+        public void CloseToolTip()
+        {
+            if (currentToolTip != null && currentToolTip.IsOpen)
+            {
+                currentToolTip.IsOpen = false;
+                if (currentTimer != null)
+                {
+                    currentTimer.Stop();
+                    currentTimer = null;
+                }
+            }
+        }
+
+        public void ShowTooltipMessage(FrameworkElement element,
+                                       string message, MessageBoxImage iconType = MessageBoxImage.None,
+                                       PlacementMode placement = PlacementMode.Bottom,
+                                       double scale = 1.0)
+        {
+            // 이미 열려있는 툴팁이 있다면 닫기
+            if (currentToolTip != null && currentToolTip.IsOpen)
+            {
+                currentToolTip.IsOpen = false;
+                if (currentTimer != null)
+                {
+                    currentTimer.Stop();
+                    currentTimer = null;
+                }
+            }
+
+            object tooltipContent;
+
+            // 아이콘이 필요 없는 경우
+            if (iconType == MessageBoxImage.None)
+            {
+                tooltipContent = message;
+            }
+            else
+            {
+                // StackPanel 생성
+                var stackPanel = new StackPanel
+                {
+                    Orientation = Orientation.Horizontal
+                };
+
+                // 시스템 아이콘 설정
+                System.Drawing.Icon systemIcon;
+                switch (iconType)
+                {
+                    case MessageBoxImage.Information:
+                        systemIcon = System.Drawing.SystemIcons.Information;
+                        break;
+                    case MessageBoxImage.Warning:
+                        systemIcon = System.Drawing.SystemIcons.Warning;
+                        break;
+                    case MessageBoxImage.Error:
+                        systemIcon = System.Drawing.SystemIcons.Error;
+                        break;
+                    case MessageBoxImage.Question:
+                        systemIcon = System.Drawing.SystemIcons.Question;
+                        break;
+                    default:
+                        systemIcon = null;
+                        break;
+                }
+
+                if (systemIcon != null)
+                {
+                    // System.Drawing에서 아이콘 가져오기
+                    System.Windows.Media.Imaging.BitmapSource iconSource =
+                        System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(
+                            systemIcon.Handle,
+                            System.Windows.Int32Rect.Empty,
+                            System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions());
+
+                    // 이미지 생성
+                    var image = new Image
+                    {
+                        Source = iconSource,
+                        Width = 16,
+                        Height = 16,
+                        Margin = new Thickness(0, 0, 5, 0)
+                    };
+
+                    // StackPanel에 추가
+                    stackPanel.Children.Add(image);
+                }
+
+                // 텍스트블록 생성
+                var textBlock = new TextBlock
+                {
+                    Text = message,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+
+                stackPanel.Children.Add(textBlock);
+                tooltipContent = stackPanel;
+            }
+
+            // 새 툴팁 생성
+            var tooltip = new ToolTip
+            {
+                Content = tooltipContent,
+                PlacementTarget = element,
+                Placement = placement,
+                IsOpen = true,
+                LayoutTransform = new ScaleTransform(scale, scale)
+            };
+
+            // 위치에 따른 설정
+            if (placement == PlacementMode.Bottom)
+            {
+                tooltip.VerticalOffset = 5;
+            }
+            else if (placement == PlacementMode.Right)
+            {
+
+                element.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    tooltip.HorizontalOffset = 5;
+                }));
+            }
+
+            currentToolTip = tooltip;
+
+            // 3초 후 툴팁 자동 닫기
+            var timer = new System.Windows.Threading.DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(3)
+            };
+            timer.Tick += (s, eventArgs) =>
+            {
+                tooltip.IsOpen = false;
+                timer.Stop();
+            };
+            timer.Start();
+            currentTimer = timer;
+        }
         #endregion
 
         #region 스크린샷

@@ -16,6 +16,7 @@ namespace WizMes_SungShinNQ
     public partial class App : Application
     {
         Lib lib = new Lib();
+        public static bool? _isExcelActivatedCache = null;
 
         public App()
         {
