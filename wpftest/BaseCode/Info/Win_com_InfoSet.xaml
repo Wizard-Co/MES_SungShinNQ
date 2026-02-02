@@ -12,7 +12,7 @@
             <RowDefinition Height="88*" />
             <RowDefinition Height="532*" />
         </Grid.RowDefinitions>
-        <Grid Grid.Row="0" Background="{DynamicResource WizMes_SungShinNQ}">
+        <Grid Grid.Row="0" Margin="1" Background="{DynamicResource WizMes_YoungNam}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="*" />
@@ -22,44 +22,44 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="100*" />
                 <ColumnDefinition Width="160*" />
-                <ColumnDefinition Width="230*" />
-                <ColumnDefinition Width="230*" />
-                <ColumnDefinition Width="100*" />
+                <ColumnDefinition Width="180*" />
+                <ColumnDefinition Width="180*" />
+                <ColumnDefinition Width="200*" />
             </Grid.ColumnDefinitions>
-            
+
             <Grid Grid.Column="1" Grid.Row="0">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="65*" />
+                    <ColumnDefinition Width="75*" />
                     <ColumnDefinition Width="85*" />
                 </Grid.ColumnDefinitions>
-                <Label x:Name="lblSearchDay" Grid.Column="0" Margin="1" MouseLeftButtonUp="lblSearchDay_MouseLeftButtonUp">
-                    <StackPanel Orientation="Horizontal">
-                        <Viewbox>
+                <Label x:Name="lblSearchDay" Grid.Column="0" MouseLeftButtonUp="lblSearchDay_MouseLeftButtonUp" Style="{DynamicResource LabelSearch}">
+                    <StackPanel Style="{DynamicResource StackPanelInLabel}">
+                        <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}">
                             <CheckBox x:Name="chkSearchDay" VerticalAlignment="Center" Checked="chkSearchDay_Checked" Unchecked="chkSearchDay_Unchecked"/>
                         </Viewbox>
-                        <TextBlock Text=" 검색일자" VerticalAlignment="Center"/>
+                        <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}">
+                            <TextBlock Text=" 검색일자"  Style="{DynamicResource TextBlockInViewBoxSearch}"/>
+                        </Viewbox>
+
                     </StackPanel>
                 </Label>
-                <DatePicker x:Name="FromDateSearch" Grid.Column="1" Margin="1" IsEnabled="False"/>
+                <DatePicker x:Name="FromDateSearch" Grid.Column="1" Style="{DynamicResource DatePickerMonthYearSearch}" IsEnabled="False"/>
             </Grid>
             <Grid Grid.Column="1" Grid.Row="1" >
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="65*" />
+                    <ColumnDefinition Width="75*" />
                     <ColumnDefinition Width="85*" />
                 </Grid.ColumnDefinitions>
-                <DatePicker x:Name="ToDateSearch" Grid.Column="1" Margin="1" IsEnabled="False"/>
+                <DatePicker x:Name="ToDateSearch" Grid.Column="1" Style="{DynamicResource DatePickerMonthYearSearch}" IsEnabled="False"/>
             </Grid>
             <Grid Grid.Column="1" Grid.Row="2">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="42*" />
-                    <ColumnDefinition Width="42*" />
+                    <ColumnDefinition Width="75*" />
                     <ColumnDefinition Width="42*" />
                     <ColumnDefinition Width="42*" />
                 </Grid.ColumnDefinitions>
-                <Button x:Name="btnLastMonth" Grid.Column="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Content="전월" Click="btnLastMonth_Click"/>
-                <Button x:Name="btnThisMonth" Grid.Column="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Content="금월" Margin="1" Click="btnThisMonth_Click" />
-                <Button x:Name="btnYesterDay" Grid.Column="2" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Content="전일" Margin="1" Click="btnYesterDay_Click"/>
-                <Button x:Name="btnToday" Grid.Column="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Content="금일" Margin="1" Click="btnToday_Click"/>
+                <Button x:Name="btnLastMonth" Grid.Column="1" Content="전월" Click="btnLastMonth_Click"/>
+                <Button x:Name="btnThisMonth" Grid.Column="2" Content="금월" Click="btnThisMonth_Click"/>
             </Grid>
 
             <Grid Grid.Column="4" Grid.Row="0" Grid.RowSpan="4" >
@@ -71,20 +71,22 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <Button x:Name="btnSave" Grid.Column="0" Margin="1" Click="btnSave_Click" IsEnabled="False">
+                <Button x:Name="btnSave" Grid.Column="2" Margin="1" Click="btnSave_Click" IsEnabled="False">
                     <StackPanel Orientation="Horizontal">
                         <Image Source="{DynamicResource btiSave}" Style="{DynamicResource imgSize}" VerticalAlignment="Center"/>
                         <TextBlock Text="{Binding Source={StaticResource tblSave},Mode=OneWay,Path=Text}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
-                <Button x:Name="btnClose" Grid.Column="1" Grid.Row="0" Margin="1" Click="btnClose_Click">
+                <Button x:Name="btnClose" Grid.Column="3" Grid.Row="0" Margin="1" Click="btnClose_Click">
                     <StackPanel Orientation="Horizontal">
                         <Image Source="{DynamicResource btiClose}" Style="{DynamicResource imgSize}" VerticalAlignment="Center"/>
                         <TextBlock Text="{Binding Source={StaticResource tblClose},Mode=OneWay,Path=Text}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
-                <Button x:Name="btnSearch" Grid.Column="0" Grid.Row="1" Margin="1" Click="btnSearch_Click">
+                <Button x:Name="btnSearch" Grid.Column="2" Grid.Row="1" Margin="1" Click="btnSearch_Click">
                     <StackPanel Orientation="Horizontal">
                         <Image Source="{DynamicResource btiSearch}" Style="{DynamicResource imgSize}" VerticalAlignment="Center"/>
                         <TextBlock Text="{Binding Source={StaticResource tblSearch},Mode=OneWay,Path=Text}" VerticalAlignment="Center"/>
@@ -117,7 +119,8 @@
                             <RowDefinition Height="*" />
                             <RowDefinition Height="auto" />
                         </Grid.RowDefinitions>
-                        <DataGrid x:Name="dgdAll"  ItemsSource="{Binding Path=dt}" SelectionChanged="dgdAll_SelectChanged"  AutoGenerateColumns="False" Style="{DynamicResource DataGridSet1}">
+                        <DataGrid x:Name="dgdAll"  ItemsSource="{Binding Path=dt}" SelectionChanged="dgdAll_SelectChanged"  AutoGenerateColumns="False"  IsReadOnly="True" 
+                                  Style="{DynamicResource DataGridSet1}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn  x:Name="gc1" Header="시작일"  Width="auto"  Binding="{Binding Path=FromDate}" MinWidth="70"/>
                                 <DataGridTextColumn  x:Name="gc2" Header="종료일"  Width="auto" Binding="{Binding Path=ToDate}" MinWidth="70"/>
@@ -151,10 +154,18 @@
                             </Viewbox>
                             <Grid Grid.Column="1">
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="*" />
-                                    <RowDefinition Height="2*" />
+                                    <RowDefinition Height="18" />
+                                    <RowDefinition Height="8*" />
                                     <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
+                                <Grid Grid.Row="0">
+                                    <Viewbox VerticalAlignment="Center">
+                                        <CheckBox x:Name="chkUpYn_All"
+                                          Content="최상단 공지"
+                                          IsEnabled="False"
+                                          Padding="0"/>
+                                    </Viewbox>
+                                </Grid>
                                 <Grid Grid.Row="1">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
@@ -162,15 +173,16 @@
                                         <ColumnDefinition Width="0.1*" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
+
                                     <Viewbox Grid.Row="0" Grid.Column="0">
                                         <TextBlock Text="공지기간 설정" Padding="5 0 0 3" FontSize="14"
                                            VerticalAlignment="Center" HorizontalAlignment="Center" Margin="1" />
                                     </Viewbox>
 
-                                    <DatePicker Grid.Row="0" Grid.Column="1" x:Name="FromDate_All"  IsHitTestVisible="False" Padding="0"/>
+                                    <DatePicker Grid.Row="0" Grid.Column="1" x:Name="FromDate_All"  IsHitTestVisible="False" Style="{DynamicResource DatePickerInputArea}"/>
                                     <TextBlock Grid.Row="0" Grid.Column="2" Text="-" 
                                            VerticalAlignment="Center" HorizontalAlignment="Center" Margin="1"/>
-                                    <DatePicker Grid.Row="0" Grid.Column="3" x:Name="ToDate_All"  IsHitTestVisible="False"  Padding="0"/>
+                                    <DatePicker Grid.Row="0" Grid.Column="3" x:Name="ToDate_All"  IsHitTestVisible="False"  Style="{DynamicResource DatePickerInputArea}"/>
                                 </Grid>
                                 <Grid Grid.Row="1">
                                     <Grid.ColumnDefinitions>
@@ -312,7 +324,7 @@
                             <RowDefinition Height="*" />
                             <RowDefinition Height="auto" />
                         </Grid.RowDefinitions>
-                        <DataGrid x:Name="dgdPerson" AutoGenerateColumns="False" SelectionChanged="dgdPerson_SelectChanged" Style="{DynamicResource DataGridSet1}">
+                        <DataGrid x:Name="dgdPerson" AutoGenerateColumns="False" SelectionChanged="dgdPerson_SelectChanged" IsReadOnly="True" Style="{DynamicResource DataGridSet1}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn  x:Name="Col20" Header="시작일" Binding="{Binding Path=per_FromDate}" Width="auto" MinWidth="70" />
                                 <DataGridTextColumn  x:Name="Col21" Header="종료일" Binding="{Binding Path=per_ToDate}"  Width="auto" MinWidth="70"/>
@@ -339,10 +351,18 @@
                             </Viewbox>
                             <Grid Grid.Column="1">
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="*" />
-                                    <RowDefinition Height="2*" />
+                                    <RowDefinition Height="18" />
+                                    <RowDefinition Height="8*" />
                                     <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
+                                <Grid Grid.Row="0">
+                                    <Viewbox VerticalAlignment="Center">
+                                        <CheckBox x:Name="chkUpYn_AllUser"
+                                       Content="최상단 공지"
+                                       IsEnabled="False"
+                                       Padding="0"/>
+                                    </Viewbox>
+                                </Grid>
                                 <Grid Grid.Row="1">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
@@ -355,10 +375,10 @@
                                            VerticalAlignment="Center" HorizontalAlignment="Center" Margin="1" />
                                     </Viewbox>
 
-                                    <DatePicker Grid.Row="0" Grid.Column="1" x:Name="FromDate_Person"  IsHitTestVisible="False" Padding="0"/>
+                                    <DatePicker Grid.Row="0" Grid.Column="1" x:Name="FromDate_Person"  IsHitTestVisible="False" Style="{DynamicResource DatePickerInputArea}"/>
                                     <TextBlock Grid.Row="0" Grid.Column="2" Text="-" 
                                            VerticalAlignment="Center" HorizontalAlignment="Center" Margin="1"/>
-                                    <DatePicker Grid.Row="0" Grid.Column="3" x:Name="ToDate_Person"  IsHitTestVisible="False"  Padding="0"/>
+                                    <DatePicker Grid.Row="0" Grid.Column="3" x:Name="ToDate_Person"  IsHitTestVisible="False"  Style="{DynamicResource DatePickerInputArea}"/>
                                 </Grid>
                                 <Grid Grid.Row="1">
                                     <Grid.ColumnDefinitions>
@@ -426,7 +446,7 @@
                                         <RowDefinition Height="5*"/>
                                         <RowDefinition Height="40*"/>
                                     </Grid.RowDefinitions>
-                                    <DataGrid  ItemsSource="{Binding Path=MyView}" AutoGenerateColumns="False" Style="{DynamicResource DataGridSet1}">
+                                    <DataGrid  ItemsSource="{Binding Path=MyView}" AutoGenerateColumns="False"  Style="{DynamicResource DataGridSet1}">
                                         <DataGrid.Columns>
                                             <DataGridTemplateColumn   x:Name="Col30" Header="부서명"  Width="auto" MinWidth="50"/>
                                             <DataGridTemplateColumn  x:Name="Col31" Header="사원명"  Width="*" MinWidth="50"/>
@@ -457,7 +477,8 @@
                                         <RowDefinition Height="80*"/>
                                         <RowDefinition Height="113*"/>
                                     </Grid.RowDefinitions>
-                                    <DataGrid x:Name="dgdTargetPerson" Grid.Column="0" Grid.Row="0" ItemsSource="{Binding Path=MyView}" AutoGenerateColumns="False" Style="{DynamicResource DataGridSet1}" MouseLeftButtonUp="All_Area_Node_Person_Click" Grid.RowSpan="2">
+                                    <DataGrid x:Name="dgdTargetPerson" Grid.Column="0" Grid.Row="0" ItemsSource="{Binding Path=MyView}" AutoGenerateColumns="False"  Style="{DynamicResource DataGridSet1}"
+                                              MouseLeftButtonUp="All_Area_Node_Person_Click" Grid.RowSpan="2">
                                         <DataGrid.Columns>
                                             <DataGridTextColumn  x:Name="Col40" Header="사원명" Binding="{Binding Path=Name}" Width="*" />
                                             <DataGridTextColumn  x:Name="Col41" Header="사원별ID" Binding="{Binding Path=PersonID}" Width="1.5*"/>
