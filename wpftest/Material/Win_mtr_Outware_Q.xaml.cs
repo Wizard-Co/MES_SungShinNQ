@@ -410,6 +410,12 @@ namespace WizMes_SungShinNQ
 
         private void FillGrid()
         {
+            if (dgdOutware.Items.Count > 0
+               || dgdTotal.Items.Count > 0)
+            {
+                dgdOutware.Items.Clear();
+                dgdTotal.Items.Clear();
+            }
             lstOutware.Clear();
 
             Dictionary<string, object> sqlParameter = new Dictionary<string, object>();
@@ -755,7 +761,7 @@ namespace WizMes_SungShinNQ
                                 ColorGreen = "false",
                                 ColorRed = "true"
                             };
-                            dgdOutware.Items.Add(Window_SubulOutwareViewInsert);
+                            dgdTotal.Items.Add(Window_SubulOutwareViewInsert);
                         }
                     }
 
