@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -16,13 +16,15 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using WizMes_SungShinNQ.PopUp;
 using WizMes_SungShinNQ.PopUP;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 
 namespace WizMes_SungShinNQ
 {
     /**************************************************************************************************
-    '** System 명 : WizMes_SungShinNQ
+    '** System 명 : WizMes_GLS
     '** Author    : Wizard
     '** 작성자    : 최준호
     '** 내용      : 검사기준등록
@@ -40,6 +42,9 @@ namespace WizMes_SungShinNQ
     /// </summary>
     public partial class Win_Qul_InspectAutoBasis_U : UserControl
     {
+        string stDate = string.Empty;
+        string stTime = string.Empty;
+
         string sInspectPoint = string.Empty;
         string strFlag = string.Empty;
         string ButtonEOClickCheck = string.Empty;
@@ -56,17 +61,20 @@ namespace WizMes_SungShinNQ
         string strFullPath = string.Empty;
         string strDelFileName = string.Empty;
 
-        List<string> deleteListFtpFile = new List<string>(); // 삭제할 파일 리스트
+        List<string[]> deleteListFtpFile = new List<string[]>(); // 삭제할 파일 리스트
         List<string> lstExistFtpFile = new List<string>();
 
         // 촤! FTP Server 에 있는 폴더 + 파일 경로를 저장해놓고 그걸로 다운 및 업로드하자 마!
         // 이미지 이름 : 폴더이름
         Dictionary<string, string> lstFtpFilePath = new Dictionary<string, string>();
+        HashSet<string> lstFilesName = new HashSet<string>();
 
         private FTP_EX _ftp = null;
 
         List<string[]> listFtpFile = new List<string[]>();
         private List<UploadFileInfo> _listFileInfo = new List<UploadFileInfo>();
+
+        PlusFinder pf = new PlusFinder();
 
         internal struct UploadFileInfo          //FTP.
         {
@@ -124,14 +132,28 @@ namespace WizMes_SungShinNQ
 
         public Win_Qul_InspectAutoBasis_U()
         {
-            InitializeComponent();
+            InitializeComponent();        
         }
+
+        public bool ShouldSkipEnterKey(string textBoxName)
+        {
+            return textBoxName == "txtArticleID";
+        }
+
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
+            stDate = DateTime.Now.ToString("yyyyMMdd");
+            stTime = DateTime.Now.ToString("HHmm");
+
+
             Lib.Instance.UiLoading(this);
-            TbnProcessCycle_Click(tbnProcessCycle, null);
+            TbnJaju_Click(tbnJaju, null);
+            //TbnOutCome_Click(tbnOutCome, null);
+            //TbnProcessCycle_Click(tbnProcessCycle, null);
             SetComboBox();
+
+        
             //dtpMoldNo.SelectedDate = DateTime.Today;
         }
 
@@ -148,6 +170,14 @@ namespace WizMes_SungShinNQ
 
             ovcManageView = ComboBoxUtil.Instance.GetCMCode_SetComboBox("INSITEMGBN", "");
             ovcCycleView = ComboBoxUtil.Instance.GetCMCode_SetComboBox("INSCYCLEGBN", "");
+
+            //데이터 입력 그리드용 콤보(점검주기구분)
+            ObservableCollection<CodeView> ovcInsCycleID = ComboBoxUtil.Instance.Gf_DB_CM_GetComCodeDataset(null, "INSCYCLE", "Y", "", "");
+            cboInsCycle.ItemsSource = ovcInsCycleID;
+            cboInsCycle.DisplayMemberPath = "code_name";
+            cboInsCycle.SelectedValuePath = "code_id";
+            cboInsCycle.SelectedIndex = 0;
+
         }
 
         void SetBuyerArticleNo(string strID)  //품명을 뿌려야하니까 수정 2020.03.19, 장가빈
@@ -160,9 +190,12 @@ namespace WizMes_SungShinNQ
                 if (dt.Rows[0]["Article"] != null &&
                     !dt.Rows[0]["Article"].ToString().Trim().Equals(string.Empty))
                 {
-                    txtBuyerArticle.Text = dt.Rows[0]["Article"].ToString();
-                    txtProcess.Tag = dt.Rows[0]["ProcessID"].ToString();
-                    txtProcess.Text = dt.Rows[0]["Process"].ToString();
+                    txtSpec.Text = dt.Rows[0]["Spec"].ToString();
+                    txtArticleID.Text = dt.Rows[0]["Article"].ToString();
+                    txtArticleID.Tag = dt.Rows[0]["ArticleID"].ToString();
+                    //txtBuyerArticleNo.Text = dt.Rows[0]["BuyerArticleNo"].ToString();              
+                    //txtProcess.Tag = dt.Rows[0]["ProcessID"].ToString();
+                    //txtProcess.Text = dt.Rows[0]["Process"].ToString();
                 }
             }
         }
@@ -213,14 +246,14 @@ namespace WizMes_SungShinNQ
         {
             if (e.Key == Key.Enter)
             {
-                MainWindow.pf.ReturnCode(txtArticleSrh, 76, txtArticleSrh.Text);
+                MainWindow.pf.ReturnCode(txtArticleSrh, 77, txtArticleSrh.Text);
             }
         }
 
         // 품명(품번으로 수정요청, 2020.03.19, 장가빈)
         private void BtnPfArticleSrh_Click(object sender, RoutedEventArgs e)
         {
-            MainWindow.pf.ReturnCode(txtArticleSrh, 76, txtArticleSrh.Text);
+            MainWindow.pf.ReturnCode(txtArticleSrh, 77, txtArticleSrh.Text);
         }
 
         // EONO
@@ -281,15 +314,7 @@ namespace WizMes_SungShinNQ
 
                 }
 
-                txtInspectBasisID.Text = "";
-                txtArticle.Text = "";
-                txtProcess.Text = "";
-                txtCarModel.Text = "";
-                txtBuyerArticle.Text = "";
-                txtECONO.Text = "";
-                //dtpMoldNo.SelectedDate = DateTime.Today;
-                //txtMoldNo.Text = "";
-                txtComments.Text = "";
+                ClearGrid();
 
                 sInspectPoint = "1";
                 txtProcess.Visibility = Visibility.Hidden;
@@ -318,15 +343,7 @@ namespace WizMes_SungShinNQ
                     dgdSub.Refresh();
                 }
 
-                txtInspectBasisID.Text = "";
-                txtArticle.Text = "";
-                txtProcess.Text = "";
-                txtCarModel.Text = "";
-                txtBuyerArticle.Text = "";
-                txtECONO.Text = "";
-                //dtpMoldNo.SelectedDate = DateTime.Today;
-                //txtMoldNo.Text = "";
-                txtComments.Text = "";
+                ClearGrid();
 
                 sInspectPoint = "3";
                 txtProcess.Visibility = 0;
@@ -355,15 +372,8 @@ namespace WizMes_SungShinNQ
                     dgdSub.Refresh();
 
                 }
-                txtInspectBasisID.Text = "";
-                txtArticle.Text = "";
-                txtProcess.Text = "";
-                txtCarModel.Text = "";
-                txtBuyerArticle.Text = "";
-                txtECONO.Text = "";
-                //dtpMoldNo.SelectedDate = DateTime.Today;
-                //txtMoldNo.Text = "";
-                txtComments.Text = "";
+
+                ClearGrid();
 
                 sInspectPoint = "9";
                 txtProcess.Visibility = 0;
@@ -392,15 +402,7 @@ namespace WizMes_SungShinNQ
                     dgdSub.Refresh();
                 }
 
-                txtInspectBasisID.Text = "";
-                txtArticle.Text = "";
-                txtProcess.Text = "";
-                txtCarModel.Text = "";
-                txtBuyerArticle.Text = "";
-                txtECONO.Text = "";
-                //dtpMoldNo.SelectedDate = DateTime.Today;
-                //txtMoldNo.Text = "";
-                txtComments.Text = "";
+                ClearGrid();
 
                 sInspectPoint = "5";
                 txtProcess.Visibility = Visibility.Hidden;
@@ -420,6 +422,8 @@ namespace WizMes_SungShinNQ
             Lib.Instance.UiButtonEnableChange_SCControl(this);
             dgdMain.IsHitTestVisible = false;
             gbxInput.IsHitTestVisible = true;
+            cboInsCycle.IsEnabled = true;
+            cboInsCycle.SelectedIndex = 0;
             subAdd.IsEnabled = true;
             subDel.IsEnabled = true;
         }
@@ -432,6 +436,7 @@ namespace WizMes_SungShinNQ
             Lib.Instance.UiButtonEnableChange_IUControl(this);
             dgdMain.IsHitTestVisible = true;
             gbxInput.IsHitTestVisible = false;
+            cboInsCycle.IsEnabled = false;
             subAdd.IsEnabled = false;
             subDel.IsEnabled = false;
         }
@@ -481,7 +486,6 @@ namespace WizMes_SungShinNQ
         //추가
         private void btnAdd_Click(object sender, RoutedEventArgs e)
         {
-
             if (dgdMain.SelectedItem != null)
             {
                 if (dgdMain.Items.Count > 0)
@@ -493,20 +497,18 @@ namespace WizMes_SungShinNQ
                     Wh_Ar_SelectedLastIndex = 0;
                 }
             }
-            this.DataContext = new object();
-            ClearGrid();
+            this.DataContext = null;
             strFlag = "I";
+            dtpMoldNo.SelectedDate = DateTime.Today;
             ControlVisibleAndEnable_AU();
             tbkMsg.Text = "자료 추가 중";
             ovcInspectAutoBasisSub.Clear();
 
             AddSubItem();
 
-            //추가 시작 포커스. (품 명)
-            txtArticle.Focus();
-
             strImagePath = string.Empty;
             strDelFileName = string.Empty;
+         
         }
 
         //수정
@@ -520,10 +522,11 @@ namespace WizMes_SungShinNQ
             }
             else
             {
-                Wh_Ar_SelectedLastIndex = dgdMain.SelectedIndex;
+                Wh_Ar_SelectedLastIndex = dgdMain.SelectedIndex;                
                 strFlag = "U";
                 ControlVisibleAndEnable_AU();
                 tbkMsg.Text = "자료 수정 중";
+           
             }
         }
 
@@ -542,13 +545,9 @@ namespace WizMes_SungShinNQ
                 {
                     if (MessageBox.Show("선택하신 항목을 삭제하시겠습니까?", "삭제 전 확인", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                     {
-
-                        if (Procedure.Instance.DeleteData(InsAutoBasis.InspectBasisID, InsAutoBasis.Seq
-                            , "InspectBasisID", "Seq", "xp_Code_dInspectAutoBasis"))
+                        using (Loading ld = new Loading(beDelete))
                         {
-                            rowNum = dgdMain.SelectedIndex - 1;
-                            ClearGrid();
-                            re_Search(rowNum);
+                            ld.ShowDialog();
                         }
                     }
                 }
@@ -563,6 +562,27 @@ namespace WizMes_SungShinNQ
             }
         }
 
+        private void beDelete()
+        {
+            //삭제버튼 비활성화
+            btnDelete.IsEnabled = false;
+
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                var InsAutoBasis = dgdMain.SelectedItem as Win_Qul_InspectAutoBasis_U_CodeView;
+
+                DataStore.Instance.InsertLogByForm(this.GetType().Name, "D");
+                if (Procedure.Instance.DeleteData(InsAutoBasis.InspectBasisID, InsAutoBasis.Seq
+                    , "InspectBasisID", "Seq", "xp_Code_dInspectAutoBasis"))
+                {
+                    rowNum = dgdMain.SelectedIndex - 1;                
+                    re_Search(rowNum);
+                }
+            }), System.Windows.Threading.DispatcherPriority.Background);
+
+            btnDelete.IsEnabled = true;
+        }
+
         //닫기
         private void btnClose_Click(object sender, RoutedEventArgs e)
         {
@@ -572,74 +592,89 @@ namespace WizMes_SungShinNQ
         // 검색 클릭
         private void btnSearch_Click(object sender, RoutedEventArgs e)
         {
+            using (Loading ld = new Loading(beSearch))
+            {
+                ld.ShowDialog();
+            }
+        }
+
+        private void beSearch()
+        {
             //검색버튼 비활성화
             btnSearch.IsEnabled = false;
 
             Dispatcher.BeginInvoke(new Action(() =>
-
             {
-                Thread.Sleep(2000);
-
                 //로직
                 rowNum = 0;
                 re_Search(rowNum);
 
             }), System.Windows.Threading.DispatcherPriority.Background);
 
-
-
-            Dispatcher.BeginInvoke(new Action(() =>
-
-            {
-                btnSearch.IsEnabled = true;
-
-            }), System.Windows.Threading.DispatcherPriority.Background);
-
+            btnSearch.IsEnabled = true;
         }
 
         // 저장 클릭
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
-
-            if (SaveData(txtInspectBasisID.Text, 1))
+            using (Loading ld = new Loading(beSave))
             {
-                ControlVisibleAndEnable_SC();
+                ld.ShowDialog();
+            }
+        }
 
-                //저장,취소하면 삭제를 위해 담아둔 뷰를 모두 삭제
-                ovcInspectAutoBasisSub_Delete.Clear();
+        private void beSave()
+        {
+            //저장버튼 비활성화
+            btnSave.IsEnabled = false;
 
-                rowNum = dgdMain.Items.Count + 1;
-                re_Search(rowNum);
-                //FillGrid();
-                dgdMain.ItemsSource = null;
-                dgdMain.ItemsSource = ovcInspectAutoBasis;
-                dgdMain.Items.Refresh();
-
-                if (strFlag == "I")     //1. 추가 > 저장했다면,
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (SaveData(txtInspectBasisID.Text, 1))
                 {
-                    if (dgdMain.Items.Count > 0)
+                    ControlVisibleAndEnable_SC();
+
+                    //저장,취소하면 삭제를 위해 담아둔 뷰를 모두 삭제
+                    ovcInspectAutoBasisSub_Delete.Clear();
+
+                    rowNum = dgdMain.Items.Count + 1;
+                    re_Search(rowNum);
+                    //FillGrid();
+                    dgdMain.ItemsSource = null;
+                    dgdMain.ItemsSource = ovcInspectAutoBasis;
+                    dgdMain.Items.Refresh();
+
+                    if (strFlag == "I")     //1. 추가 > 저장했다면,
                     {
-                        dgdMain.SelectedIndex = dgdMain.Items.Count - 1;
+                        if (dgdMain.Items.Count > 0)
+                        {
+                            dgdMain.SelectedIndex = dgdMain.Items.Count - 1;
+                            dgdMain.Focus();
+                        }
+                    }
+                    else        //2. 수정 > 저장했다면,
+                    {
+                        dgdMain.SelectedIndex = Wh_Ar_SelectedLastIndex;
                         dgdMain.Focus();
                     }
+                    strFlag = string.Empty; // 추가했는지, 수정했는지 알려면 맨 마지막에 flag 값을 비어야 한다.
+                    ButtonEOClickCheck = string.Empty;
                 }
-                else        //2. 수정 > 저장했다면,
-                {
-                    dgdMain.SelectedIndex = Wh_Ar_SelectedLastIndex;
-                    dgdMain.Focus();
-                }
-                strFlag = string.Empty; // 추가했는지, 수정했는지 알려면 맨 마지막에 flag 값을 비어야 한다.
-                ButtonEOClickCheck = string.Empty;
-            }
+            }), System.Windows.Threading.DispatcherPriority.Background);
+
+            btnSave.IsEnabled = true;
         }
 
         // 취소 클릭
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
-            ClearGrid();
             ControlVisibleAndEnable_SC();
             //저장,취소하면 삭제를 위해 담아둔 뷰를 모두 삭제
             ovcInspectAutoBasisSub_Delete.Clear();
+            listFtpFile.Clear();
+            lstFtpFilePath.Clear();
+            lstFilesName.Clear();
+            deleteListFtpFile.Clear();
 
             rowNum = dgdMain.SelectedIndex;
             re_Search(rowNum);
@@ -652,13 +687,21 @@ namespace WizMes_SungShinNQ
                     dgdMain.SelectedIndex = Wh_Ar_SelectedLastIndex;
                     dgdMain.Focus();
                 }
+                else
+                {
+                    //검사기준이 아무것도 등록 안되어 있는
+                    //상태에서 입력하다 취소를 했을 때 비워주기
+                    this.DataContext = null;
+                    ClearGrid();
+                    ovcInspectAutoBasisSub.Clear();
+
+                }
             }
             else        //2. 수정하다가 취소했다면
             {
                 dgdMain.SelectedIndex = Wh_Ar_SelectedLastIndex;
                 dgdMain.Focus();
-            }
-
+            }       
             strFlag = string.Empty; // 추가했는지, 수정했는지 알려면 맨 마지막에 flag 값을 비어야 한다.
         }
 
@@ -680,6 +723,7 @@ namespace WizMes_SungShinNQ
 
             if (ExpExc.DialogResult.HasValue)
             {
+                DataStore.Instance.InsertLogByForm(this.GetType().Name, "E");
                 if (ExpExc.choice.Equals(dgdMain.Name))
                 {
                     if (ExpExc.Check.Equals("Y"))
@@ -744,13 +788,16 @@ namespace WizMes_SungShinNQ
                 sqlParameter.Add("chkInspectBasisID", chkInspectBasisSrh.IsChecked == true ? 1 : 0);
                 sqlParameter.Add("InspectBasisID", chkInspectBasisSrh.IsChecked == true ? txtInspectBasisSrh.Text : "");
                 sqlParameter.Add("chkArticleID", chkArticleSrh.IsChecked == true ? 1 : 0);
-                sqlParameter.Add("ArticleID", chkArticleSrh.IsChecked == true ? txtArticleSrh.Text : "");
+                sqlParameter.Add("ArticleID", chkArticleSrh.IsChecked == true ? txtArticleSrh.Tag : "");
+                sqlParameter.Add("chkArticleNo", chkArticleNo.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("ArticleNo", chkArticleNo.IsChecked == true ? (txtArticleNo.Tag != null ? txtArticleNo.Tag.ToString() : "") : "");
                 sqlParameter.Add("chkEcoNo", chkECONOSrh.IsChecked == true ? 1 : 0);
                 sqlParameter.Add("EcoNo", chkECONOSrh.IsChecked == true ? txtECONOSrh.Text : "");
                 sqlParameter.Add("chkMoldNo", chkMoldNoSrh.IsChecked == true ? 1 : 0);
-                sqlParameter.Add("MoldNo", chkMoldNoSrh.IsChecked == true ? txtMoldNoSrh.Text : "");
+                sqlParameter.Add("MoldNo", chkMoldNoSrh.IsChecked == true ? txtMoldNoSrh.SelectedDate.Value.ToString("yyyyMMdd") : "");
+                //sqlParameter.Add("MoldNo", chkMoldNoSrh.IsChecked == true ? txtMoldNoSrh.Text : ""); //dtpMoldNo.SelectedDate.Value.ToString("yyyyMMdd")
                 sqlParameter.Add("InspectPoint", sInspectPoint);
-                DataSet ds = DataStore.Instance.ProcedureToDataSet("xp_Code_sInspectAutoBasis", sqlParameter, false);
+                DataSet ds = DataStore.Instance.ProcedureToDataSet_LogWrite("xp_Code_sInspectAutoBasis", sqlParameter, true, "R");
 
                 if (ds != null && ds.Tables.Count > 0)
                 {
@@ -776,6 +823,7 @@ namespace WizMes_SungShinNQ
                                 Seq = dr["Seq"].ToString(),
                                 ArticleID = dr["ArticleID"].ToString(),
                                 Article = dr["Article"].ToString(),
+                                Spec = dr["Spec"].ToString(),
 
                                 ProcessID = dr["ProcessID"].ToString(),
                                 Process = dr["Process"].ToString(),
@@ -787,6 +835,10 @@ namespace WizMes_SungShinNQ
                                 Model = dr["Model"].ToString(),
                                 InspectPoint = dr["InspectPoint"].ToString(),
                                 MoldNo = Lib.Instance.StrDateTimeBar(dr["MoldNo"].ToString()),
+                                InsCycleID = dr["InsCycleID"].ToString(),
+                                sketch1FilePath = dr["sketch1FilePath"].ToString(),
+                                sketch1FileName = dr["sketch1FileName"].ToString(),
+                                sketch1FileAlias = dr["sketch1FileAlias"].ToString(),
                                 CreateDate = dr["CreateDate"].ToString()
                             };
                             ovcInspectAutoBasis.Add(InsAutoBasis);
@@ -865,8 +917,9 @@ namespace WizMes_SungShinNQ
                                 InspectCycleGubunName = dr["InspectCycleGubunName"].ToString(),
                                 InspectCycle = dr["InspectCycle"].ToString(),
                                 Comments = dr["Comments"].ToString(),
-                                InsImageFile = dr["InsImageFile"].ToString(),
-                                InsImagePath = dr["InsImagePath"].ToString(),
+                                InsImageFile = dr["InsImageFile"].ToString().Replace(" ",""),
+                                InsImagePath = dr["InsImagePath"].ToString().Trim(),
+                                //ExcelCoordinates = dr["ExcelCoordinates"].ToString(),
 
                                 ovcCycle = ovcCycleView,
                                 ovcManage = ovcManageView,
@@ -901,8 +954,10 @@ namespace WizMes_SungShinNQ
                             else
                             {
                                 InsAutoBasisSub.Spec = InsAutoBasisSub.insRaSpec;
-                                InsAutoBasisSub.SpecMax = Lib.Instance.returnNumString(InsAutoBasisSub.insRASpecMax);
-                                InsAutoBasisSub.SpecMin = Lib.Instance.returnNumString(InsAutoBasisSub.InsRaSpecMin);
+                                //InsAutoBasisSub.SpecMax = Lib.Instance.returnNumString(InsAutoBasisSub.insRASpecMax); 최대최소 입력시 빈칸 입력할수 있다고 텍스트로 받음
+                                //InsAutoBasisSub.SpecMin = Lib.Instance.returnNumString(InsAutoBasisSub.InsRaSpecMin); 최대최소 입력시 빈칸 입력할수 있다고 텍스트로 받음  
+                                InsAutoBasisSub.SpecMax = InsAutoBasisSub.insRASpecMax;
+                                InsAutoBasisSub.SpecMin = InsAutoBasisSub.InsRaSpecMin;
                                 InsAutoBasisSub.insTypeText = "DIM's";
                             }
 
@@ -924,54 +979,126 @@ namespace WizMes_SungShinNQ
         }
 
         // 품명 플러스파인더(품번으로 수정 요청, 2020.03.19, 장가빈)
-        private void TxtArticle_KeyDown(object sender, KeyEventArgs e)
+        private void txtBuyerArticleNo_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
                 if (tbnJaju.IsChecked == true || tbnProcessCycle.IsChecked == true)
                 {
-                    MainWindow.pf.ReturnCode(txtArticle, 83, txtArticle.Text);
+                    MainWindow.pf.ReturnCode(txtBuyerArticleNo, txtProcess, 831, txtBuyerArticleNo.Text);
                 }
                 else
                 {
-                    MainWindow.pf.ReturnCode(txtArticle, 76, txtArticle.Text);
+                    MainWindow.pf.ReturnCode(txtBuyerArticleNo, 76, txtBuyerArticleNo.Text);
                 }
 
 
-                if (txtArticle.Tag != null)
+                if (txtBuyerArticleNo.Tag != null)
                 {
-                    SetBuyerArticleNo(txtArticle.Tag.ToString());
+                    SetBuyerArticleNo(txtBuyerArticleNo.Tag.ToString());
                     //txtProcess.Focus();
                 }
 
 
-                //MainWindow.pf.ReturnCode(txtArticle, (int)Defind_CodeFind.DCF_Article, "");
-                //MainWindow.pf.ReturnCode(txtArticle, 83, txtArticle.Text);
-
             }
         }
 
-        // 품명 플러스파인더
-        private void BtnPfArticle_Click(object sender, RoutedEventArgs e)
+        // 품번 플러스파인더
+        private void btnBuyerArticleNo_Click(object sender, RoutedEventArgs e)
         {
-            //MainWindow.pf.ReturnCode(txtArticle, (int)Defind_CodeFind.DCF_Article, "");
-            //MainWindow.pf.ReturnCode(txtArticle, 83, txtArticle.Text);
 
             if (tbnJaju.IsChecked == true || tbnProcessCycle.IsChecked == true)
             {
-                MainWindow.pf.ReturnCode(txtArticle, 83, txtArticleSrh.Text);
+                MainWindow.pf.ReturnCode(txtBuyerArticleNo, txtProcess, txtBuyerArticleNo, 831, txtBuyerArticleNo.Text);
             }
             else
             {
-                MainWindow.pf.ReturnCode(txtArticle, 76, txtArticleSrh.Text);
+                MainWindow.pf.ReturnCode(txtBuyerArticleNo, 76, txtBuyerArticleNo.Text);
             }
 
-            if (txtArticle.Tag != null)
+            if (txtBuyerArticleNo.Tag != null)
             {
-                SetBuyerArticleNo(txtArticle.Tag.ToString());
+                SetBuyerArticleNo(txtBuyerArticleNo.Tag.ToString());
                 //txtProcess.Focus();
             }
         }
+
+        private void CommonPlusfinder_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                TextBox txtbox = (TextBox)sender;
+                TextBox txtbox1 = new TextBox();
+                if (txtbox != null && !string.IsNullOrEmpty(txtbox.Name))
+                {
+                    if (txtbox.Name.Equals("txtArticleID"))
+                    {
+                        if (tbnJaju.IsChecked == true || tbnProcessCycle.IsChecked == true)
+                        {
+                            pf.ReturnCode(txtbox, txtbox1, 831, "");
+                            if (txtbox.Tag != null)
+                            {
+                                SetBuyerArticleNo(txtbox.Tag?.ToString() ?? string.Empty);
+                                if (txtbox1.Tag != null)
+                                {
+                                    txtProcess.Text = txtbox1.Text;
+                                    txtProcess.Tag = txtbox1.Tag;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            pf.ReturnCode(txtbox, 77, txtbox.Text);
+                            if (txtbox.Tag != null)
+                            {
+                                SetBuyerArticleNo(txtbox.Tag?.ToString() ?? string.Empty);
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
+
+        private void CommonPlusfinder_Click(object sender, RoutedEventArgs e)
+        {
+            Button btn = (Button)sender;
+            TextBox txtbox = lib.FindSiblingControl<TextBox>(btn);
+            TextBox txtbox1 = new TextBox();
+            if (txtbox != null && !string.IsNullOrEmpty(txtbox.Name))
+            {
+                if (txtbox.Name.Equals("txtArticleID"))
+                {
+                    if(tbnJaju.IsChecked == true || tbnProcessCycle.IsChecked == true)
+                    {
+                        pf.ReturnCode(txtbox, txtbox1, 831, txtbox.Text);
+                        if (txtbox.Tag != null)
+                        {
+                            SetBuyerArticleNo(txtbox.Tag?.ToString() ?? string.Empty);
+                            if (txtbox1.Tag != null)
+                            {
+                                txtProcess.Text = txtbox1.Text;
+                                txtProcess.Tag = txtbox1.Tag;
+
+                            }
+                        }
+                    }
+                    else
+                    {
+                        pf.ReturnCode(txtbox, 77, txtbox.Text);
+                        if(txtbox.Tag != null)
+                        {
+                            SetBuyerArticleNo(txtbox.Tag?.ToString() ?? string.Empty);
+
+                        }
+                    }
+
+                
+                }
+          
+            }
+        }
+
 
         // 공정 플러스파인더
         private void txtProcess_KeyDown(object sender, KeyEventArgs e)
@@ -982,36 +1109,36 @@ namespace WizMes_SungShinNQ
 
                 if (txtProcess.Tag != null)
                 {
-                    txtCarModel.Focus();
+                    txtModel.Focus();
                 }
             }
         }
         // 공정 플러스파인더
-        private void btnPfProcess_Click(object sender, RoutedEventArgs e)
+        private void btnProcess_Click(object sender, RoutedEventArgs e)
         {
             MainWindow.pf.ReturnCode(txtProcess, (int)Defind_CodeFind.DCF_PROCESS, "");
 
             if (txtProcess.Tag != null)
             {
-                txtCarModel.Focus();
+                txtModel.Focus();
             }
         }
 
 
         // 차종 플러스파인더
-        private void TxtCarModel_KeyDown(object sender, KeyEventArgs e)
+        private void txtModel_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
-                MainWindow.pf.ReturnCode(txtCarModel, (int)Defind_CodeFind.DCF_BUYERMODEL, "");
+                MainWindow.pf.ReturnCode(txtModel, (int)Defind_CodeFind.DCF_BUYERMODEL, "");
                 txtECONO.Focus();
             }
         }
 
         // 차종 플러스파인더
-        private void BtnPfCarModel_Click(object sender, RoutedEventArgs e)
+        private void btnModel_Click(object sender, RoutedEventArgs e)
         {
-            MainWindow.pf.ReturnCode(txtCarModel, (int)Defind_CodeFind.DCF_BUYERMODEL, "");
+            MainWindow.pf.ReturnCode(txtModel, (int)Defind_CodeFind.DCF_BUYERMODEL, "");
         }
 
         // 저장 실동작
@@ -1021,13 +1148,10 @@ namespace WizMes_SungShinNQ
             SstrID = strID;
 
             bool flag = false;
-            bool inspointFlag = false;
             List<Procedure> Prolist = new List<Procedure>();
             List<Dictionary<string, object>> ListParameter = new List<Dictionary<string, object>>();
 
             //string GetKey = "";
-            string ProcessID = txtProcess.Tag != null ? txtProcess.Tag.ToString() : "";
-            if (sInspectPoint == "3" || sInspectPoint == "9") inspointFlag = true;
 
             try
             {
@@ -1037,17 +1161,17 @@ namespace WizMes_SungShinNQ
                     sqlParameter.Clear();
                     sqlParameter.Add("InspectBasisID", strID);
                     sqlParameter.Add("Seq", Seq);
-                    sqlParameter.Add("ArticleID", txtArticle.Tag.ToString());
+                    //sqlParameter.Add("ArticleID", txtBuyerArticleNo.Tag.ToString());
+                    sqlParameter.Add("ArticleID", txtArticleID.Tag?.ToString() ?? string.Empty);
                     sqlParameter.Add("EcoNo", txtECONO.Text);
                     sqlParameter.Add("Comments", txtComments.Text);
 
-                    sqlParameter.Add("BuyerModelID", txtCarModel.Tag != null ? txtCarModel.Tag.ToString() : "");
+                    sqlParameter.Add("BuyerModelID", txtModel.Tag != null ? txtModel.Tag.ToString() : "");
                     sqlParameter.Add("InspectPoint", sInspectPoint);
                     sqlParameter.Add("MoldNo", dtpMoldNo.SelectedDate.Value.ToString("yyyyMMdd"));
-                    sqlParameter.Add("ProcessID", inspointFlag ? ProcessID : "");
+                    sqlParameter.Add("ProcessID", txtProcess.Tag != null ? txtProcess.Tag.ToString() : "7101");
 
-
-
+                    sqlParameter.Add("InsCycleID", cboInsCycle.SelectedValue != null ? cboInsCycle.SelectedValue.ToString() : "");
 
                     if (strFlag.Equals("I"))   //추가일 때 
                     {
@@ -1064,7 +1188,7 @@ namespace WizMes_SungShinNQ
 
 
                         List<KeyValue> list_Result = new List<KeyValue>();
-                        list_Result = DataStore.Instance.ExecuteAllProcedureOutputGetCS(Prolist, ListParameter);
+                        list_Result = DataStore.Instance.ExecuteAllProcedureOutputGetCS_NewLog(Prolist, ListParameter,"C");
                         string sGetID = string.Empty;
 
                         if (list_Result[0].key.ToLower() == "success")
@@ -1106,6 +1230,33 @@ namespace WizMes_SungShinNQ
                                 SubInsAutoBasis.stringFlag = "I";
                             }
 
+                            if (SubInsAutoBasis.insTypeText.ToString() == "DIM's")
+                            {
+                                if (!IsNumberic(SubInsAutoBasis.SpecMax) && !(IsNumberic(SubInsAutoBasis.SpecMin)))
+                                {
+                                    MessageBox.Show("검사 상/하한 수치가 입력되지 않았거나 숫자형식이 아닙니다.");
+                                    flag = false;
+                                    return flag;
+                                }
+                                if (SubInsAutoBasis.SpecMax == "" || SubInsAutoBasis.SpecMin == "")
+                                {
+                                    MessageBox.Show("검사 상/하한 수치가 입력되지 않았거나 숫자형식이 아닙니다.");
+                                    flag = false;
+                                    return flag;
+                                }
+                                if (SubInsAutoBasis.InsSampleQty == "" || SubInsAutoBasis.InsSampleQty == "0")
+                                {
+                                    MessageBox.Show("샘플수량을 입력해주세요.");
+                                    flag = false;
+                                    return flag;
+                                }
+                                else if (SubInsAutoBasis.InsSampleQty != "" && !IsNumberic(SubInsAutoBasis.InsSampleQty))
+                                {
+                                    MessageBox.Show("샘플수량은 숫자만 입력이 가능합니다.");
+                                    flag = false;
+                                    return flag;
+                                }
+                            }
 
                             if (SubInsAutoBasis != null)
                             {
@@ -1149,7 +1300,7 @@ namespace WizMes_SungShinNQ
                             flag = true;
                         }
                     }
-                    else //수정일 때 
+                    else if(strFlag == "U") //수정일 때 
                     {
                         sqlParameter.Add("UpdateUserID", MainWindow.CurrentUser);
 
@@ -1178,6 +1329,25 @@ namespace WizMes_SungShinNQ
                                 {
                                     if (!IsNumberic(SubInsAutoBasis.SpecMax) && !(IsNumberic(SubInsAutoBasis.SpecMin)))
                                     {
+                                        MessageBox.Show("검사 상/하한 수치가 입력되지 않았거나 숫자형식이 아닙니다.");
+                                        flag = false;
+                                        return flag;
+                                    }
+                                    if(SubInsAutoBasis.SpecMax =="" || SubInsAutoBasis.SpecMin == "")
+                                    {
+                                        MessageBox.Show("검사 상/하한 수치가 입력되지 않았거나 숫자형식이 아닙니다.");
+                                        flag = false;
+                                        return flag;
+                                    }
+                                    if (SubInsAutoBasis.InsSampleQty == "" || SubInsAutoBasis.InsSampleQty == "0")
+                                    {
+                                        MessageBox.Show("샘플수량을 입력해주세요.");
+                                        flag = false;
+                                        return flag;
+                                    }
+                                    else if (SubInsAutoBasis.InsSampleQty != "" && !IsNumberic(SubInsAutoBasis.InsSampleQty))
+                                    {
+                                        MessageBox.Show("샘플수량은 숫자만 입력이 가능합니다.");
                                         flag = false;
                                         return flag;
                                     }
@@ -1209,7 +1379,7 @@ namespace WizMes_SungShinNQ
                         }
 
                         string[] Confirm = new string[2];
-                        Confirm = DataStore.Instance.ExecuteAllProcedureOutputNew(Prolist, ListParameter);
+                        Confirm = DataStore.Instance.ExecuteAllProcedureOutputNew_NewLog(Prolist, ListParameter,"U");
                         if (Confirm[0] != "success")
                         {
                             MessageBox.Show("[저장실패]\r\n" + Confirm[1].ToString());
@@ -1247,12 +1417,23 @@ namespace WizMes_SungShinNQ
                     {
                         FTP_Save_FileByFtpServerFilePath(lstFtpFilePath, strID);
                     }
+
+                    if (deleteListFtpFile.Count > 0)
+                    {
+                        foreach (string[] str in deleteListFtpFile)
+                        {
+                            FTP_RemoveFile(strID + "/" + str[0]);
+                        }
+                    }
+
+                    UpdateDBFtp(strID);
                 }
 
                 // 파일 List 비워주기
                 listFtpFile.Clear();
-                //deleteListFtpFile.Clear();
                 lstFtpFilePath.Clear();
+                lstFilesName.Clear();
+                deleteListFtpFile.Clear();
 
             }
             catch (Exception ex)
@@ -1260,9 +1441,12 @@ namespace WizMes_SungShinNQ
                 MessageBox.Show("오류 발생, 오류 내용 : " + ex.ToString());
             }
             finally
-            {
-
+            {                
                 DataStore.Instance.CloseConnection();
+                if(flag == true)
+                {
+                    MessageBox.Show("저장 되었습니다.","확인");
+                }
             }
 
             return flag;
@@ -1310,7 +1494,6 @@ namespace WizMes_SungShinNQ
                 MessageBox.Show(ep1.Message);
             }
         }
-
 
 
 
@@ -1372,12 +1555,28 @@ namespace WizMes_SungShinNQ
                 }
                 else
                 {
-                    sqlParameter.Add("InsTPSpec", "");
-                    sqlParameter.Add("InsTPSpecMin", "");
-                    sqlParameter.Add("InsTPSpecMax", "");
+                    sqlParameter.Add("InsTPSpec", InsAutoBasisSub.Spec);
+                    sqlParameter.Add("InsTPSpecMin", InsAutoBasisSub.SpecMin);
+                    sqlParameter.Add("InsTPSpecMax", InsAutoBasisSub.SpecMax);
                     sqlParameter.Add("InsRASpec", InsAutoBasisSub.Spec);
-                    sqlParameter.Add("InsRASpecMin", InsAutoBasisSub.SpecMin.Replace(",", ""));
-                    sqlParameter.Add("InsRASpecMax", InsAutoBasisSub.SpecMax.Replace(",", ""));
+
+                    if (InsAutoBasisSub.SpecMin.Replace(",", "") == "")
+                    {
+                        sqlParameter.Add("InsRASpecMin", -99999);
+                    }
+                    else
+                    {
+                        sqlParameter.Add("InsRASpecMin", InsAutoBasisSub.SpecMin.Replace(",", ""));
+                    }
+
+                    if (InsAutoBasisSub.SpecMax.Replace(",", "") == "")
+                    {
+                        sqlParameter.Add("InsRASpecMax", 99999);
+                    }
+                    else
+                    {
+                        sqlParameter.Add("InsRASpecMax", InsAutoBasisSub.SpecMax.Replace(",", ""));
+                    }
                 }
 
                 //샘플수량은 빈값 들어가면 안돼, 0 이거나 숫자가 들어가도록.
@@ -1392,6 +1591,7 @@ namespace WizMes_SungShinNQ
                 sqlParameter.Add("InsImageFile", InsAutoBasisSub.InsImageFile != null ? InsAutoBasisSub.InsImageFile : "");
                 sqlParameter.Add("InsImagePath", "/ImageData/" + ForderName + "/" + strID);
 
+                sqlParameter.Add("ExcelCoordinates", !string.IsNullOrEmpty(InsAutoBasisSub.ExcelCoordinates) ? InsAutoBasisSub.ExcelCoordinates.ToUpper() : string.Empty);
 
                 if (strFlag.Equals("I"))
                     sqlParameter.Add("CreateUserID", MainWindow.CurrentUser);
@@ -1417,13 +1617,21 @@ namespace WizMes_SungShinNQ
         {
             bool flag = true;
 
-            if (txtArticle.Text.Length <= 0 || txtArticle.Text.Equals(""))
+            //if (txtBuyerArticleNo.Text.Length <= 0 || txtBuyerArticleNo.Text.Equals(""))
+            //{
+            //    MessageBox.Show("품번이 입력되지 않았습니다.");
+            //    flag = false;
+            //    return flag;
+            //}
+
+            if(string.IsNullOrEmpty(txtArticleID.Text) || txtArticleID.Tag == null)
             {
-                MessageBox.Show("품번이 입력되지 않았습니다.");
+                MessageBox.Show("품명이 입력되지 않았습니다. 먼저 품명을 검색 입력하세요");
                 flag = false;
                 return flag;
             }
-            if (tbnJaju.IsChecked == true && tbnProcessCycle.IsChecked == true)
+
+            if (tbnJaju.IsChecked == true || tbnProcessCycle.IsChecked == true)
             {
                 if (txtProcess.Text.Length <= 0 || txtProcess.Text.Equals(""))
                 {
@@ -1432,22 +1640,24 @@ namespace WizMes_SungShinNQ
                     return flag;
                 }
             }
-            else if (tbnInCome.IsChecked == true && tbnOutCome.IsChecked == true)
+            else if (tbnInCome.IsChecked == true || tbnOutCome.IsChecked == true) //수입이랑 출하는 공정칸을 숨겨놨기때문에 2024-03-28
             {
-                MessageBox.Show("공정 입력하지 않아도 됩니다.");
-                return flag;
+                if (txtProcess.Text.Length > 0 || !txtProcess.Text.Equals(""))
+                {
+                    txtProcess.Text = "";
+                    //MessageBox.Show("공정 입력하지 않아도 됩니다.");
+                    //flag = false;
+                    //return flag;
+                }
             }
-            else if (dtpMoldNo.SelectedDate == null)
+
+            if (dtpMoldNo.SelectedDate == null)
             {
                 MessageBox.Show("기준일자를 등록해주세요.");
                 flag = false;
                 return flag;
             }
 
-            //현승씨가 만들어 놓은 부분
-            //var dgdSubInput = dgdSub.SelectedItem as Win_Qul_InspectAutoBasis_U_Sub_CodeView;
-
-            //내가 살짝 수정한 부분
             int i = 0;
             for (i = 0; i < dgdSub.Items.Count; i++)
             {
@@ -1455,18 +1665,29 @@ namespace WizMes_SungShinNQ
 
                 if (dgdSubInput.insType.ToString().Trim() == "2")
                 {
-                    if (!IsNumberic(dgdSubInput.SpecMin))
+                    if (dgdSubInput.SpecMin != "" && !IsNumberic(dgdSubInput.SpecMin))
                     {
                         MessageBox.Show("수치 하한 값에는 숫자만 입력 가능합니다.\n다시 입력해주세요.", "주의");
                         flag = false;
                         return flag;
                     }
 
-                    if (!IsNumberic(dgdSubInput.SpecMax))
+                    if (dgdSubInput.SpecMax != "" && !IsNumberic(dgdSubInput.SpecMax))
                     {
                         MessageBox.Show("수치 상한 값에는 숫자만 입력 가능합니다.\n다시 입력해주세요.", "주의");
                         flag = false;
                         return flag;
+                    }
+
+                    //JDJ 추가
+                    if (dgdSubInput.SpecMin != "" && IsNumberic(dgdSubInput.SpecMin) && dgdSubInput.SpecMax != "" && IsNumberic(dgdSubInput.SpecMax))
+                    {
+                        if (Convert.ToDouble(dgdSubInput.SpecMax) < Convert.ToDouble(dgdSubInput.SpecMin))
+                        {
+                            MessageBox.Show("수치 하한 값이 상한 값보다 큽니다.\n다시 입력해주세요.", "주의");
+                            flag = false;
+                            return flag;
+                        }
                     }
                 }
             }
@@ -1483,18 +1704,26 @@ namespace WizMes_SungShinNQ
                     flag = false;
                     return flag;
                 }
+                //JDJ 추가
+                else if (dgdSubInput.InsSampleQty == "" || dgdSubInput.InsSampleQty == "0")
+                {
+                    MessageBox.Show("샘플수량을 입력해주세요.");
+                    flag = false;
+                    return flag;
+                }
                 else if (dgdSubInput.InsSampleQty != "" && !IsNumberic(dgdSubInput.InsSampleQty))
                 {
                     MessageBox.Show("샘플수량은 숫자만 입력이 가능합니다.");
                     flag = false;
                     return flag;
                 }
-                else if (!IsNumberic(dgdSubInput.InspectCycle))
-                {
-                    MessageBox.Show("주기는 숫자만 입력이 가능합니다.");
-                    flag = false;
-                    return flag;
-                }
+
+                //else if (!IsNumberic(dgdSubInput.InspectCycle))
+                //{
+                //    MessageBox.Show("주기는 숫자만 입력이 가능합니다.");
+                //    flag = false;
+                //    return flag;
+                //}
             }
             return flag;
         }
@@ -1508,7 +1737,32 @@ namespace WizMes_SungShinNQ
         {
             if (e.Key == Key.Down || e.Key == Key.Up || e.Key == Key.Left || e.Key == Key.Right)
             {
-                DataGridSubCell_KeyDown(sender, e);
+                var cell = sender as DataGridCell;
+
+                // 셀 내부의 TextBox 찾기
+                TextBox textBox = lib.FindVisualChild<TextBox>(cell);
+
+                if (textBox != null && textBox.IsFocused)
+                {
+                    // SelectAll 상태인지 확인
+                    bool isSelectAll = textBox.SelectionLength == textBox.Text.Length;
+
+                    // SelectAll이 아니면 커서가 깜빡이는 상태 -> 기본 셀 이동 막음
+                    if (!isSelectAll)
+                    {
+                        // 기본 셀 이동 완전 차단
+                        //e.Handled = true;
+                        return;
+                    }
+                    else
+                    {
+                        // SelectAll 상태면 편집 모드 종료하고 셀 이동 허용
+                        cell.IsEditing = false;
+                    }
+                }
+
+
+                //DataGridSubCell_KeyDown(sender, e);
             }
         }
 
@@ -1557,7 +1811,7 @@ namespace WizMes_SungShinNQ
                     }
                     else
                     {
-                        MessageBox.Show("있으면 찾아보자...");
+                        //MessageBox.Show("있으면 찾아보자...");
                     }
                 }
                 else if (e.Key == Key.Delete)
@@ -1732,16 +1986,49 @@ namespace WizMes_SungShinNQ
 
         private void dgdMain_LeftDoubleDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.ClickCount == 2)
-            {
-                btnUpdate_Click(btnUpdate, null);
-            }
+            //if (e.ClickCount == 2)
+            //{
+            //    btnUpdate_Click(btnUpdate, null);
+            //}
 
             //btnUpdate_Click(btnUpdate, null);
         }
 
 
+        #region 그리드 초기화
+        private void ClearGrid()
+        {
+            List<Grid> grids = new List<Grid> { grdInput };
+            foreach (var grid in grids)
+            {
+                lib.FindUiObject(grid, child =>
+                {
+                    //if (child is DataGrid dgd)
+                    //{
+                    //    if (dgd.Items.Count > 0)
+                    //    {
+                    //        dgd.ItemsSource = null;
+                    //        dgd.Items.Clear();
+                    //    }
+                    //}
+                    if(child is TextBox txtbox)
+                    {
+                        txtbox.Text = string.Empty;
+                        txtbox.Tag = null;
+                    }
+                    else if(child is DatePicker dtp)
+                    {
+                        dtp.SelectedDate = null;
+                    }
+                    else if(child is ComboBox cbo)
+                    {
+                        cbo.SelectedValue = null;
+                    }
+                });
+            }
+        }
 
+        #endregion
 
         #region 포커스 이동용 키 다운 이벤트 모음
         private void txtECONO_KeyDown(object sender, KeyEventArgs e)
@@ -1769,12 +2056,165 @@ namespace WizMes_SungShinNQ
         {
             if (e.Key == Key.Enter)
             {
-                txtArticle.Focus();
+                txtBuyerArticleNo.Focus();
+            }
+        }
+
+        private void dtpInsSampleQty_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            TextBox txtbox = sender as TextBox;
+
+            if (!string.IsNullOrEmpty(txtbox.Text))
+            {
+                int value = lib.RemoveComma(txtbox.Text, 0);
+                if (value > 10)
+                {
+                    MessageBox.Show("샘플 수량은 최대 10개입니다.","확인");
+
+                    var dataContext = txtbox.DataContext;
+                    if (dataContext != null)
+                    {
+                        var binding = txtbox.GetBindingExpression(TextBox.TextProperty);
+                        binding?.UpdateTarget();
+                    }
+                    return;
+                }
             }
         }
 
         #endregion
 
+
+        #region 엑셀좌표 입력 이벤트
+        //#warning 가능한 사용 안함
+
+        //private void ExcelCoordinatePanel_Loaded(object sender, RoutedEventArgs e)
+        //{
+        //    var panel = sender as WrapPanel;
+        //    var data = panel.Tag as Win_Qul_InspectAutoBasis_U_Sub_CodeView;
+
+        //    if (!string.IsNullOrEmpty(data.ExcelCoordinates))
+        //    {
+        //        var coords = data.ExcelCoordinates.Split(',');
+        //        foreach (var coord in coords)
+        //        {
+        //            if (!string.IsNullOrWhiteSpace(coord))
+        //                AddTextBox(panel, coord.Trim(), data);
+        //        }
+        //    }
+
+        //    int maxCount = int.TryParse(data.InsSampleQty, out int result) ? result : 0;
+        //    if (panel.Children.Count < maxCount)
+        //    {
+        //        AddTextBox(panel, "", data);
+        //    }
+        //}
+
+        //private void AddTextBox(WrapPanel panel, string text, Win_Qul_InspectAutoBasis_U_Sub_CodeView data)
+        //{
+        //    var textBox = new TextBox
+        //    {
+        //        Text = text,
+        //        MaxLength = 10,
+        //        Width = 25,
+        //        Height = 20,
+        //        Margin = new Thickness(1),
+        //        Tag = data
+        //    };
+
+        //    textBox.PreviewKeyDown += TextBox_PreviewKeyDown;
+        //    textBox.PreviewTextInput += TextBox_PreviewTextInput;
+
+
+        //    textBox.TextChanged += (s, e) =>
+        //    {
+        //        var tb = s as TextBox;
+        //        var parent = tb.Parent as WrapPanel;
+        //        var dataItem = tb.Tag as Win_Qul_InspectAutoBasis_U_Sub_CodeView;
+
+        //        // 데이터 업데이트만 담당
+        //        var values = parent.Children.OfType<TextBox>()
+        //                          .Where(x => !string.IsNullOrWhiteSpace(x.Text))
+        //                          .Select(x => x.Text);
+        //        dataItem.ExcelCoordinates = string.Join(",", values);
+        //    };
+
+        //    textBox.GotFocus += (s, e) => ((TextBox)s).SelectAll();
+
+        //    panel.Children.Add(textBox);
+
+        //    if (string.IsNullOrEmpty(text))
+        //        textBox.Focus();
+        //}
+
+
+
+        //private void TextBox_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
+        //{
+        //    // 입력되는 텍스트가 엑셀 좌표 형식이 아니면 차단
+        //    foreach (char c in e.Text)
+        //    {
+        //        if (!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')))
+        //        {
+        //            Lib.Instance.ShowTooltipMessage(sender as FrameworkElement, "특수 문자는 입력 할 수 없습니다.", MessageBoxImage.Stop, PlacementMode.Bottom);
+        //            e.Handled = true;
+        //            return;
+        //        }
+        //    }
+        //}
+
+        //private void TextBox_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        //{
+        //    var tb = sender as TextBox;
+        //    var parent = tb.Parent as WrapPanel;
+
+        //    // 백스페이스나 Delete 키를 누르고 텍스트가 비어있을 때
+        //    if ((e.Key == System.Windows.Input.Key.Back || e.Key == System.Windows.Input.Key.Delete) && string.IsNullOrEmpty(tb.Text))
+        //    {
+        //        var currentIndex = parent.Children.IndexOf(tb);
+
+        //        // 현재가 첫 번째가 아니고, 총 개수가 1개보다 많을 때
+        //        if (currentIndex > 0 && parent.Children.Count > 1)
+        //        {
+        //            // 이전 TextBox 찾기
+        //            var prevTextBox = parent.Children[currentIndex - 1] as TextBox;
+
+        //            // 현재 TextBox 제거
+        //            parent.Children.Remove(tb);
+
+        //            // 이전 TextBox로 포커스 이동하고 커서를 끝으로
+        //            prevTextBox.Focus();
+        //            prevTextBox.CaretIndex = prevTextBox.Text.Length;
+
+        //            e.Handled = true; // 이벤트 처리 완료
+        //        }
+        //    }
+        //    // Tab 키를 누르면 새 TextBox 추가
+        //    else if (e.Key == System.Windows.Input.Key.Tab && !string.IsNullOrWhiteSpace(tb.Text))
+        //    {
+        //        var dataItem = tb.Tag as Win_Qul_InspectAutoBasis_U_Sub_CodeView;
+        //        int maxCount = int.TryParse(dataItem.InsSampleQty, out int result) ? result : 0;
+
+        //        if (parent.Children.Count < maxCount)
+        //        {
+        //            // 새 TextBox 추가
+        //            AddTextBox(parent, "", dataItem);
+
+        //            // 새로 생성된 TextBox로 포커스 이동
+        //            var newTextBox = parent.Children[parent.Children.Count - 1] as TextBox;
+        //            newTextBox.Focus();
+
+        //            e.Handled = true; // Tab의 기본 동작(다음 컨트롤로 이동) 막기
+        //        }
+        //    }
+        //    else if (e.ImeProcessedKey != System.Windows.Input.Key.HangulMode && e.Key == Key.ImeProcessed)
+        //    {
+        //        Lib.Instance.ShowTooltipMessage(sender as FrameworkElement, "한글은 입력할 수 없습니다.", MessageBoxImage.Stop, PlacementMode.Bottom);
+        //        e.Handled = true;
+        //    }
+        //}
+
+        #endregion
 
         #region FTP
 
@@ -1810,12 +2250,120 @@ namespace WizMes_SungShinNQ
         {
             var InspectAutoSub = dgdSub.CurrentItem as Win_Qul_InspectAutoBasis_U_Sub_CodeView;
 
-            if (InspectAutoSub != null && !InspectAutoSub.InsImageFile.Equals("") && lblMsg.Visibility != Visibility.Visible)
+            if (InspectAutoSub != null && !InspectAutoSub.InsImageFile.Equals(""))
             {
                 //FTP_DownLoadFile(WinMcRegularSub.McImagePath + "/" + WinMcRegularSub.McInspectBasisID + "/" + WinMcRegularSub.McImageFile);
                 FTP_DownLoadFile2(InspectAutoSub.InspectBasisID, InspectAutoSub.InsImageFile);
             }
         }
+
+        private void SeeImage(string buttonTag, TextBox txtbox = null)
+        {
+            if (txtInspectBasisID.Text != "")
+            {
+                string ClickPoint = buttonTag;
+
+                string sketch1FileName = txtSketch1FileName.Text.Trim() != "" ? txtSketch1FileName.Text : "";
+
+                if (buttonTag == "sketch1" && txtSketch1FileName.Text.Trim() == string.Empty)
+                {
+                    MessageBox.Show("파일이 없습니다.");
+                    return;
+                }
+                else if(buttonTag == "Image" && string.IsNullOrEmpty(txtbox.Text.Trim()))
+                {
+                    MessageBox.Show("파일이 없습니다.");
+                    return;
+                }
+
+                try
+                    {
+                        // 접속 경로
+                        _ftp = new FTP_EX(FTP_ADDRESS, FTP_ID, FTP_PASS);
+
+                        string str_path = string.Empty;
+                        str_path = FTP_ADDRESS + '/' + txtInspectBasisID.Text;
+                        _ftp = new FTP_EX(str_path, FTP_ID, FTP_PASS);
+
+                        string str_remotepath = string.Empty;
+                        string str_localpath = string.Empty;
+
+                        //원격경로
+                        if (buttonTag == "sketch1") { str_remotepath = sketch1FileName; }
+
+                        //로컬경로
+                        if (buttonTag == "sketch1") { str_localpath = LOCAL_DOWN_PATH + "\\" + sketch1FileName; }
+
+                        DirectoryInfo DI = new DirectoryInfo(LOCAL_DOWN_PATH);      // Temp 폴더가 없는 컴터라면, 만들어 줘야지.
+                        if (DI.Exists == false)
+                        {
+                            DI.Create();
+                        }
+
+                        FileInfo file = new FileInfo(str_localpath);
+
+                        //Temp에 이미 있을 때 기존 파일을 삭제하고 다시 다운 받자
+                        try
+                        {
+                            file.Delete();
+                        }
+                        catch (IOException)
+                        {
+                            // 파일명과 확장자 분리
+                            string directory = Path.GetDirectoryName(str_localpath);
+                            string fileName = Path.GetFileNameWithoutExtension(str_localpath);
+                            string extension = Path.GetExtension(str_localpath);
+
+                            // 복사본 파일명 생성 (예: test.hwp -> test - 복사본.hwp)
+                            int copyNum = 1;
+                            string newPath = Path.Combine(directory, $"{fileName} - 복사본{extension}");
+
+                            // 복사본 파일이 이미 존재하면 번호 추가 (예: test - 복사본 (2).hwp)
+                            while (File.Exists(newPath))
+                            {
+                                copyNum++;
+                                newPath = Path.Combine(directory, $"{fileName} - 복사본 ({copyNum}){extension}");
+                            }
+
+                            str_localpath = newPath; // 새로운 경로로 업데이트
+                            MessageBox.Show("파일이 사용 중이어서 복사본으로 다운로드 했습니다.", "알림");
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("파일 처리 중 오류가 발생했습니다: " + ex.Message);
+                            return;
+                        }
+
+                        //받으세용
+                        _ftp.download(str_remotepath, str_localpath);
+
+                        //파일 다운로드 후 바로 열기
+                        if (File.Exists(str_localpath))
+                        {
+                            try
+                            {
+                                System.Diagnostics.Process.Start(new ProcessStartInfo
+                                {
+                                    FileName = str_localpath,
+                                    UseShellExecute = true
+                                });
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show("파일을 여는 중 오류가 발생했습니다:" +
+                                    "\n파일을 열기위한 프로그램이 없거나 기본 실행프로그램이 지정이 안 되었을 수도 있습니다." + ex.Message);
+                            }
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("파일을 여는 도중 오류가 발생했습니다. MethodName : SeeImage()\n" + ex.ToString());
+                        return;
+                    }
+            }
+        }
+
 
         private void FTP_Upload_TextBox(TextBox textBox)
         {
@@ -1844,10 +2392,10 @@ namespace WizMes_SungShinNQ
 
                     StreamReader sr = new StreamReader(OFdlg.FileName);
                     long FileSize = sr.BaseStream.Length;
-                    if (sr.BaseStream.Length > (2048 * 1000))
+                    if (sr.BaseStream.Length > 500 * 1024 * 1024)
                     {
                         //업로드 파일 사이즈범위 초과
-                        MessageBox.Show("이미지의 파일사이즈가 2M byte를 초과하였습니다.");
+                        MessageBox.Show("첨부 파일사이즈가 50Mb 를 초과하였습니다.");
                         sr.Close();
                         return;
                     }
@@ -2247,8 +2795,6 @@ namespace WizMes_SungShinNQ
 
 
 
-
-
         private void SubAdd_Click(object sender, RoutedEventArgs e)
         {
             int count = dgdSub.Items.Count + 1;
@@ -2332,94 +2878,379 @@ namespace WizMes_SungShinNQ
             }
         }
 
-        #region 기타 메서드
+       
 
-
-        private void ClearGrid()
+        private void chkArticleNo_Click(object sender, RoutedEventArgs e)
         {
-            List<Grid> grids = new List<Grid> { grdInput};
-            foreach (var grid in grids)
+            if(chkArticleNo.IsChecked == true)
             {
-                FindUiObject(grid, child =>
+                chkArticleNo.IsChecked = true;
+                txtArticleNo.IsEnabled = true;
+                btnArticleNo.IsEnabled = true;
+            }
+            else
+            {
+                chkArticleNo.IsChecked = false;
+                txtArticleNo.IsEnabled = false;
+                btnArticleNo.IsEnabled = false;
+            }
+        }
+
+        private void TxtArticleNo_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                MainWindow.pf.ReturnCode(txtArticleNo, 77, txtArticleNo.Text);
+            }
+        }
+
+        private void btnArticleNo_Click(object sender, RoutedEventArgs e)
+        {
+           
+            MainWindow.pf.ReturnCode(txtArticleNo, 77, txtArticleNo.Text);
+         
+        }
+
+        private void chkArticleNo_Click(object sender, MouseButtonEventArgs e)
+        {
+            if(chkArticleNo.IsChecked == true)
+            {
+                chkArticleNo.IsChecked = false;
+                txtArticleNo.IsEnabled = false;
+                btnArticleNo.IsEnabled = false;
+            }
+            else
+            {
+                chkArticleNo.IsChecked = true;
+                txtArticleNo.IsEnabled = true;
+                btnArticleNo.IsEnabled = true;
+            }
+        }
+
+
+        private void btnFileUpload_Click(object sender, RoutedEventArgs e)
+        {
+            var rowData = (sender as Button)?.DataContext as Win_Qul_InspectAutoBasis_U_Sub_CodeView;
+            TextBox imgtxtbox = new TextBox();
+
+            string ClickPoint = ((Button)sender).Tag.ToString();
+            if (ClickPoint.Equals("sketch1")) { FTP_Upload_TextBox(txtSketch1FileName, ClickPoint); }
+            else if (ClickPoint.Equals("Image"))
+            {
+                FTP_Upload_TextBox(imgtxtbox, ClickPoint);
+                if (imgtxtbox.Tag != null)
                 {
-                    if(child is TextBox textbox)
+                    rowData.InsImageFile = imgtxtbox.Text;
+                    rowData.InsImagePath = imgtxtbox.Tag.ToString();
+
+                }
+            }
+        }
+
+        private void btnFileDelete_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult msgresult = MessageBox.Show("파일을 삭제 하시겠습니까?", "삭제 확인", MessageBoxButton.YesNo);
+            if (msgresult == MessageBoxResult.Yes)
+            {
+                string ClickPoint = ((Button)sender).Tag.ToString();
+                string fileName = string.Empty;
+
+                if ((ClickPoint == "sketch1") && (txtSketch1FileName.Text != string.Empty)) { fileName = txtSketch1FileName.Text; FileDeleteAndTextBoxEmpty(txtSketch1FileName); lstFilesName.Remove(fileName); }
+
+            }
+        }
+
+        private bool FTP_RemoveFile(string strSaveName)
+        {
+            _ftp = new FTP_EX(FTP_ADDRESS, FTP_ID, FTP_PASS);
+            if (_ftp.delete(strSaveName) == true)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        //폴더 삭제(내부 파일 자동 삭제)
+        private bool FTP_RemoveDir(string strSaveName)
+        {
+            _ftp = new FTP_EX(FTP_ADDRESS, FTP_ID, FTP_PASS);
+            if (_ftp.removeDir(strSaveName) == true)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private void FileDeleteAndTextBoxEmpty(TextBox txt)
+        {
+            if (strFlag.Equals("U"))
+            {
+                var basisArgs = dgdMain.SelectedItem as Win_Qul_InspectAutoBasis_U_CodeView;
+
+                if (basisArgs != null)
+                {
+                    //FTP_RemoveFile(Article.ArticleID + "/" + txt.Text);
+
+                    // 파일이름, 파일경로
+                    string[] strFtp = { txt.Text, txt.Tag != null ? txt.Tag.ToString() : "" };
+
+                    deleteListFtpFile.Add(strFtp);
+                }
+            }
+
+            txt.Text = "";
+            txt.Tag = "";
+        }
+
+        private void FTP_Upload_TextBox(TextBox textBox, string buttonTag = "")
+        {
+
+            try
+            {
+                //if (!textBox.Text.Equals(string.Empty) && strFlag.Equals("U"))
+                //{
+                //    MessageBox.Show("먼저 해당파일의 삭제를 진행 후 진행해주세요.");
+                //    return;
+                //}
+                if (!textBox.Text.Equals(string.Empty) && strFlag.Equals("U"))
+                {
+                    MessageBoxResult msgresult = MessageBox.Show("파일을 여시겠습니까?", "확인", MessageBoxButton.YesNo);
+                    if (msgresult == MessageBoxResult.Yes)
                     {
-                        textbox.Text = string.Empty;
-                        textbox.Tag = null;
+                        SeeImage(buttonTag, textBox);
                     }
-                    if(child is DatePicker dtp)
+                    else
                     {
-                        dtp.SelectedDate = null;
+                        return;
                     }
-                    if (child is DataGrid dgd)
+
+                }
+                else
+                {
+
+
+                    Microsoft.Win32.OpenFileDialog OFdlg = new Microsoft.Win32.OpenFileDialog();
+                    if (buttonTag.Equals("Image"))                   
+                        OFdlg.Filter = "Image files (*.jpg, *.jpeg, *.jpe, *.jfif, *.png, *.pcx, *.pdf) | *.jpg; *.jpeg; *.jpe; *.jfif; *.png; *.pcx; *.pdf | All Files|*.*";
+                    else
+                        OFdlg.Filter = "모든 파일 (*.*)|*.*";
+
+                    Nullable<bool> result = OFdlg.ShowDialog();
+                    if (result == true)
                     {
-                        if (dgd.Items.Count > 0)
+                        // 선택된 파일의 확장자 체크
+                        if (MainWindow.OFdlg_Filter_NotAllowed.Contains(Path.GetExtension(OFdlg.FileName).ToLower()))
                         {
-                            dgd.ItemsSource = null;
-                            dgd.Items.Clear();
+                            MessageBox.Show("보안상의 이유로 해당 파일은 업로드할 수 없습니다.");
+                            return;
+                        }
+
+                        strFullPath = OFdlg.FileName;
+
+                        string ImageFileName = OFdlg.SafeFileName;  //명.
+                        string ImageFilePath = string.Empty;       // 경로
+
+
+                        //프로세스 점유중인 파일도 스트림 가능한데 이거하려면 FTP업로드하는 메서드도 다 바꿔야함
+                        //long FileSize;
+                        //using (FileStream fs = new FileStream(OFdlg.FileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                        //{
+                        //    FileSize = fs.Length;
+                        //}
+
+                        // 파일명 유효성 검사 추가
+                        //if (!IsValidFileName(ImageFileName))
+                        //{
+                        //    MessageBox.Show("파일명에 허용되지 않는 특수문자가 포함되어 있습니다.\n시스템 저장시 오류를 일으킬 수 있으므로 변경 후 첨부하여 주세요");
+                        //    return;
+                        //}
+
+                        ImageFilePath = strFullPath.Replace(ImageFileName, "");
+
+                        StreamReader sr = new StreamReader(OFdlg.FileName);
+                        long FileSize = sr.BaseStream.Length;
+                        if (sr.BaseStream.Length > 50 * 1024 * 1024)
+                        {
+                            //업로드 파일 사이즈범위 초과
+                            MessageBox.Show("파일사이즈가 50Mb 초과하였습니다.");
+                            sr.Close();
+                            return;
+                        }
+                        //if (sr.BaseStream.Length > (1024 * 1024 * 500))
+                        //{
+                        //    //업로드 파일 사이즈범위 초과기
+                        //    MessageBox.Show("첨부파일 크기는 500Mb 미만 이어야 합니다.");
+                        //    sr.Close();
+                        //    return;
+                        //}
+                        if (!FTP_Upload_Name_Cheking(ImageFileName))
+                        {
+                            MessageBox.Show("업로드 하려는 파일 중, 이름이 중복된 항목이 있습니다." +
+                                            "\n파일 이름을 변경하고 다시 시도하여 주세요\n다른 탭에 중복된 파일이 있는지 확인하세요.");
+                        }
+                        else
+                        {
+                            textBox.Text = ImageFileName;
+                            textBox.Tag = ImageFilePath;
+
+                            string[] strTemp = new string[] { ImageFileName, ImageFilePath.ToString() };
+                            listFtpFile.Add(strTemp);
+                            lstFilesName.Add(ImageFileName);
                         }
                     }
-                });
+                }
             }
+            catch (Exception ex)
+            {
+                if (ex.ToString().Contains("사용 중"))
+                    MessageBox.Show("업로드하려는 파일이 열려 있습니다.\n먼저 파일을 닫고 첨부하여 주세요");
+            }
+
         }
 
-        //UI컨트롤 요소찾기
-        private void FindUiObject(DependencyObject parent, Action<DependencyObject> action)
+        //파일 중복인지 확인
+        private bool FTP_Upload_Name_Cheking(string fileName)
         {
-            int childCount = VisualTreeHelper.GetChildrenCount(parent);
-            for (int i = 0; i < childCount; i++)
+            bool flag = true;
+
+            if (!lstFilesName.Add(fileName))
             {
-                var child = VisualTreeHelper.GetChild(parent, i);
-
-                action?.Invoke(child);
-
-                FindUiObject(child, action);
+                flag = false;
+                return flag;
             }
+
+
+            return flag;
         }
 
-        //컨트롤 안 특정 타입의 자식 컨트롤을 찾는 함수 (그리드내에서)
-        //var parentContainer = VisualTreeHelper.GetParent(checkbox);
-        //var datePicker = FindChild<DatePicker>(parentContainer);
-        private T FindChild<T>(DependencyObject parent) where T : DependencyObject
+
+
+        private bool UpdateDBFtp(string basisID)
         {
-            int childCount = VisualTreeHelper.GetChildrenCount(parent);
-            for (int i = 0; i < childCount; i++)
+            bool flag = false;
+
+            string str_localpath = string.Empty;
+            List<string[]> UpdateFilesInfo = new List<string[]>();
+            List<Procedure> Prolist = new List<Procedure>();
+            List<Dictionary<string, object>> ListParameter = new List<Dictionary<string, object>>();
+
+            try
             {
-                var child = VisualTreeHelper.GetChild(parent, i);
-                if (child is T typedChild)
+                Dictionary<string, object> sqlParameter = new Dictionary<string, object>();
+                sqlParameter.Clear();
+                sqlParameter.Add("inspectBasisID", basisID);
+                sqlParameter.Add("sketch1FileName", txtSketch1FileName.Text.Trim() != "" ? txtSketch1FileName.Text : "");
+                sqlParameter.Add("sketch1FilePath", txtSketch1FileName.Tag != null ? txtSketch1FileName.Tag.ToString().Trim() != string.Empty ? "/ImageData/InspectAutoBasis/" + basisID : "DEL" : "");
+
+                Procedure pro1 = new Procedure();
+                pro1.Name = "xp_order_uInspectAutoBasis_FTP";
+                pro1.OutputUseYN = "";
+                pro1.OutputName = "";
+                pro1.OutputLength = "";
+
+                Prolist.Add(pro1);
+                ListParameter.Add(sqlParameter);
+
+                
+                for(int  i =0; i < dgdSub.Items.Count; i++)
                 {
-                    return typedChild;
+                    var item = dgdSub.Items[i] as Win_Qul_InspectAutoBasis_U_Sub_CodeView;
+                    if(item != null)
+                    {
+                        sqlParameter = new Dictionary<string, object>();
+                        sqlParameter.Clear();
+                        sqlParameter.Add("inspectBasisID", basisID);
+                        sqlParameter.Add("SubSeq", i + 1);
+                        sqlParameter.Add("InsImageFile", item.InsImageFile ?? string.Empty);
+                        sqlParameter.Add("InsImagePath", item.InsImagePath != null ? !string.IsNullOrEmpty(item.InsImagePath) ? "/ImageData/InspectAutoBasis/" + basisID : "DEL" : string.Empty);
+
+                        Procedure pro2 = new Procedure();
+                        pro2.Name = "xp_order_uInspectAutoBasisSub_FTP";
+                        pro2.OutputUseYN = "N";
+                        pro2.OutputName = "";
+                        pro2.OutputLength = "";
+
+                        Prolist.Add(pro2);
+                        ListParameter.Add(sqlParameter);
+                    }
                 }
 
-                // 재귀적으로 자식의 자식들도 검색
-                var result = FindChild<T>(child);
-                if (result != null)
-                    return result;
+                string[] result = DataStore.Instance.ExecuteAllProcedureOutputNew_NewLog(Prolist, ListParameter, "c");
+
+                if (result[0].Equals("success"))
+                {
+                    flag = true;
+                }
+                else
+                {
+                    MessageBox.Show("수정 실패 , 내용 : " + result[1]);
+                }
             }
-            return null;
+            catch (Exception ex)
+            {
+                MessageBox.Show("첨부파일경로, 파일명을 데이터베이스에 기록 중 오류가 발생/ MethodName : UpdateDBFtp()\n" + ex.ToString());
+            }
+
+
+
+            return flag;
         }
 
-
-        // 자식요소 안에서 부모요소 찾기
-        //DataGridRow row = FindVisualParent<DataGridRow>(checkBox); 데이터그리드안의 행속 체크박스의 부모행 찾기
-        //DataGrid parentGrid = FindVisualParent<DataGrid>(row); 데이터그리드 행의 부모 데이터그리드 찾기
-        private T FindVisualParent<T>(DependencyObject child) where T : DependencyObject
+        private void txtSketch1FileName_MouseEnter(object sender, MouseEventArgs e)
         {
-            DependencyObject parentObject = VisualTreeHelper.GetParent(child);
+            TextBox txtbox = sender as TextBox;
+            if (!string.IsNullOrEmpty(txtbox.Text) && txtbox.ExtentWidth > txtbox.ViewportWidth)
+            {
+                string fileName = txtbox.Text;
+                Lib.Instance.ShowTooltipMessage(sender as FrameworkElement, fileName, MessageBoxImage.None, PlacementMode.Top);
+            }
 
-            if (parentObject == null)
-                return null;
-
-            T parent = parentObject as T;
-            if (parent != null)
-                return parent;
-            else
-                return FindVisualParent<T>(parentObject);
         }
 
-        #endregion
+        private void txtSketch1FileName_MouseLeave(object sender, MouseEventArgs e)
+        {
+            lib.CloseToolTip();
+        }
+
+        private void btnSketch_MouseEnter(object sender, MouseEventArgs e)
+        {
+
+        }
+
+        private void btnSketch_Click(object sender, RoutedEventArgs e)
+        {
+            var rowData = (sender as Button)?.DataContext as Win_Qul_InspectAutoBasis_U_Sub_CodeView;
+            if (rowData != null)
+            {
+                if (string.IsNullOrEmpty(rowData.InsImagePath))
+                {
+
+                }
+            }
+        }
+
+        private void btnImage_MouseEnter(object sender, MouseEventArgs e)
+        {
+
+        }
+
+        private void dgdtpetxtImage_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if(e.Key != Key.Enter && e.Key != Key.Back)
+            {                
+                Lib.Instance.ShowTooltipMessage(sender as FrameworkElement, "엔터키 또는 백스페이스만 가능합니다", MessageBoxImage.Stop, PlacementMode.Top, 1.2);
+                e.Handled = true;
+                return;
+            }
+        }
     }
-    #endregion FTP 이미지
+    #endregion
 
 
 

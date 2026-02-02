@@ -20,7 +20,12 @@ namespace WizMes_SungShinNQ
         delegate void FHideWindow();
         TextBox txtBox;
         TextBox txtLot; //2021-11-09 Lotid를 위해 추가
+        TextBox txtBoxName;
         Lib Lib = new Lib();
+
+        int nLarge = -999; //특정번호로 호출할때 추가 정보 돌려주기
+        int nLarge_dt = -999; //플러스파인더 내에서 검색할때 0, 1번째 컬럼 이외 검색하고 싶을때 사용  SearchName()
+        bool plusfinderCall = false;
 
         public PlusFinder()
         {
@@ -339,7 +344,7 @@ namespace WizMes_SungShinNQ
             txtName.Text = string.Empty;
         }
 
-        private void DataTableByWhere(TextBox _txtBox)
+        private void DataTableByWhere(TextBox _txtBox, int large)
         {
             try
             {
@@ -348,6 +353,10 @@ namespace WizMes_SungShinNQ
                 {
                     string ColID = rs_dt.Columns[0].Caption;//명칭
                     string ColName = rs_dt.Columns[1].Caption;//코드
+                    string colID2 = string.Empty;
+                    string colName2 = string.Empty;
+                    string colID3 = string.Empty;
+                    string colName3 = string.Empty;
                     string ColArticle = "";
                     if (ColID == "사번")
                     {
@@ -387,20 +396,39 @@ namespace WizMes_SungShinNQ
                         // 위의 셀렉트 안쓰고 텍스트로 찾으면?
                         foreach (DataRow dr in rs_dt.Rows)
                         {
-                            Console.WriteLine(dr.ToString());
+                            string normalizedData = Data.ToUpper().Replace(" ", "");
+                            bool isMatch = false;
 
                             string str1 = dr[ColName].ToString();
                             string str2 = dr[ColID].ToString();
+                            bool compare1 = str1.ToUpper().Replace(" ", "").Contains(normalizedData);
+                            bool compare2 = str2.ToUpper().Replace(" ", "").Contains(normalizedData);
 
-                            if (dr[ColName].ToString().ToUpper().Replace(" ", "").Contains(Data.ToUpper().Replace(" ", "")))
+                            switch (large)
+                            {
+                                //20260202 최대현
+                                //사용자가 교차검색 원할 때 아래 내용을 참조해서 주석 풀고 작성하세요~ 
+                                //그리고 SelectName() 함수도 동일하게 수정 필요
+                                //case 77:
+                                //case 7077:
+                                //case 831:
+                                //case 100:
+                                //    // 먼저 match 여부 확인, 컬럼 체크는 필요할 때만
+                                //    isMatch = compare1 || compare2 ||
+                                //              (rs_dt.Columns.Contains("규격") && dr["규격"].ToString().ToUpper().Replace(" ", "").Contains(normalizedData));
+                                //    break;
+                                //case 0:
+                                //    isMatch = compare1 || compare2;
+                                //    break;
+                                default:
+                                    isMatch = compare1;
+                                    break;
+                            }
+
+                            if (isMatch)
                             {
                                 dtCodeTemp.Rows.Add(dr.ItemArray);
-                                //continue;
                             }
-                            //else if (dr[ColName].ToString().ToUpper().Replace(" ", "").Contains(Data.ToUpper().Replace(" ", ""))) //같은걸 왜 넣어놨지?
-                            //{
-                            //    dtCodeTemp.Rows.Add(dr.ItemArray);
-                            //}
                         }
 
                         if (dtCodeTemp.Rows.Count == 1)
@@ -413,72 +441,72 @@ namespace WizMes_SungShinNQ
                         }
                         //dt count가 0일때
                         //[2]명칭으로 찾기
-                        if (dtCodeTemp.Rows.Count == 0)
-                        {
-                            #region 봉인
+                        //if (dtCodeTemp.Rows.Count == 0)
+                        //{
+                        //    #region 봉인
 
-                            //if (ColName == "수주번호")
-                            //{
-                            //    sql = ColName + " LIKE '%" + Data + "%' OR " +
-                            //        //ColName + " LIKE '(주)" + Data + "%;" + //vb소스상에 있는데 왜 했는지 모르겠음. 그래서 뺌.
-                            //        " OR 품목명 LIKE '" + Data + "%'" +
-                            //        " OR 거래처코드 = '" + Data + "'";
-                            //}
-                            ////else if (ColName == "품명")
-                            ////{
-                            ////    sql = ColID + " LIKE '%" + Data + "%' OR " + ColName + " LIKE '%" + Data + "%'";
-                            ////}
-                            //else if (ColID == "사번")
-                            //{
-                            //    sql = ColID + " LIKE '%" + Data + "%' OR " + ColName + " LIKE '%" + Data + "%' OR " + ColArticle + " LIKE '%" + Data + "%'";
-                            //}
-                            //else
-                            //{
-                            //    sql = ColName + " LIKE '%" + Data + "%'";
-                            //}
+                        //    //if (ColName == "수주번호")
+                        //    //{
+                        //    //    sql = ColName + " LIKE '%" + Data + "%' OR " +
+                        //    //        //ColName + " LIKE '(주)" + Data + "%;" + //vb소스상에 있는데 왜 했는지 모르겠음. 그래서 뺌.
+                        //    //        " OR 품목명 LIKE '" + Data + "%'" +
+                        //    //        " OR 거래처코드 = '" + Data + "'";
+                        //    //}
+                        //    ////else if (ColName == "품명")
+                        //    ////{
+                        //    ////    sql = ColID + " LIKE '%" + Data + "%' OR " + ColName + " LIKE '%" + Data + "%'";
+                        //    ////}
+                        //    //else if (ColID == "사번")
+                        //    //{
+                        //    //    sql = ColID + " LIKE '%" + Data + "%' OR " + ColName + " LIKE '%" + Data + "%' OR " + ColArticle + " LIKE '%" + Data + "%'";
+                        //    //}
+                        //    //else
+                        //    //{
+                        //    //    sql = ColName + " LIKE '%" + Data + "%'";
+                        //    //}
 
-                            //foreach (DataRow dr in rs_dt.Select(sql))
-                            //{
-                            //    dtCodeTemp.Rows.Add(dr.ItemArray);
-                            //}
+                        //    //foreach (DataRow dr in rs_dt.Select(sql))
+                        //    //{
+                        //    //    dtCodeTemp.Rows.Add(dr.ItemArray);
+                        //    //}
 
-                            #endregion
+                        //    #endregion
 
-                            // 위의 셀렉트 안쓰고 텍스트로 찾으면?
+                        //    // 위의 셀렉트 안쓰고 텍스트로 찾으면?
 
-                            //속도 때문인가? sMiddle이 없을때는 여기에서 필터링을 한다. 
-                            //근데 왜 두번째열로만 검색을..하지? 
-                            foreach (DataRow dr in rs_dt.Rows)
-                            {
-                                Console.WriteLine(dr.ToString());
+                        //    //속도 때문인가? sMiddle이 없을때는 여기에서 필터링을 한다. 
+                        //    //근데 왜 두번째열로만 검색을..하지? 
+                        //    //foreach (DataRow dr in rs_dt.Rows)
+                        //    //{
+                        //    //    Console.WriteLine(dr.ToString());
 
-                                //string str1 = dr[ColName].ToString();
-                                //string str2 = dr[ColID].ToString();
+                        //    //    //string str1 = dr[ColName].ToString();
+                        //    //    //string str2 = dr[ColID].ToString();
 
-                                if (dr[ColName].ToString().ToUpper().Replace(" ", "").Contains(Data.ToUpper().Replace(" ", "")))
-                                {
-                                    dtCodeTemp.Rows.Add(dr.ItemArray);
-                                }
-                            }
+                        //    //    if (dr[ColName].ToString().ToUpper().Replace(" ", "").Contains(Data.ToUpper().Replace(" ", "")))
+                        //    //    {
+                        //    //        dtCodeTemp.Rows.Add(dr.ItemArray);
+                        //    //    }
+                        //    //}
 
-                            //이전 like 필터링을 다 거쳤음에도 rs_dt에 값이 있으면(sMiddle을 프로시저에 넘겨줘서 값이 있다고 판단)
-                            if (dtCodeTemp.Rows.Count == 0 && rs_dt.Rows.Count > 0)
-                            {
-                                foreach (DataRow dr in rs_dt.Rows)
-                                {
-                                    dtCodeTemp.Rows.Add(dr.ItemArray);
-                                }
-                            }
+                        //    ////이전 like 필터링을 다 거쳤음에도 rs_dt에 값이 있으면(sMiddle을 프로시저에 넘겨줘서 값이 있다고 판단)
+                        //    //if (dtCodeTemp.Rows.Count == 0 && rs_dt.Rows.Count > 0)
+                        //    //{
+                        //    //    foreach (DataRow dr in rs_dt.Rows)
+                        //    //    {
+                        //    //        dtCodeTemp.Rows.Add(dr.ItemArray);
+                        //    //    }
+                        //    //}
 
-                            if (dtCodeTemp.Rows.Count == 1)
-                            {
-                                string col_ID = dtCodeTemp.Rows[0].ItemArray[0].ToString();
-                                string col_Name = dtCodeTemp.Rows[0].ItemArray[1].ToString();
+                        //    //if (dtCodeTemp.Rows.Count == 1)
+                        //    //{
+                        //    //    string col_ID = dtCodeTemp.Rows[0].ItemArray[0].ToString();
+                        //    //    string col_Name = dtCodeTemp.Rows[0].ItemArray[1].ToString();
 
-                                txtBox.Text = col_Name;
-                                txtBox.Tag = col_ID;
-                            }
-                        }
+                        //    //    txtBox.Text = col_Name;
+                        //    //    txtBox.Tag = col_ID;
+                        //    //}
+                        //}
                         if (dtCodeTemp.Rows.Count > 1)
                         {
                             mDataGrid.ItemsSource = dtCodeTemp.DefaultView;
@@ -488,12 +516,37 @@ namespace WizMes_SungShinNQ
                         }
                         else if (dtCodeTemp.Rows.Count == 1)
                         {
-                            mDataGrid.ItemsSource = dtCodeTemp.DefaultView;
-                            txtName.Text = txtBox.Text;
-                            txtCode.Tag = txtBox.Tag;
-                            txtName.Focus();
-                            //this.ShowDialog();
+                            //    mDataGrid.ItemsSource = dtCodeTemp.DefaultView;
+                            //    txtName.Text = txtBox.Text;
+                            //    txtCode.Tag = txtBox.Tag;
+                            //    txtName.Focus();
+                            //    //this.ShowDialog();
+                            string col_ID = dtCodeTemp.Rows[0].ItemArray[0].ToString();
+                            string col_Name = dtCodeTemp.Rows[0].ItemArray[1].ToString();
+
+                            if (!nLarge.Equals(-999) && plusfinderCall)
+                            {
+                                if (nLarge is 100 or 101)
+                                {
+                                    colID2 = dtCodeTemp.Rows[0].ItemArray[2]?.ToString() ?? string.Empty; //규격
+                                    colName2 = dtCodeTemp.Rows[0].ItemArray[3]?.ToString() ?? string.Empty; //단위
+                                    txtLot.Text = colName2;
+                                    txtLot.Tag = colID2;
+                                } 
+                                else if (nLarge is 831)
+                                {
+                                    colName2 = dtCodeTemp.Rows[0].ItemArray[3]?.ToString() ?? string.Empty;
+                                    colID2 = dtCodeTemp.Rows[0].ItemArray[4]?.ToString() ?? string.Empty;
+                                    txtLot.Text = colName2;
+                                    txtLot.Tag = colID2;
+                                }
+
+                            }
+
+                            txtBox.Text = col_Name;
+                            txtBox.Tag = col_ID;
                         }
+
                         else if (dtCodeTemp.Rows.Count == 0)
                         {
                             MessageBox.Show("검색결과가 없습니다. 다시 검색해주세요.");
@@ -520,6 +573,9 @@ namespace WizMes_SungShinNQ
                     this.ShowDialog();
                     
                 }
+
+                nLarge = -999;
+                plusfinderCall = false;
             }
             catch (Exception ex)
             {
@@ -529,35 +585,95 @@ namespace WizMes_SungShinNQ
 
         public void ReturnCode(TextBox _txtBox, int large, string smiddle)
         {
+
             DataClear();
             txtBox = _txtBox;
             ProcQuery(large, smiddle);
+            nLarge_dt = large;
             if (rs_dt.Rows.Count > 0)
             {
-                DataTableByWhere(txtBox);
-            }
-            else
-            {
-                MessageBox.Show("검색결과가 없습니다.");
-            }
-            
-        }
-        //2021-11-09 자재입고에서 자재입고반품을 위해 Lotid 가져오는 plusfinder 생성
-        public void ReturnCodeMTR(TextBox _txtBox,TextBox _txtLot, int large, string smiddle, string CustomID)
-        {
-            DataClear();
-            txtBox = _txtBox; //Lotid
-            txtLot = _txtLot; //Qty
-            ProcQuery(large, smiddle, CustomID);
-            if (rs_dt.Rows.Count > 0)
-            {
-                DataTableByWhere(txtBox);
+                DataTableByWhere(txtBox, large);
             }
             else
             {
                 MessageBox.Show("검색결과가 없습니다.");
             }
 
+            nLarge = -999;
+            plusfinderCall = false;
+        }
+
+        public void ReturnCode(TextBox _txtBox, TextBox _txtProcess, TextBox _txtBoxName, int large, string smiddle)
+        {
+            DataClear();
+            txtBox = _txtBox;
+            txtLot = _txtProcess;
+            txtBoxName = _txtBoxName;
+            nLarge = large;
+            nLarge_dt = large;
+            plusfinderCall = true;
+            ProcQuery(large, smiddle);
+            if (rs_dt.Rows.Count > 0)
+            {
+                DataTableByWhere(txtBox, large);
+            }
+            else
+            {
+                if (nLarge is not 900)
+                    MessageBox.Show("검색결과가 없습니다.");
+            }
+
+            nLarge = -999;
+            plusfinderCall = false;
+
+        }
+
+        public void ReturnCode(TextBox _txtBox, TextBox _txtProcess, int large, string smiddle)
+        {
+
+            DataClear();
+            txtBox = _txtBox;
+            txtLot = _txtProcess; //Qty
+            nLarge = large;
+            nLarge_dt = large;
+            plusfinderCall = true;
+            ProcQuery(large, smiddle);
+            if (rs_dt.Rows.Count > 0)
+            {
+                DataTableByWhere(txtBox, large);
+                //mDataGrid.SelectedIndex = 0;
+                //mDataGrid.SelectedIndex = -1;
+            }
+            else
+            {
+                if (nLarge is not 900)
+                    MessageBox.Show("검색결과가 없습니다.");
+            }
+
+            nLarge = -999;
+            plusfinderCall = false;
+
+        }
+
+        //2021-11-09 자재입고에서 자재입고반품을 위해 Lotid 가져오는 plusfinder 생성
+        public void ReturnCodeMTR(TextBox _txtBox, TextBox _txtLot, int large, string smiddle, string CustomID)
+        {
+            DataClear();
+            txtBox = _txtBox; //Lotid
+            txtLot = _txtLot; //Qty
+            nLarge_dt = large;
+            ProcQuery(large, smiddle, CustomID);
+            if (rs_dt.Rows.Count > 0)
+            {
+                DataTableByWhere(txtBox, large);
+            }
+            else
+            {
+                MessageBox.Show("검색결과가 없습니다.");
+            }
+
+            nLarge = -999;
+            plusfinderCall = false;
         }
 
 
@@ -567,10 +683,11 @@ namespace WizMes_SungShinNQ
         {
             DataClear();
             txtBox = _txtBox;
+            nLarge_dt = large;
             ProcQuery(large, smiddle);
             if (rs_dt.Rows.Count > 0)
             {
-                DataTableByWhere(txtBox);
+                DataTableByWhere(txtBox, large);
             }
             else
             {
@@ -586,11 +703,16 @@ namespace WizMes_SungShinNQ
             {
                 string colID = dataRow.Row.ItemArray[0].ToString();
                 string colName = dataRow.Row.ItemArray[1].ToString();
+                string colID2 = string.Empty;
+                string colName2 = string.Empty;
+                string colID3 = string.Empty;
+                string colName3 = string.Empty;
                 //2021-11-09 자재입고반품일 경우, LOTID와 수량을 가져가야되서 조건 추가
                 if (mDataGrid.Columns[0].Header.ToString() == "거래처")
                 {
                     colID = dataRow.Row.ItemArray[1].ToString();
                     colName = dataRow.Row.ItemArray[2].ToString();
+     
 
                     txtBox.Text = colID;
                     txtLot.Text = colName;
@@ -607,33 +729,33 @@ namespace WizMes_SungShinNQ
                         colID = dataRow.Row.ItemArray[1].ToString();
                         colName = dataRow.Row.ItemArray[2].ToString();
                     }
-                    //if (mDataGrid.Columns.Count == 13)
-                    //{
-                    //    if (mDataGrid.Columns[4].Header.ToString() == "Seq")
 
-                    //        colID = dataRow.Row.ItemArray[0].ToString();
-                    //    colName = dataRow.Row.ItemArray[1].ToString();
-
-                    //    string OutSeq = dataRow.Row.ItemArray[4].ToString();
-                    //    string OutwareID = dataRow.Row.ItemArray[3].ToString();
-
-                    //    refEvent?.Invoke($"{OutSeq},{OutwareID}");
-
-                    //}
-
-                    if (mDataGrid.Columns[mDataGrid.Columns.Count -1].Header.ToString().Equals("남은검사횟수"))
+                    if (!nLarge.Equals(-999) && plusfinderCall)
                     {
-                        colID = dataRow.Row.ItemArray[0].ToString();
-                        colName = dataRow.Row.ItemArray[1].ToString();
+                        if (nLarge is 100 or 101)
+                        {
+                            colID2 = dataRow.Row.ItemArray[2]?.ToString() ?? string.Empty; //규격
+                            colName2 = dataRow.Row.ItemArray[3]?.ToString() ?? string.Empty; //단위
+                            txtLot.Text = colName2;
+                            txtLot.Tag = colID2;
+                        }
+                        else if (nLarge is 831)
+                        {
+                            colName2 = dataRow.Row.ItemArray[3]?.ToString() ?? string.Empty;
+                            colID2 = dataRow.Row.ItemArray[4]?.ToString() ?? string.Empty;
+                            txtLot.Text = colName2;
+                            txtLot.Tag = colID2;
+                        }
 
-                        string processID = dataRow.Row.ItemArray[3].ToString();
-
-                           refEvent?.Invoke($"{processID}");
                     }
+
 
                     txtBox.Text = colName;
                     txtBox.Tag = colID;
-               
+
+                    nLarge = -999;
+                    plusfinderCall = false;
+
                     this.DialogResult = DialogResult.HasValue;
                     this.Close();
                 }

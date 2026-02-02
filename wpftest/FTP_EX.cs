@@ -156,63 +156,63 @@ namespace WizMes_SungShinNQ
 
 
         /* Download File */
-        public bool download(string remoteFile, string localFile)
-		{
-			try
-			{
-				/* Create an FTP Request */
-				//string url = HttpUtility.UrlEncode("#");
-				//url = remoteFile.Replace("#", url);
-
-				//ftpRequest = (FtpWebRequest)FtpWebRequest.Create(host + "/" + url);
-                ftpRequest = (FtpWebRequest)FtpWebRequest.Create(host + "/" + remoteFile);
-				/* Log in to the FTP Server with the User Name and Password Provided */
-				ftpRequest.Credentials = new NetworkCredential(user, pass);
-				/* When in doubt, use these options */
-				ftpRequest.UseBinary = true;
-				ftpRequest.UsePassive = true;
-				ftpRequest.KeepAlive = true;
-				/* Specify the Type of FTP Request */
-				ftpRequest.Method = WebRequestMethods.Ftp.DownloadFile;
-				/* Establish Return Communication with the FTP Server */
-				ftpResponse = (FtpWebResponse)ftpRequest.GetResponse();
-				/* Get the FTP Server's Response Stream */
-				ftpStream = ftpResponse.GetResponseStream();
-				/* Open a File Stream to Write the Downloaded File */
-				FileStream localFileStream = new FileStream(localFile, FileMode.Create);
-				/* Buffer for the Downloaded Data */
-				byte[] byteBuffer = new byte[bufferSize];
-				int bytesRead = ftpStream.Read(byteBuffer, 0, bufferSize);
-				/* Download the File by Writing the Buffered Data Until the Transfer is Complete */
-				try
-				{
-					while (bytesRead > 0)
-					{
-						localFileStream.Write(byteBuffer, 0, bytesRead);
-						bytesRead = ftpStream.Read(byteBuffer, 0, bufferSize);
-					}
-				}
-				catch (Exception ex) {
-                    System.Windows.MessageBox.Show("1" + ex.Message + " / " + ex.Source);
-                    throw ex; 
-                }
-				/* Resource Cleanup */
-				localFileStream.Close();
-				ftpStream.Close();
-				ftpResponse.Close();
-				ftpRequest = null;
-                return true;
-			}
-			catch (Exception ex) 
+        public bool download(string remoteFile, string localFile, bool showMsg = true)
+        {
+            try
             {
-                System.Windows.MessageBox.Show("2" + ex.Message + " / " + ex.Source);
+                /* Create an FTP Request */
+                //string url = HttpUtility.UrlEncode("#");
+                //url = remoteFile.Replace("#", url);
+
+                //ftpRequest = (FtpWebRequest)FtpWebRequest.Create(host + "/" + url);
+                ftpRequest = (FtpWebRequest)FtpWebRequest.Create(host + "/" + remoteFile);
+                /* Log in to the FTP Server with the User Name and Password Provided */
+                ftpRequest.Credentials = new NetworkCredential(user, pass);
+                /* When in doubt, use these options */
+                ftpRequest.UseBinary = true;
+                ftpRequest.UsePassive = true;
+                ftpRequest.KeepAlive = true;
+                /* Specify the Type of FTP Request */
+                ftpRequest.Method = WebRequestMethods.Ftp.DownloadFile;
+                /* Establish Return Communication with the FTP Server */
+                ftpResponse = (FtpWebResponse)ftpRequest.GetResponse();
+                /* Get the FTP Server's Response Stream */
+                ftpStream = ftpResponse.GetResponseStream();
+                /* Open a File Stream to Write the Downloaded File */
+                FileStream localFileStream = new FileStream(localFile, FileMode.Create);
+                /* Buffer for the Downloaded Data */
+                byte[] byteBuffer = new byte[bufferSize];
+                int bytesRead = ftpStream.Read(byteBuffer, 0, bufferSize);
+                /* Download the File by Writing the Buffered Data Until the Transfer is Complete */
+                try
+                {
+                    while (bytesRead > 0)
+                    {
+                        localFileStream.Write(byteBuffer, 0, bytesRead);
+                        bytesRead = ftpStream.Read(byteBuffer, 0, bufferSize);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (showMsg == true) System.Windows.MessageBox.Show("1" + ex.Message + " / " + ex.Source);
+                    throw;
+                }
+                /* Resource Cleanup */
+                localFileStream.Close();
+                ftpStream.Close();
+                ftpResponse.Close();
+                ftpRequest = null;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                if (showMsg == true) System.Windows.MessageBox.Show("2" + ex.Message + " / " + ex.Source);
                 return false;
                 //throw ex;
             }
-		}
-
-		/* Upload File */
-		public bool upload(string remoteFile, string localFile)
+        }
+        /* Upload File */
+        public bool upload(string remoteFile, string localFile)
 		{
 			try
 			{

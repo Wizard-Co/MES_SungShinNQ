@@ -3125,6 +3125,28 @@ namespace WizMes_SungShinNQ
             return returnString;
         }
 
+        //소수점 시자리 리턴
+        public string returnNumStringThree(string strTarget)
+        {
+            string returnString = string.Empty;
+
+            if (strTarget.Contains(","))
+            {
+                strTarget = strTarget.Replace(",", "");
+            }
+
+            if (this.IsNumOrAnother(strTarget))
+            {
+                returnString = string.Format("{0:N3}", double.Parse(strTarget));
+            }
+            else
+            {
+                returnString = strTarget;
+            }
+
+            return returnString;
+        }
+
         //소수점은 놔두고 리턴
         public string returnNumStringTwoExceptDot(string strTarget)
         {

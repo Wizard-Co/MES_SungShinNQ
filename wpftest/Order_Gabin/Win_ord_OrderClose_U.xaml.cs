@@ -2,13 +2,17 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
-using System.Threading;
+using System.Windows.Data;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using WizMes_SungShinNQ.PopUp;
 using WizMes_SungShinNQ.PopUP;
+using WizMes_SungShinNQ.PopUp;
 using WPF.MDI;
+using System.Linq;
+using System.Windows.Controls.Primitives;
+using System.Windows.Media;
+using System.Text.RegularExpressions;
 
 namespace WizMes_SungShinNQ
 {
@@ -17,6 +21,9 @@ namespace WizMes_SungShinNQ
     /// </summary>
     public partial class Win_ord_OrderClose_U : UserControl
     {
+        string stDate = string.Empty;
+        string stTime = string.Empty;
+
         private Microsoft.Office.Interop.Excel.Application excelapp;
         private Microsoft.Office.Interop.Excel.Workbook workbook;
         private Microsoft.Office.Interop.Excel.Worksheet worksheet;
@@ -24,15 +31,16 @@ namespace WizMes_SungShinNQ
         private Microsoft.Office.Interop.Excel.Worksheet copysheet;
         private Microsoft.Office.Interop.Excel.Worksheet pastesheet;
 
+        private ToolTip toolTip = new ToolTip();
         Win_ord_OrderClose_U_CodeView WinOrderClose = new Win_ord_OrderClose_U_CodeView();
         Lib lib = new Lib();
         string rowHeaderNum = string.Empty;
         int rowNum = 0;
+        int rbnOrder = 0;
 
-        WizMes_SungShinNQ.PopUp.NoticeMessage msg = new PopUp.NoticeMessage();
-        System.Data.DataTable DT;
-        System.Data.DataTable DTotal;
-
+        NoticeMessage msg = new NoticeMessage();
+        DataTable DT;
+        ////private List<DataGridColumn> _dynamicColumns = new List<DataGridColumn>();
 
         public Win_ord_OrderClose_U()
         {
@@ -41,11 +49,15 @@ namespace WizMes_SungShinNQ
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
+            stDate = DateTime.Now.ToString("yyyyMMdd");
+            stTime = DateTime.Now.ToString("HHmm");
+
+
             Lib.Instance.UiLoading(sender);
             btnToday_Click(null, null);
             SetComboBox();
             Check_bdrOrder();
-            cboOrderStatus.SelectedIndex = 0;
+
         }
 
         //콤보박스 세팅
@@ -57,15 +69,30 @@ namespace WizMes_SungShinNQ
             strValue.Add("마감건");
 
             ObservableCollection<CodeView> cbOrderStatus = ComboBoxUtil.Instance.Direct_SetComboBox(strValue);
-            ObservableCollection<CodeView> cbWork = ComboBoxUtil.Instance.GetCode_SetComboBox("Work", null);
+            cboOrderStatusSrh.ItemsSource = cbOrderStatus;
+            cboOrderStatusSrh.DisplayMemberPath = "code_name";
+            cboOrderStatusSrh.SelectedValuePath = "code_id";
+            cboOrderStatusSrh.SelectedIndex = 0;
 
-            this.cboOrderStatus.ItemsSource = cbOrderStatus;
-            this.cboOrderStatus.DisplayMemberPath = "code_name";
-            this.cboOrderStatus.SelectedValuePath = "code_id";
+            // 주문 구분
+            ObservableCollection<CodeView> ovcOrderClss = ComboBoxUtil.Instance.Gf_DB_CM_GetComCodeDataset(null, "ORDGBN", "Y", "", "");
+            cboOrderClssSrh.ItemsSource = ovcOrderClss;
+            cboOrderClssSrh.DisplayMemberPath = "code_name";
+            cboOrderClssSrh.SelectedValuePath = "code_id";
+            cboOrderClssSrh.SelectedIndex = 0;
 
-            this.cboWork.ItemsSource = cbWork;
-            this.cboWork.DisplayMemberPath = "code_name";
-            this.cboWork.SelectedValuePath = "code_id";
+            List<string[]> strOrderOutComplete = new List<string[]>();
+            string[] OrderOutN = {"N","미출고" };
+            string[] OrderOutY = { "Y", "출고완료" };
+            strOrderOutComplete.Add(OrderOutN);
+            strOrderOutComplete.Add(OrderOutY);
+
+            ObservableCollection<CodeView> ovcOrderOutComplete = ComboBoxUtil.Instance.Direct_SetComboBox(strOrderOutComplete);
+            cboOrderOutCompleteSrh.ItemsSource = ovcOrderOutComplete;
+            cboOrderOutCompleteSrh.DisplayMemberPath = "code_name";
+            cboOrderOutCompleteSrh.SelectedValuePath = "code_id";
+            cboOrderOutCompleteSrh.SelectedIndex = 0;
+
         }
 
         #region 라벨 체크박스 이벤트 관련
@@ -94,15 +121,6 @@ namespace WizMes_SungShinNQ
             dtpEDate.IsEnabled = false;
         }
 
-        //전일
-        private void btnYesterDay_Click(object sender, RoutedEventArgs e)
-        {
-            DateTime[] SearchDate = lib.BringLastDayDateTimeContinue(dtpEDate.SelectedDate.Value);
-
-            dtpSDate.SelectedDate = SearchDate[0];
-            dtpEDate.SelectedDate = SearchDate[1];
-        }
-
         //금일
         private void btnToday_Click(object sender, RoutedEventArgs e)
         {
@@ -110,39 +128,80 @@ namespace WizMes_SungShinNQ
             dtpEDate.SelectedDate = DateTime.Today;
         }
 
-        // 전월 버튼 클릭 이벤트
+        //전월
         private void btnLastMonth_Click(object sender, RoutedEventArgs e)
         {
-            DateTime[] SearchDate = lib.BringLastMonthContinue(dtpSDate.SelectedDate.Value);
+            //dtpSDate.SelectedDate = Lib.Instance.BringLastMonthDatetimeList()[0];
+            //dtpEDate.SelectedDate = Lib.Instance.BringLastMonthDatetimeList()[1];
 
-            dtpSDate.SelectedDate = SearchDate[0];
-            dtpEDate.SelectedDate = SearchDate[1];
-        }
-
-        // 금월 버튼 클릭 이벤트
-        private void btnThisMonth_Click(object sender, RoutedEventArgs e)
-        {
-            dtpSDate.SelectedDate = lib.BringThisMonthDatetimeList()[0];
-            dtpEDate.SelectedDate = lib.BringThisMonthDatetimeList()[1];
-        }
-
-        //수주상태
-        private void cboOrderStatus_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (cboOrderStatus.SelectedIndex == 0)
+            if (dtpSDate.SelectedDate != null)
             {
-                btnFinal.IsEnabled = false;
-            }
-            else if (cboOrderStatus.SelectedIndex == 1)
-            {
-                btnFinal.IsEnabled = true;
-                btnFinal.Content = "마감처리";
+                DateTime ThatMonth1 = dtpSDate.SelectedDate.Value.AddDays(-(dtpSDate.SelectedDate.Value.Day - 1)); // 선택한 일자 달의 1일!
+
+                DateTime LastMonth1 = ThatMonth1.AddMonths(-1); // 저번달 1일
+                DateTime LastMonth31 = ThatMonth1.AddDays(-1); // 저번달 말일
+
+                dtpSDate.SelectedDate = LastMonth1;
+                dtpEDate.SelectedDate = LastMonth31;
             }
             else
             {
-                btnFinal.IsEnabled = true;
-                btnFinal.Content = "진행처리";
+                DateTime ThisMonth1 = DateTime.Today.AddDays(-(DateTime.Today.Day - 1)); // 이번달 1일
+
+                DateTime LastMonth1 = ThisMonth1.AddMonths(-1); // 저번달 1일
+                DateTime LastMonth31 = ThisMonth1.AddDays(-1); // 저번달 말일
+
+                dtpSDate.SelectedDate = LastMonth1;
+                dtpEDate.SelectedDate = LastMonth31;
             }
+        }
+
+        //금월
+        private void btnThisMonth_Click(object sender, RoutedEventArgs e)
+        {
+            dtpSDate.SelectedDate = Lib.Instance.BringThisMonthDatetimeList()[0];
+            dtpEDate.SelectedDate = Lib.Instance.BringThisMonthDatetimeList()[1];
+        }
+
+        ////금년
+        //private void btnThisYear_Click(object sender, RoutedEventArgs e)
+        //{
+        //    dtpSDate.SelectedDate = Lib.Instance.BringThisYearDatetimeFormat()[0];
+        //    dtpEDate.SelectedDate = Lib.Instance.BringThisYearDatetimeFormat()[1];
+        //}
+
+        //전일
+        private void BtnYesterDay_Click(object sender, RoutedEventArgs e)
+        {
+            if (dtpSDate.SelectedDate != null)
+            {
+                dtpSDate.SelectedDate = dtpSDate.SelectedDate.Value.AddDays(-1);
+                dtpEDate.SelectedDate = dtpSDate.SelectedDate;
+            }
+            else
+            {
+                dtpSDate.SelectedDate = DateTime.Today.AddDays(-1);
+                dtpEDate.SelectedDate = DateTime.Today.AddDays(-1);
+            }
+        }
+
+        //수주상태
+        private void cboOrderStatusSrh_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {          
+             if (cboOrderStatusSrh.SelectedIndex == 0)
+             {
+                 btnFinal.IsEnabled = false;
+             }
+             else if (cboOrderStatusSrh.SelectedIndex == 1)
+             {
+                 btnFinal.IsEnabled = true;
+                 btnFinal.Content = "마감처리";
+             }
+             else
+             {
+                 btnFinal.IsEnabled = true;
+                 btnFinal.Content = "진행처리";
+             }
         }
 
         //수주 진행 건은 마감처리 / 마감 건은 진행처리로 변경하는 버튼
@@ -255,159 +314,54 @@ namespace WizMes_SungShinNQ
             FillGrid();
         }
 
-        //거래처
-        private void lblCustom_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            if (chkCustom.IsChecked == true) { chkCustom.IsChecked = false; }
-            else { chkCustom.IsChecked = true; }
-        }
 
-        //거래처
-        private void chkCustom_Checked(object sender, RoutedEventArgs e)
+        //검색조건 - 거래처 - 키다운
+        private void txtCustomIDSrh_KeyDown(object sender, KeyEventArgs e)
         {
-            txtCustom.IsEnabled = true;
-            btnPfCustom.IsEnabled = true;
-            txtCustom.Focus();
-        }
-
-        //거래처
-        private void chkCustom_Unchecked(object sender, RoutedEventArgs e)
-        {
-            txtCustom.IsEnabled = false;
-            btnPfCustom.IsEnabled = false;
-        }
-
-        //거래처
-        private void txtCustom_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter)
+            if(e.Key == Key.Enter)
             {
-                MainWindow.pf.ReturnCode(txtCustom, (int)Defind_CodeFind.DCF_CUSTOM, "");
+                MainWindow.pf.ReturnCode(txtCustomIDSrh, 0, "");
             }
         }
+        //검색조건 - 거래처 - 버튼 클릭
 
-        //거래처
-        private void btnPfCustom_Click(object sender, RoutedEventArgs e)
+        private void btnCustomIDSrh_Click(object sender, RoutedEventArgs e)
         {
-            MainWindow.pf.ReturnCode(txtCustom, (int)Defind_CodeFind.DCF_CUSTOM, "");
+            MainWindow.pf.ReturnCode(txtCustomIDSrh, 0, "");
         }
 
-        //품명
-        private void lblArticle_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            if (chkArticle.IsChecked == true) { chkArticle.IsChecked = false; }
-            else { chkArticle.IsChecked = true; }
-        }
 
-        //품명
-        private void chkArticle_Checked(object sender, RoutedEventArgs e)
-        {
-            txtArticle.IsEnabled = true;
-            btnPfArticle.IsEnabled = true;
-            txtArticle.Focus();
-        }
-
-        //품명
-        private void chkArticle_Unchecked(object sender, RoutedEventArgs e)
-        {
-            txtArticle.IsEnabled = false;
-            btnPfArticle.IsEnabled = false;
-        }
-
-        //품명(품번 검색으로 수정, 2020.03.17, 장가빈)
-        private void txtArticle_KeyDown(object sender, KeyEventArgs e)
+        //검색조건 - 품명 - 키다운
+        private void txtArticleIDSrh_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
-            {
-                MainWindow.pf.ReturnCode(txtArticle, 81, txtArticle.Text);
-            }
+                MainWindow.pf.ReturnCode(txtArticleIDSrh, 77, "");
         }
 
-        //품명(품번 검색으로 수정, 2020.03.17, 장가빈)
-        private void btnPfArticle_Click(object sender, RoutedEventArgs e)
+        //검색조건 - 품명 - 버튼 클릭
+        private void btnArticleIDSrh_Click(object sender, RoutedEventArgs e)
         {
-            MainWindow.pf.ReturnCode(txtArticle, 81, txtArticle.Text);
+            MainWindow.pf.ReturnCode(txtArticleIDSrh, 77, "");
         }
 
-        //차종
-        private void lblModel_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            if (chkModel.IsChecked == true) { chkModel.IsChecked = false; }
-            else { chkModel.IsChecked = true; }
-        }
-
-        //차종
-        private void chkModel_Checked(object sender, RoutedEventArgs e)
-        {
-            txtModel.IsEnabled = true;
-            btnPfModel.IsEnabled = true;
-            txtModel.Focus();
-        }
-
-        //차종
-        private void chkModel_Unchecked(object sender, RoutedEventArgs e)
-        {
-            txtModel.IsEnabled = false;
-            btnPfModel.IsEnabled = false;
-        }
-
-        //차종
-        private void txtModel_KeyDown(object sender, KeyEventArgs e)
+        //검색조건 - 품번 - 키다운
+        private void txtBuyerArticleNoSrh_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
-            {
-                MainWindow.pf.ReturnCode(txtModel, (int)Defind_CodeFind.DCF_BUYERMODEL, "");
-            }
+                MainWindow.pf.ReturnCode(txtBuyerArticleNoSrh, 7071, "");
+        }
+        //검색조건 - 품번 - 버튼 클릭
+        private void btnBuyerArticleNoSrh_KeyDown(object sender, RoutedEventArgs e)
+        {
+              MainWindow.pf.ReturnCode(txtBuyerArticleNoSrh, 7071, "");
         }
 
-        //차종
-        private void btnPfModel_Click(object sender, RoutedEventArgs e)
-        {
-            MainWindow.pf.ReturnCode(txtModel, (int)Defind_CodeFind.DCF_BUYERMODEL, "");
-        }
 
-        //OrderNo
-        private void lblOrder_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            if (chkOrder.IsChecked == true) { chkOrder.IsChecked = false; }
-            else { chkOrder.IsChecked = true; }
-        }
 
-        //OrderNo
-        private void chkOrder_Checked(object sender, RoutedEventArgs e)
-        {
-            txtOrderNo.IsEnabled = true;
-            btnPfOrderNo.IsEnabled = true;
-            txtOrderNo.Focus();
-        }
-
-        //OrderNo
-        private void chkOrder_Unchecked(object sender, RoutedEventArgs e)
-        {
-            txtOrderNo.IsEnabled = false;
-            btnPfOrderNo.IsEnabled = false;
-        }
-
-        //OrderNo
-        private void txtOrderNo_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter)
-            {
-                if (e.Key == Key.Enter)
-                {
-                    MainWindow.pf.ReturnCode(txtOrderNo, (int)Defind_CodeFind.DCF_ORDER, "");
-                }
-            }
-        }
-
-        //OrderNo
-        private void btnPfOrderNo_Click(object sender, RoutedEventArgs e)
-        {
-            MainWindow.pf.ReturnCode(txtOrderNo, (int)Defind_CodeFind.DCF_ORDER, "");
-        }
 
         private void rbnOrderNo_Click(object sender, RoutedEventArgs e)
         {
+
             Check_bdrOrder();
         }
 
@@ -426,60 +380,290 @@ namespace WizMes_SungShinNQ
             }
             else if (rbnOrderNo.IsChecked == true)
             {
-                tbkOrder.Text = "Order No.";
+                tbkOrder.Text = "Order No";
                 dgdtxtOrderID.Visibility = Visibility.Hidden;
                 dgdtxtOrderNo.Visibility = Visibility.Visible;
             }
         }
 
-        //가공구분
-        private void lblWork_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+
+        private void CommonControl_Click(object sender, EventArgs e)
         {
-            if (chkWork.IsChecked == true) { chkWork.IsChecked = false; }
-            else { chkWork.IsChecked = true; }
+            CheckBox checkBox = null;
+            DependencyObject parentGrid = null;
+
+            if (sender is Label label)
+            {
+                // 라벨의 부모 그리드 찾기
+                parentGrid = FindVisualParent<Grid>(label);
+                if (parentGrid != null)
+                {
+                    // 같은 그리드 내에서 체크박스 찾기
+                    checkBox = FindChild<CheckBox>(parentGrid);
+                    if (checkBox != null)
+                    {
+                        // 체크박스 상태 토글
+                        checkBox.IsChecked = !checkBox.IsChecked;
+                    }
+                }
+            }
+            else if (sender is CheckBox clickedCheckBox)
+            {
+                // 클릭된 것이 체크박스인 경우
+                checkBox = clickedCheckBox;
+                parentGrid = FindVisualParent<Grid>(checkBox);
+            }
+
+            // 체크박스와 부모 그리드가 있으면 컨트롤 활성화/비활성화 처리
+            if (checkBox != null && parentGrid != null)
+            {
+                List<Control> controlsToToggle = new List<Control>();
+
+                // 그리드 내 모든 Control 찾기 (체크박스 제외)
+                FindUiObject(parentGrid, obj => {
+                    if (obj is Control control && obj != checkBox && !(obj is Label) && !(obj is CheckBox))
+                    {
+                        controlsToToggle.Add(control);
+                    }
+                });
+
+                // 컨트롤 활성화/비활성화
+                foreach (var control in controlsToToggle)
+                {
+                    control.IsEnabled = checkBox.IsChecked == true;
+                }
+            }
         }
 
-        //가공구분
-        private void chkWork_Checked(object sender, RoutedEventArgs e)
+        //UI컨트롤 요소찾기
+        private void FindUiObject(DependencyObject parent, Action<DependencyObject> action)
         {
-            cboWork.IsEnabled = true;
+            int childCount = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < childCount; i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+
+                action?.Invoke(child);
+
+                FindUiObject(child, action);
+            }
         }
 
-        //가공구분
-        private void chkWork_Unchecked(object sender, RoutedEventArgs e)
+        //컨트롤 안 특정 타입의 자식 컨트롤을 찾는 함수 (그리드내에서)
+        //var parentContainer = VisualTreeHelper.GetParent(checkbox);
+        //var datePicker = FindChild<DatePicker>(parentContainer);
+        private T FindChild<T>(DependencyObject parent) where T : DependencyObject
         {
-            cboWork.IsEnabled = false;
+            int childCount = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < childCount; i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T typedChild)
+                {
+                    return typedChild;
+                }
+
+                // 재귀적으로 자식의 자식들도 검색
+                var result = FindChild<T>(child);
+                if (result != null)
+                    return result;
+            }
+            return null;
         }
+
+
+        // 자식요소 안에서 부모요소 찾기
+        //DataGridRow row = FindVisualParent<DataGridRow>(checkBox); 데이터그리드안의 행속 체크박스의 부모행 찾기
+        //DataGrid parentGrid = FindVisualParent<DataGrid>(row); 데이터그리드 행의 부모 데이터그리드 찾기
+        private T FindVisualParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            DependencyObject parentObject = VisualTreeHelper.GetParent(child);
+
+            if (parentObject == null)
+                return null;
+
+            T parent = parentObject as T;
+            if (parent != null)
+                return parent;
+            else
+                return FindVisualParent<T>(parentObject);
+        }
+
+
+        //8자리 char형태 날짜 년도-월-일 하이픈 삽입
+        //16자리 일경우 8자리 사이에 ~ 삽입
+        private string DateTypeHyphen(string DigitsDate)
+        {
+            string pattern1 = @"(\d{4})(\d{2})(\d{2})";
+            string pattern2 = @"(\d{4})(\d{2})(\d{2})(\d{4})(\d{2})(\d{2})";
+            string pattern3 = @"(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})";
+            string pattern4 = @"(\d{2})(\d{2})";
+
+            if (DigitsDate.Length == 8)
+            {
+                DigitsDate = Regex.Replace(DigitsDate, pattern1, "$1-$2-$3");
+            }      
+            else if (DigitsDate.Length == 16)
+            {
+                DigitsDate = Regex.Replace(DigitsDate, pattern2, "$1-$2-$3 ~ $4-$5-$6");
+            }
+            else if (DigitsDate.Length == 13)
+            {
+                DigitsDate= DigitsDate.Replace("/", "");
+                DigitsDate = Regex.Replace(DigitsDate, pattern3, "$1-$2-$3 $4:$5");
+            }
+            else if (DigitsDate.Length == 4)
+            {
+                DigitsDate = Regex.Replace(DigitsDate, pattern4, "$1:$2");
+
+            }
+            else if (DigitsDate.Length == 0)
+            {
+                DigitsDate = string.Empty;
+            }
+
+            if (DigitsDate.Length == 1 && DigitsDate.Equals("/")) DigitsDate = string.Empty;
+
+            return DigitsDate;
+        }
+
+        private object RemoveComma(object obj, bool returnAsNumber = false, Type returnType = null)
+        {
+            //파라미터가 만약 null일때
+            if (obj == null)
+            {
+                //숫자타입이 false면 string으로 내보내기
+                if (!returnAsNumber) return "0";
+
+                // 만약 숫자타입을 써야되면 returnType파라미터의 받은 형태로 전달
+                // null일 때도 returnType에 따라 적절한 타입의 0 반환
+                switch (returnType?.Name)
+                {
+                    case "Decimal": return (object)0m;  //monetary
+                    case "Double": return (object)0d;   //double
+                    case "Int64": return (object)0L;    //long
+                    default: return (object)0;          //int
+                }
+            }
+
+            string digits = obj.ToString()
+                              .Trim()
+                              .Replace(",", "");
+
+            //만약 빈공백(blank)이더라도 0으로 내보내야한다.
+            if (string.IsNullOrEmpty(digits))
+            {
+                if (!returnAsNumber) return "0";
+
+                // returnType을 활용해서 적절한 타입으로 반환
+                switch (returnType?.Name)
+                {
+                    case "Decimal": return (object)0m;
+                    case "Double": return (object)0d;
+                    case "Int64": return (object)0L;
+                    default: return (object)0;
+                }
+            }
+
+
+            try
+            {
+                Type targetType = returnType ?? typeof(int);
+
+                //혹시나 하는 예외처리
+                //입력 컨트롤간에 LostFocus나 TextChanged같은 걸로 계산을 할 때
+                //처리 가능한 숫자 범위를 초과하면 오류가 발생하므로
+                //초과하면 해당 자료형타입이 처리할 수 있는 최대 숫자를 표시해줌
+                switch (targetType.Name)
+                {
+                    case "Int32":
+                        if (decimal.TryParse(digits, out decimal intParsed))
+                        {
+                            if (intParsed > int.MaxValue) return int.MaxValue;
+                            if (intParsed < int.MinValue) return int.MinValue;
+                            return (int)intParsed;
+                        }
+                        return int.MaxValue;
+
+                    case "Int64":
+                        if (decimal.TryParse(digits, out decimal longParsed))
+                        {
+                            if (longParsed > long.MaxValue) return long.MaxValue;
+                            if (longParsed < long.MinValue) return long.MinValue;
+                            return (long)longParsed;
+                        }
+                        return long.MaxValue;
+
+                    case "Double":
+                        if (double.TryParse(digits, out double doubleParsed))
+                        {
+                            return doubleParsed;
+                        }
+                        return double.MaxValue;
+
+                    case "Decimal":
+                        if (decimal.TryParse(digits, out decimal decimalParsed))
+                        {
+                            return decimalParsed;
+                        }
+                        return decimal.MaxValue;
+
+                    default:
+                        return int.MaxValue;
+                }
+            }
+            catch
+            {
+
+                if (returnType != null)
+                {
+                    switch (returnType.Name)
+                    {
+                        case "Int32":
+                            return int.MaxValue;
+                        case "Int64":
+                            return long.MaxValue;
+                        case "Double":
+                            return double.MaxValue;
+                        case "Decimal":
+                            return decimal.MaxValue;
+                        default:
+                            return int.MaxValue;
+                    }
+                }
+                return int.MaxValue;
+            }
+        }
+
+        private string ConvertDate(DatePicker datePicker)
+        {
+            if (datePicker.SelectedDate != null)
+                return datePicker.SelectedDate.Value.ToString("yyyyMMdd");
+            else
+                return string.Empty;
+        }
+
+        private bool IsDatePickerNull(DatePicker datePicker)
+        {
+            if (datePicker.SelectedDate == null)
+                return true;
+            else
+                return false;
+        }
+
+
 
         #endregion
 
         private void btnSearch_Click(object sender, RoutedEventArgs e)
         {
-            //검색버튼 비활성화
-            btnSearch.IsEnabled = false;
-
-            Dispatcher.BeginInvoke(new Action(() =>
-
+            if(lib.DatePickerCheck(dtpSDate, dtpEDate, chkOrderDay))
             {
-                Thread.Sleep(2000);
-
-                //로직
-                FillGrid();
-
-            }), System.Windows.Threading.DispatcherPriority.Background);
-
-
-
-            Dispatcher.BeginInvoke(new Action(() =>
-
-            {
-                btnSearch.IsEnabled = true;
-
-            }), System.Windows.Threading.DispatcherPriority.Background);
-            
-
-            
-
+                using (Loading ld = new Loading(re_Search))
+                {
+                    ld.ShowDialog();
+                }
+            }
         }
 
         //닫기
@@ -521,6 +705,7 @@ namespace WizMes_SungShinNQ
                 return;
             }
 
+            DataStore.Instance.InsertLogByForm(this.GetType().Name, "P");
             msg.Show();
             msg.Topmost = true;
             msg.Refresh();
@@ -553,6 +738,7 @@ namespace WizMes_SungShinNQ
             {
                 if (ExpExc.choice.Equals(dgdMain.Name))
                 {
+                    DataStore.Instance.InsertLogByForm(this.GetType().Name, "E");
                     //MessageBox.Show("대분류");
                     if (ExpExc.Check.Equals("Y"))
                         dt = lib.DataGridToDTinHidden(dgdMain);
@@ -583,38 +769,49 @@ namespace WizMes_SungShinNQ
         //실조회 및 하단 합계
         private void FillGrid()
         {
+                dgdMain.Items.Clear();
+                dgdSum.Items.Clear();
+
+
+
             try
             {
-                if (dgdMain != null)
-                {
-                    dgdMain.Items.Clear();
-                }
-                if (dgdSum != null)
-                {
-                    dgdSum.Items.Clear();
-                }
-
                 Dictionary<string, object> sqlParameter = new Dictionary<string, object>();
+                sqlParameter.Clear();
+
                 sqlParameter.Add("ChkDate", chkOrderDay.IsChecked == true ? 1 : 0);
                 sqlParameter.Add("SDate", chkOrderDay.IsChecked == true ? dtpSDate.SelectedDate.Value.ToString("yyyyMMdd") : "");
                 sqlParameter.Add("EDate", chkOrderDay.IsChecked == true ? dtpEDate.SelectedDate.Value.ToString("yyyyMMdd") : "");
-                sqlParameter.Add("ChkCustom", chkCustom.IsChecked == true ? (txtCustom.Tag != null ? 1 : 2) : 0);
-                sqlParameter.Add("CustomID", chkCustom.IsChecked == true ?(txtCustom.Tag != null ? txtCustom.Tag.ToString() : txtCustom.Text) : "");
-                sqlParameter.Add("ChkArticle", 0);// chkArticle.IsChecked == true ? (txtArticle.Tag != null ? 1 : 2) : 0);
-                sqlParameter.Add("ArticleID", "");//chkArticle.IsChecked == true ? (txtArticle.Tag != null ? txtArticle.Tag.ToString() : txtArticle.Text) : "");
-                sqlParameter.Add("ChkOrderID", chkOrder.IsChecked == true ? (rbnOrderID.IsChecked == true ? 1 : 2) : 0);
-                sqlParameter.Add("OrderID", txtOrderNo.Text);
-                sqlParameter.Add("ChkClose", int.Parse(cboOrderStatus.SelectedValue != null ? cboOrderStatus.SelectedValue.ToString() : ""));
-                sqlParameter.Add("nChkOrderFlag", 0);
-                sqlParameter.Add("ChkFiber", 0);
-                sqlParameter.Add("ChkBuyerModel", chkModel.IsChecked == true ? 1 : 0);
-                sqlParameter.Add("sBuyerModelID", chkModel.IsChecked == true ?
-                    (txtModel.Tag != null ? txtModel.Tag.ToString() : "") : "");
-                sqlParameter.Add("ChkWorkID", chkWork.IsChecked == true ? 1 : 0);
-                sqlParameter.Add("sWorkID", chkWork.IsChecked == true ? (cboWork.SelectedValue != null ? cboWork.SelectedValue.ToString() : "") : "");
-                sqlParameter.Add("BuyerArticleNo", chkArticle.IsChecked == true ? txtArticle.Text.Trim() : "");
 
-                DataSet ds = DataStore.Instance.ProcedureToDataSet("xp_Order_sOrderTotal", sqlParameter, false);
+                // 거래처
+                sqlParameter.Add("ChkCustomID", chkCustomIDSrh.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("CustomID", chkCustomIDSrh.IsChecked == true ? txtCustomIDSrh.Tag != null ? txtCustomIDSrh.Tag.ToString() : "" : "");
+      
+                // 품명
+                sqlParameter.Add("ChkArticleID", chkArticleIDSrh.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("ArticleID", chkArticleIDSrh.IsChecked == true ? txtArticleIDSrh.Tag != null ? txtArticleIDSrh.Tag.ToString() : "" : "");
+
+                //품번
+                sqlParameter.Add("ChkBuyerArticleNo", chkBuyerArticleNoSrh.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("BuyerArticleNo", chkBuyerArticleNoSrh.IsChecked == true ? txtBuyerArticleNoSrh.Tag != null ? txtBuyerArticleNoSrh.Tag.ToString() : "" : "");
+
+                //주문구분
+                sqlParameter.Add("ChkOrderClss", chkOrderClssSrh.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("OrderClss", chkOrderClssSrh.IsChecked == true ? cboOrderClssSrh.SelectedValue != null ? cboOrderClssSrh.SelectedValue.ToString() : "" : "");
+
+                // 관리번호
+                sqlParameter.Add("ChkOrderID", chkOrderNoSrh.IsChecked == true ? (rbnOrderID.IsChecked == true ? 1 : 2) : 0);
+                sqlParameter.Add("OrderID", txtOrderNoSrh.Text);
+               
+                // 수주상태
+                sqlParameter.Add("ChkClose", int.Parse(cboOrderStatusSrh.SelectedValue != null ? cboOrderStatusSrh.SelectedValue.ToString() : ""));
+
+                //출고진행구분
+                sqlParameter.Add("ChkOrderOutComplete", chkOrderOutCompleteSrh.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("OrderOutComplete", chkOrderOutCompleteSrh.IsChecked == true ? cboOrderOutCompleteSrh.SelectedValue?.ToString() : string.Empty);
+
+
+                DataSet ds = DataStore.Instance.ProcedureToDataSet_LogWrite("xp_Order_sOrderTotal", sqlParameter, true, "R");
 
                 if (ds != null && ds.Tables.Count > 0)
                 {
@@ -623,6 +820,7 @@ namespace WizMes_SungShinNQ
                     //dataGrid.Items.Clear();
                     if (dt.Rows.Count == 0)
                     {
+
                         MessageBox.Show("조회된 데이터가 없습니다.");
                     }
                     else
@@ -630,200 +828,75 @@ namespace WizMes_SungShinNQ
                         DataRowCollection drc = dt.Rows;
 
                         int i = 0;
-                        int OrderSum = 0;
-                        int InsertSum = 0;
-                        double InspectSum = 0;
-                        double PassSum = 0;
-                        double DefectSum = 0;
-                        double OutSum = 0;
-                        double OasSum = 0;
+                        decimal orderSum = 0;
+                        decimal insertSum = 0;
+                        decimal realQtySum = 0;
+                        decimal outQtySum = 0;
+                        decimal outQtyYetSum = 0;
 
-                        foreach (DataRow item in drc)
+                        foreach(DataRow dr in drc)
                         {
-                            var Window_OrderClose_DTO = new Win_ord_OrderClose_U_CodeView()
+                            i++;
+                            var OrderItem = new Win_ord_OrderClose_U_CodeView
                             {
-                                IsCheck = false,
-                                OrderID = item["OrderID"].ToString(),
-                                OrderNo = item["OrderNO"] as string,
-                                CustomID = item["CustomID"] as string,
-                                KCustom = item["KCustom"] as string,
-
-                                DvlyDate = item["DvlyDate"] as string,
-                                CloseClss = item["CloseClss"] as string,
-                                //ChunkRate = item["ChunkRate"].ToString(),
-                                //LossRate = item["LossRate"] as string,
-                                Article = item["Article"] as string,
-
-                                WorkName = item["WorkName"].ToString(),
-                                //WorkWidth = item["WorkWidth"] as string,
-                                OrderQty = item["OrderQty"].ToString(),
-                                UnitClss = item["UnitClss"] as string,  //주문기준 value
-                                InspectQty = item["InspectQty"].ToString(),
-
-                                PassQty = item["PassQty"].ToString(),
-                                DefectQty = item["DefectQty"].ToString(),
-                                OutQty = item["OutQty"].ToString(),
-                                BuyerModel = item["BuyerModel"] as string,
-                                BuyerModelID = item["BuyerModelID"] as string,
-
-                                BuyerArticleNo = item["BuyerArticleNo"] as string,
-                                UnitClssName = item["UnitClssName"] as string,
-                                p1StartWorkDate = item["p1StartWorkDate"] as string,
-                                p1StartWorkDTime = item["p1StartWorkDTime"] as string,
-                                p1WorkQty = item["p1WorkQty"].ToString(),
-
-                                p1ProcessID = item["p1ProcessID"] as string,
-                                p1ProcessName = item["p1ProcessName"] as string,
-                                //ArticleID = item["ArticleID"] as string,
-                                //AcptDate = item["AcptDate"] as string,
-                                Num = i + 1,
-
+                                Num = i,
+                                OrderID = dr["OrderID"].ToString(),
+                                OrderNo = dr["OrderNo"].ToString(),
+                                KCustom = dr["KCustom"].ToString(),
+                                //BuyerArticleNo = dr["BuyerArticleNo"].ToString(),
+                                Article = dr["Article"].ToString(),
+                                Spec = dr["Spec"].ToString(),
+                                BuyerModel = dr["BuyerModel"].ToString(),
+                                AcptDate = DateTypeHyphen(dr["AcptDate"].ToString()),
+                                DvlyDate = DateTypeHyphen(dr["DvlyDate"].ToString()),
+                                //OrderSpec = dr["OrderSpec"].ToString(),
+                                ColorQty = Lib.Instance.RemoveComma(dr["ColorQty"].ToString(), 2m),
+                                //OrderQty = stringFormatN0(dr["OrderQty"]),
+                                UnitClssName = dr["UnitClssName"].ToString(),
+                                InputDate = DateTypeHyphen(dr["InputDate"].ToString()),
+                                InputQty = stringFormatN0(dr["InputQty"]),
+                                ExamDate = DateTypeHyphen(dr["ExamDate"].ToString()),
+                                RealQty = stringFormatN0(dr["RealQty"]),
+                                OutQty = Lib.Instance.RemoveComma(dr["OutQty"].ToString(), 2m),
+                                OutDate = DateTypeHyphen(dr["OutDate"].ToString()),
+                                OutQtyYet = Lib.Instance.RemoveComma(dr["OutQtyYet"].ToString(), 2m),
+                                Remark = dr["Remark"].ToString(),
                             };
 
-                            Window_OrderClose_DTO.OrderID_CV = Window_OrderClose_DTO.OrderID.Substring(0, 4) + "-" +
-                                Window_OrderClose_DTO.OrderID.Substring(4, 2) + "-" + Window_OrderClose_DTO.OrderID.Substring(6, 4);
+                            orderSum += Lib.Instance.RemoveComma(dr["ColorQty"].ToString(), 2m);
+                            insertSum += Lib.Instance.RemoveComma(dr["InputQty"].ToString(), 2m);
+                            realQtySum += Lib.Instance.RemoveComma(dr["RealQty"].ToString(), 2m);
+                            outQtySum += Lib.Instance.RemoveComma(dr["OutQty"].ToString(), 2m);
+                            outQtyYetSum += Lib.Instance.RemoveComma(dr["OutQtyYet"].ToString(), 2m);
 
-                            Window_OrderClose_DTO.OverAndShort = double.Parse(Window_OrderClose_DTO.OrderQty) - double.Parse(Window_OrderClose_DTO.PassQty);
 
-                            i++;
-
-                            if (Window_OrderClose_DTO.OrderQty == null || Window_OrderClose_DTO.OrderQty.Equals("") || Window_OrderClose_DTO.OrderQty.Substring(0, 1).Equals("0"))
-                            {
-                                OrderSum += 0;
-                            }
-                            else
-                            {
-                                OrderSum += int.Parse(Window_OrderClose_DTO.OrderQty);
-                            }
-
-                            if (Window_OrderClose_DTO.p1WorkQty == null || Window_OrderClose_DTO.p1WorkQty.Equals("") || Window_OrderClose_DTO.p1WorkQty.Substring(0, 1).Equals("0"))
-                            {
-                                InsertSum += 0;
-                            }
-                            else
-                            {
-                                InsertSum += (int)(double.Parse(Window_OrderClose_DTO.p1WorkQty));
-                            }
-
-                            if (Window_OrderClose_DTO.p1WorkQty != null && Lib.Instance.IsNumOrAnother(Window_OrderClose_DTO.p1WorkQty))
-                            {
-                                if (Window_OrderClose_DTO.p1WorkQty.Contains("."))
-                                {
-                                    Window_OrderClose_DTO.p1WorkQty = Window_OrderClose_DTO.p1WorkQty.Substring(0, Window_OrderClose_DTO.p1WorkQty.IndexOf("."));
-                                }
-                            }
-
-                            if (Window_OrderClose_DTO.InspectQty == null || Window_OrderClose_DTO.InspectQty.Equals("") || Window_OrderClose_DTO.InspectQty.Substring(0, 1).Equals("0"))
-                            {
-                                InspectSum += 0;
-                            }
-                            else
-                            {
-                                InspectSum += double.Parse(Window_OrderClose_DTO.InspectQty);
-                            }
-
-                            if (Window_OrderClose_DTO.InspectQty != null && Lib.Instance.IsNumOrAnother(Window_OrderClose_DTO.InspectQty))
-                            {
-                                if (Window_OrderClose_DTO.InspectQty.Contains("."))
-                                {
-                                    Window_OrderClose_DTO.InspectQty = Window_OrderClose_DTO.InspectQty.Substring(0, Window_OrderClose_DTO.InspectQty.IndexOf("."));
-                                }
-                            }
-
-                            if (Window_OrderClose_DTO.PassQty == null || Window_OrderClose_DTO.PassQty.Equals("") || Window_OrderClose_DTO.PassQty.Substring(0, 1).Equals("0"))
-                            {
-                                PassSum += 0;
-                            }
-                            else
-                            {
-                                PassSum += double.Parse(Window_OrderClose_DTO.PassQty);
-                            }
-
-                            if (Window_OrderClose_DTO.PassQty != null && Lib.Instance.IsNumOrAnother(Window_OrderClose_DTO.PassQty))
-                            {
-                                if (Window_OrderClose_DTO.PassQty.Contains("."))
-                                {
-                                    Window_OrderClose_DTO.PassQty = Window_OrderClose_DTO.PassQty.Substring(0, Window_OrderClose_DTO.PassQty.IndexOf("."));
-                                }
-                            }
-
-                            if (Window_OrderClose_DTO.DefectQty == null || Window_OrderClose_DTO.DefectQty.Equals("") || Window_OrderClose_DTO.DefectQty.Substring(0, 1).Equals("0"))
-                            {
-                                DefectSum += 0;
-                            }
-                            else
-                            {
-                                DefectSum += double.Parse(Window_OrderClose_DTO.DefectQty);
-                            }
-
-                            if (Window_OrderClose_DTO.DefectQty != null && Lib.Instance.IsNumOrAnother(Window_OrderClose_DTO.DefectQty))
-                            {
-                                if (Window_OrderClose_DTO.DefectQty.Contains("."))
-                                {
-                                    Window_OrderClose_DTO.DefectQty = Window_OrderClose_DTO.DefectQty.Substring(0, Window_OrderClose_DTO.DefectQty.IndexOf("."));
-                                }
-                            }
-
-                            if (Window_OrderClose_DTO.OutQty == null || Window_OrderClose_DTO.OutQty.Equals("") || Window_OrderClose_DTO.OutQty.Substring(0, 1).Equals("0"))
-                            {
-                                OutSum += 0;
-                            }
-                            else
-                            {
-                                OutSum += double.Parse(Window_OrderClose_DTO.OutQty);
-                            }
-
-                            if (Window_OrderClose_DTO.OutQty != null && Lib.Instance.IsNumOrAnother(Window_OrderClose_DTO.OutQty))
-                            {
-                                if (Window_OrderClose_DTO.OutQty.Contains("."))
-                                {
-                                    Window_OrderClose_DTO.OutQty = Window_OrderClose_DTO.OutQty.Substring(0, Window_OrderClose_DTO.OutQty.IndexOf("."));
-                                }
-                            }
-
-                            OasSum += Window_OrderClose_DTO.OverAndShort;
-
-                            //중간 납기일에 들어가는 '-' 를 위해 체크한 후 잘라주거나 그냥 넣어준다.
-                            if (Window_OrderClose_DTO.DvlyDate != null && Window_OrderClose_DTO.DvlyDate.ToString().Trim() != "")
-                            {
-                                Window_OrderClose_DTO.DvlyDateEdit = item["DvlyDate"].ToString().Substring(0, 4) + "-" + item["DvlyDate"].ToString().Substring(4, 2) + "-" + item["DvlyDate"].ToString().Substring(6, 2);
-                            }
-                            else
-                            {
-                                Window_OrderClose_DTO.DvlyDateEdit = " ";
-                            }
-
-                            //중간에 투입일시의 정규식을 넣기가 힘들어 노가다...
-                            if (Window_OrderClose_DTO.p1StartWorkDate != null && !Window_OrderClose_DTO.p1StartWorkDate.Equals("") && Window_OrderClose_DTO.p1StartWorkDTime != null && !Window_OrderClose_DTO.p1StartWorkDTime.Equals(""))
-                            {
-                                Window_OrderClose_DTO.DayAndTime = item["p1StartWorkDate"].ToString().Substring(4, 2) + "-" + item["p1StartWorkDate"].ToString().Substring(6) + " "
-                                + item["p1StartWorkDTime"].ToString().Substring(0, 2) + ":" + item["p1StartWorkDTime"].ToString().Substring(2);
-                            }
-
-                            Window_OrderClose_DTO.DefectQty = Lib.Instance.returnNumStringZero(Window_OrderClose_DTO.DefectQty);
-                            Window_OrderClose_DTO.OrderQty = Lib.Instance.returnNumStringZero(Window_OrderClose_DTO.OrderQty);
-                            Window_OrderClose_DTO.InspectQty = Lib.Instance.returnNumStringZero(Window_OrderClose_DTO.InspectQty);
-                            Window_OrderClose_DTO.OutQty = Lib.Instance.returnNumStringZero(Window_OrderClose_DTO.OutQty);
-                            Window_OrderClose_DTO.p1WorkQty = Lib.Instance.returnNumStringZero(Window_OrderClose_DTO.p1WorkQty);
-                            Window_OrderClose_DTO.PassQty = Lib.Instance.returnNumStringZero(Window_OrderClose_DTO.PassQty);
-                            dgdMain.Items.Add(Window_OrderClose_DTO);
-                            rowHeaderNum = i.ToString();
+                            dgdMain.Items.Add(OrderItem);
                         }
 
-                        var ThisOrderSum = new dgOrderSum
+                        if(dgdMain.Items.Count > 0)
                         {
-                            Count = i,
-                            OrderSum = OrderSum,
-                            InsertSum = InsertSum,
-                            InspectSum = InspectSum,
-                            PassSum = PassSum,
-                            DefectSum = DefectSum,
-                            OutSum = OutSum,
-                            OasSum = OasSum,
-                            TextData = "합계"
-                        };
-                        dgdSum.Items.Add(ThisOrderSum);
+                            var OrderTotal = new dgOrderSum
+                            {
+                                Count = i,
+                                OrderSum = orderSum,
+                                OutQtySum = outQtySum,
+                                OutQtyYetSum = outQtyYetSum,
+                                ReaQtySum = realQtySum,
+                                InsertSum = insertSum,
+                            };
+
+                            dgdSum.Items.Add(OrderTotal);
+                        }
+
+
                     }
+         
+
+                }
+                if(ds.Tables.Count == 0)
+                {
+                    MessageBox.Show("조회된 데이터가 없습니다.");   
+                    
                 }
             }
             catch (Exception ex)
@@ -835,6 +908,21 @@ namespace WizMes_SungShinNQ
                 DataStore.Instance.CloseConnection();
             }
         }
+
+        
+
+        private bool HasNonNullValue(DataRowCollection drc, string propertyName)
+        {
+            foreach (DataRow row in drc)
+            {
+                if (row[propertyName] != null && !string.IsNullOrEmpty(row[propertyName].ToString()))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
 
         //전체선택
         private void btnAllCheck_Click(object sender, RoutedEventArgs e)
@@ -904,7 +992,7 @@ namespace WizMes_SungShinNQ
 
                 //하단의 회사명
                 workrange = worksheet.get_Range("AN35", "AU35");//셀 범위 지정
-                workrange.Value2 = "주식회사 지엘에스";
+                workrange.Value2 = "부경테크";
                 workrange.HorizontalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
                 workrange.Font.Size = 11;
 
@@ -964,22 +1052,22 @@ namespace WizMes_SungShinNQ
                         int insertline = copyLine + 7 + j;
 
                         str_Num = (j + 1).ToString();
-                        str_OrderID = DT.Rows[i][1].ToString();
-                        str_OrderID_CV = DT.Rows[i][2].ToString();
-                        str_KCustom = DT.Rows[i][3].ToString();
-                        str_Article = DT.Rows[i][4].ToString();
-                        str_Model = DT.Rows[i][5].ToString();
-                        str_ArticleNo = DT.Rows[i][6].ToString();
-                        str_DvlyDate = DT.Rows[i][7].ToString();
-                        str_Work = DT.Rows[i][8].ToString();
-                        str_OrderQty = DT.Rows[i][9].ToString();
-                        str_UnitClssName = DT.Rows[i][10].ToString();
-                        str_DayAndTime = DT.Rows[i][11].ToString();
-                        str_p1WorkQty = DT.Rows[i][12].ToString();
-                        str_InspectQty = DT.Rows[i][13].ToString();
-                        str_PassQty = DT.Rows[i][14].ToString();
-                        str_DefectQty = DT.Rows[i][15].ToString();
-                        str_OutQty = DT.Rows[i][16].ToString();
+                        str_OrderID       = DT.Rows[i][1] != null ? DT.Rows[i][1].ToString() : "";
+                        str_OrderID_CV    = DT.Rows[i][2] != null ? DT.Rows[i][2].ToString() : "";
+                        str_KCustom       = DT.Rows[i][3] != null ? DT.Rows[i][3].ToString() : "";
+                        str_ArticleNo     = DT.Rows[i][4] != null ? DT.Rows[i][4].ToString() : "";
+                        str_Article       = DT.Rows[i][5] != null ? DT.Rows[i][4].ToString() : "";
+                        str_Model         = string.Empty;                       
+                        str_DvlyDate      = DT.Rows[i][7] != null ? DT.Rows[i][7].ToString() : "";
+                        str_Work          = string.Empty;
+                        str_OrderQty      = DT.Rows[i][8] != null ? DT.Rows[i][8].ToString() : ""; 
+                        str_UnitClssName  = DT.Rows[i][9] != null ? DT.Rows[i][9].ToString() : "";
+                        str_DayAndTime    = string.Empty;
+                        str_p1WorkQty     = string.Empty;
+                        str_InspectQty    = DT.Rows[i][13].ToString();
+                        str_PassQty       = DT.Rows[i][13].ToString();
+                        str_DefectQty     = "0";
+                        str_OutQty        = DT.Rows[i][15].ToString();
 
                         workrange = pastesheet.get_Range("A" + insertline, "B" + insertline);    //순번
                         workrange.Value2 = str_Num;
@@ -1016,7 +1104,7 @@ namespace WizMes_SungShinNQ
                         workrange.Font.Size = 10;
                         workrange.ColumnWidth = 2.7;
 
-                        workrange = pastesheet.get_Range("O" + insertline, "R" + insertline);    //차종
+                        workrange = pastesheet.get_Range("O" + insertline, "R" + insertline);    //차종 -> 재질
                         workrange.Value2 = str_Model;
                         workrange.HorizontalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
                         workrange.Font.Size = 10;
@@ -1028,7 +1116,7 @@ namespace WizMes_SungShinNQ
                         workrange.Font.Size = 10;
                         workrange.ColumnWidth = 2.7;
 
-                        workrange = pastesheet.get_Range("W" + insertline, "Y" + insertline);    //가공구분
+                        workrange = pastesheet.get_Range("W" + insertline, "Y" + insertline);    //가공구분 -> 수주일
                         workrange.Value2 = str_Work;
                         workrange.HorizontalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
                         workrange.Font.Size = 10;
@@ -1127,7 +1215,7 @@ namespace WizMes_SungShinNQ
                     workrange.HorizontalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
                     workrange.Font.Size = 10;
 
-                    workrange = pastesheet.get_Range("AJ" + totalLine, "AL" + totalLine);    // 총 검수량
+                    workrange = pastesheet.get_Range("AJ" + totalLine, "AL" + totalLine);    // 총 검일시
                     workrange.Value2 = Sum.InspectSum;
                     workrange.HorizontalAlignment = Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
                     workrange.Font.Size = 10;
@@ -1166,7 +1254,7 @@ namespace WizMes_SungShinNQ
                     pastesheet.PrintOutEx();
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show("오류 발생, 오류 내용 : " + ex.ToString());
             }
@@ -1216,70 +1304,21 @@ namespace WizMes_SungShinNQ
             return result;
         }
 
-        //데이터 그리드 더블 클릭하면 월 납품계획 등록 화면 호출
-        private void DgdMain_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void re_Search()
         {
-            // 넘겨줄 데이터를 넣어주시죠
-            var Order = dgdMain.SelectedItem as Win_ord_OrderClose_U_CodeView;
+            //검색버튼 비활성화
+            btnSearch.IsEnabled = false;
 
-            if(Order != null)
+            Dispatcher.BeginInvoke(new Action(() =>
             {
-                string OrderID = Order.OrderID;
-                string sDate = dtpSDate.SelectedDate.Value.ToString("yyyyMMdd");
-                string eDate = dtpEDate.SelectedDate.Value.ToString("yyyyMMdd");
-                string chkYN = chkOrderDay.IsChecked == true ? "Y" : "N";
+                //로직
+                FillGrid();
+            }), System.Windows.Threading.DispatcherPriority.Background);
 
-                MainWindow.tempContent.Clear();
-                MainWindow.tempContent.Add(OrderID);
-                MainWindow.tempContent.Add(sDate);
-                MainWindow.tempContent.Add(eDate);
-                MainWindow.tempContent.Add(chkYN);
-
-                int i = 0;
-                foreach (MenuViewModel mvm in MainWindow.mMenulist)
-                {
-                    if (mvm.Menu.Equals("월간 생산계획등록"))
-                    //if (mvm.Menu.Equals("월 납품계획 등록"))
-                    {
-                        break;
-                    }
-                    i++;
-                }
-                try
-                {
-                    if (MainWindow.MainMdiContainer.Children.Contains(MainWindow.mMenulist[i].subProgramID as MdiChild))
-                    {
-                        (MainWindow.mMenulist[i].subProgramID as MdiChild).Focus();
-                    }
-                    else
-                    {
-                        Type type = Type.GetType("WizMes_SungShinNQ." + MainWindow.mMenulist[i].ProgramID.Trim(), true);
-                        object uie = Activator.CreateInstance(type);
-
-                        MainWindow.mMenulist[i].subProgramID = new MdiChild()
-                        {
-                            Title = "SamJoo [" + MainWindow.mMenulist[i].MenuID.Trim() + "] " + MainWindow.mMenulist[i].Menu.Trim() +
-                                    " (→" + MainWindow.mMenulist[i].ProgramID + ")",
-                            Height = SystemParameters.PrimaryScreenHeight * 0.8,
-                            MaxHeight = SystemParameters.PrimaryScreenHeight * 0.85,
-                            Width = SystemParameters.WorkArea.Width * 0.85,
-                            MaxWidth = SystemParameters.WorkArea.Width,
-                            Content = uie as UIElement,
-                            Tag = MainWindow.mMenulist[i]
-                        };
-
-                        Lib.Instance.AllMenuLogInsert(MainWindow.mMenulist[i].MenuID, MainWindow.mMenulist[i].Menu, MainWindow.mMenulist[i].subProgramID);
-                        MainWindow.MainMdiContainer.Children.Add(MainWindow.mMenulist[i].subProgramID as MdiChild);
-
-
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("해당 화면이 존재하지 않습니다.");
-                }
-            }
+            btnSearch.IsEnabled = true;
         }
+
+
         private void DataGrid_SizeChange(object sender, SizeChangedEventArgs e)
         {
             DataGrid dgs = sender as DataGrid;
@@ -1297,6 +1336,14 @@ namespace WizMes_SungShinNQ
                 dgs.FontSize = dgs.FontSize * c;
             }
         }
+
+        // 천자리 콤마, 소수점 버리기
+        private string stringFormatN0(object obj)
+        {
+            return string.Format("{0:N0}", obj);
+        }
+
+     
     }
 
     class Win_ord_OrderClose_U_CodeView : BaseView
@@ -1307,6 +1354,8 @@ namespace WizMes_SungShinNQ
         }
 
         public bool IsCheck { get; set; }
+        public string cls { get; set; }
+        public bool RowColor { get; set; }
         public string OrderNo { get; set; }
         public string OrderID { get; set; }
         public string CustomID { get; set; }
@@ -1317,7 +1366,7 @@ namespace WizMes_SungShinNQ
         public string ChunkRate { get; set; }
         public string LossRate { get; set; }
         public string Article { get; set; }
-
+        public string Spec { get; set; }
         public string WorkName { get; set; }
 
         //public string ArticleID { get; set; }
@@ -1327,21 +1376,105 @@ namespace WizMes_SungShinNQ
         public string InspectQty { get; set; }
         public string PassQty { get; set; }
         public string DefectQty { get; set; }
-        public string OutQty { get; set; }
+        public decimal OutQty { get; set; }
+        public string OutDate { get; set; }
+        public decimal ColorQty { get; set; }
         public string BuyerModel { get; set; }
         public string BuyerModelID { get; set; }
         public string BuyerArticleNo { get; set; }
         public string UnitClssName { get; set; }
+        public string OrderClss { get; set; }
+        public string OrderSpec { get; set; }
+        public string InputQty { get; set; }
+        public string InputDate { get; set; }
+        public decimal OutQtyYet { get; set; }
+        public string AcptDate { get; set; }
+        public string RealQty { get; set; }
+        public string ExamDate { get; set; }
+        public string Remark { get; set; }
+
         public string p1StartWorkDate { get; set; }
         public string p1StartWorkDTime { get; set; }
         public string p1WorkQty { get; set; }
         public string p1ProcessID { get; set; }
         public string p1ProcessName { get; set; }
+        public string p1DayAndTime { get; set; }
+
+
+        public string p2StartWorkDate { get; set; }
+        public string p2StartWorkDTime { get; set; }
+        public string p2WorkQty { get; set; }
+        public string p2ProcessID { get; set; }
+        public string p2ProcessName { get; set; }
+        public string p2DayAndTime { get; set; }
+
+
+        public string p3StartWorkDate { get; set; }
+        public string p3StartWorkDTime { get; set; }
+        public string p3WorkQty { get; set; }
+        public string p3ProcessID { get; set; }
+        public string p3ProcessName { get; set; }
+        public string p3DayAndTime { get; set; }
+
+
+        public string p4StartWorkDate { get; set; }
+        public string p4StartWorkDTime { get; set; }
+        public string p4WorkQty { get; set; }
+        public string p4ProcessID { get; set; }
+        public string p4ProcessName { get; set; }
+        public string p4DayAndTime { get; set; }
+
+
+        public string p5StartWorkDate { get; set; }
+        public string p5StartWorkDTime { get; set; }
+        public string p5WorkQty { get; set; }
+        public string p5ProcessID { get; set; }
+        public string p5ProcessName { get; set; }
+        public string p5DayAndTime { get; set; }
+
+        public string p6StartWorkDate { get; set; }
+        public string p6StartWorkDTime { get; set; }
+        public string p6WorkQty { get; set; }
+        public string p6ProcessID { get; set; }
+        public string p6ProcessName { get; set; }
+        public string p6DayAndTime { get; set; }
+
+        public string p7StartWorkDate { get; set; }
+        public string p7StartWorkDTime { get; set; }
+        public string p7WorkQty { get; set; }
+        public string p7ProcessID { get; set; }
+        public string p7ProcessName { get; set; }
+        public string p7DayAndTime { get; set; }
+
+        public string p8StartWorkDate { get; set; }
+        public string p8StartWorkDTime { get; set; }
+        public string p8WorkQty { get; set; }
+        public string p8ProcessID { get; set; }
+        public string p8ProcessName { get; set; }
+        public string p8DayAndTime { get; set; }
+
+        public string p9StartWorkDate { get; set; }
+        public string p9StartWorkDTime { get; set; }
+        public string p9WorkQty { get; set; }
+        public string p9ProcessID { get; set; }
+        public string p9ProcessName { get; set; }
+        public string p9DayAndTime { get; set; }
+
+        public string p10StartWorkDate { get; set; }
+        public string p10StartWorkDTime { get; set; }
+        public string p10WorkQty { get; set; }
+        public string p10ProcessID { get; set; }
+        public string p10ProcessName { get; set; }
+        public string p10DayAndTime { get; set; }
+
         public string DayAndTime { get; set; }
         public string DvlyDateEdit { get; set; }
+        public string ProductGrpID { get; set; }
+        public string ProductGrpName { get; set; }
         //public string AcptDate { get; set; }
         public double OverAndShort { get; set; }
 
+        
         public string OrderID_CV { get; set; }
         public int Num { get; set; }
     }
@@ -1349,23 +1482,17 @@ namespace WizMes_SungShinNQ
     public class dgOrderSum
     {
         public int Count { get; set; }
-        public int OrderSum { get; set; }
-        public int InsertSum { get; set; }
+        public decimal OrderSum { get; set; }
+        public decimal InsertSum { get; set; }
         public double InspectSum { get; set; }
         public double PassSum { get; set; }
         public double DefectSum { get; set; }
         public double OutSum { get; set; }
         public double OasSum { get; set; }
-
         public string TextData { get; set; }
-
-        //public int Count { get; set; }
-        //public int OrderSum { get; set; }
-        //public int InsertSum { get; set; }
-        //public double InspectSum { get; set; }
-        //public double PassSum { get; set; }
-        //public double DefectSum { get; set; }
-        //public double OutSum { get; set; }
-        //public double OasSum { get; set; }
+        public decimal ReaQtySum { get; set; }
+        public decimal OutQtySum { get; set; }
+        public decimal OutQtyYetSum { get; set; }
     }
 }
+
