@@ -1478,6 +1478,18 @@
             </Style>
 
             <!--/////////////////////////////////////////////////////////////////////////////////////-->
+            <Style TargetType="{x:Type TextBox}" x:Key="TextBoxInput_Number_Right">
+                <Setter Property="Margin" Value="1, 1, 1, 0" />
+                <Setter Property="Padding" Value="5, 0, 0, 0" />
+                <Setter Property="Background" Value="White" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="HorizontalContentAlignment" Value="Right" />
+                <Setter Property="InputMethod.IsInputMethodEnabled" Value="False" />
+                <EventSetter Event="PreviewTextInput" Handler="TextBoxOnlyNumber_PreviewTextInput" />
+                <EventSetter Event="KeyDown" Handler="TextBoxOnlyNumber_KeyDown" />
+            </Style>
+
+
             <!--/////////////////////////////////////////////////////////////////////////////////////-->
         </ResourceDictionary>
     </Application.Resources>
