@@ -14,7 +14,10 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using WizMes_SungShinNQ.PopUP;
 using WizMes_SungShinNQ.PopUp;
-using System.Text.RegularExpressions;
+using LiveCharts.Wpf;
+using LiveCharts;
+using System.Windows.Markup;
+
 
 namespace WizMes_SungShinNQ
 {
@@ -40,6 +43,8 @@ namespace WizMes_SungShinNQ
         {
             stDate = DateTime.Now.ToString("yyyyMMdd");
             stTime = DateTime.Now.ToString("HHmm");
+
+            //DataStore.Instance.InsertLogByFormS(this.GetType().Name, stDate, stTime, "S");
 
             lib.UiLoading(sender);
             dtpSDate.SelectedDate = DateTime.Today;
@@ -145,7 +150,8 @@ namespace WizMes_SungShinNQ
         private void FillGrid()
         {
             try
-            {       
+            {
+                string ArticleID = null;
 
                 if (dgdOut.Items.Count > 0)
                 {
@@ -156,20 +162,22 @@ namespace WizMes_SungShinNQ
                     dgdGonsu.Items.Clear();
                 }
 
-        
+                if (chkBuyerArticleNo.IsChecked == true)
+                {
+                    ArticleID = txtBuyerArticleNoSearch.Tag.ToString();
+                }
+                else if (CheckBoxArticleSearch.IsChecked == true)
+                {
+                    ArticleID = TextBoxArticleSearch.Tag.ToString();
+                }
 
 
                 DataSet ds = null;
                 Dictionary<string, object> sqlParameter = new Dictionary<string, object>();
                 sqlParameter.Clear();
-                sqlParameter.Add("FromDate", dtpSDate.SelectedDate == null ? "" : dtpSDate.SelectedDate.Value.ToString("yyyyMMdd"));
-                sqlParameter.Add("ToDate", dtpEDate.SelectedDate == null ? "" : dtpEDate.SelectedDate.Value.ToString("yyyyMMdd"));
-
-                sqlParameter.Add("ChkBuyerArticleNo", chkBuyerArticleNoSrh.IsChecked == true? 1:0); //품번
-                sqlParameter.Add("BuyerArticleNo", chkBuyerArticleNoSrh.IsChecked == true? txtBuyerArticleNoSrh.Tag != null ?  txtBuyerArticleNoSrh.Tag.ToString() :"":""); //품번
-
-                sqlParameter.Add("ChkArticleID", ChkArticleIDSrh.IsChecked == true ? 1 : 0);
-                sqlParameter.Add("ArticleID", ChkArticleIDSrh.IsChecked == true ? txtArticleIDSrh.Tag != null ? txtArticleIDSrh.Tag.ToString() : "":"" ); 
+                sqlParameter.Add("FromDate", dtpSDate.SelectedDate == null ? "" : dtpSDate.SelectedDate.Value.ToString().Replace("-", ""));
+                sqlParameter.Add("ToDate", dtpEDate.SelectedDate == null ? "" : dtpEDate.SelectedDate.Value.ToString().Replace("-", ""));
+                sqlParameter.Add("ArticleNo", ArticleID != null ? ArticleID : ""); //품번
                 ds = DataStore.Instance.ProcedureToDataSet("xp_prd_sKPI_KPI", sqlParameter, false);
 
                 if (ds != null && ds.Tables.Count > 0)
@@ -187,43 +195,37 @@ namespace WizMes_SungShinNQ
 
                         foreach (DataRow dr in drc)
                         {
-                            i++;
-
                             var WPKQC = new Win_prd_KPI_Q_CodeView()
                             {
-                                Num = i,
-                                gbn = dr["GBN"].ToString(),
-                                WorkMonth = DateTypeHyphen(dr["WorkMonth"].ToString()),
+                                Num = i + 1,
+
+                                //WorkDate = DatePickerFormat(dr["WorkDate"].ToString()),
+                                WorkDate = dr["WorkDate"].ToString(),
+
                                 WorkQty = stringFormatN0(dr["WorkQty"]),
-                                DefectQty = stringFormatN0(dr["DefectQty"]),
-                                DefectRate = stringFormatN2Truncate(dr["DefectRate"]),
                                 WorkTime = stringFormatN1(dr["WorkTime"]),
-                                PerDayWorkQty = stringFormatN1(dr["PerDayWorkQty"]),
-                                //WorkDays = stringFormatN0(dr["WorkDays"]),
-                                WorkGoalRate = stringFormatN1(dr["WorkGoalRate"]),
+                                WorkQtyPerHour = stringFormatN0(dr["WorkQtyPerHour"]),
+                                //Daily_WorkQty = stringFormatN0(dr["Daily_WorkQty"]),
+                                DefectQty = stringFormatN0(dr["DefectQty"]),
+                                DefectWorkQty = stringFormatN0(dr["DefectWorkQty"]),
+                                DefectRate = stringFormatN2(dr["DefectRate"]),
+                                DefectUpRate = stringFormatN1(dr["DefectUpRate"]),
+                                DefectGoalRate = stringFormatN1(dr["DefectGoalRate"]),
+                                gbn = dr["gbn"].ToString(),
+
+                                Sort = dr["Sort"].ToString(),
                                 WorkUpRate = stringFormatN1(dr["WorkUpRate"]),
-                                Goal = dr["GBN"].ToString().Equals("P") ? stringFormatN0(dr["Goal"]) : stringFormatN2(dr["Goal"]),
-                                MonthSort = dr["MonthSort"].ToString(),
+                                WorkGoalRate = stringFormatN1(dr["WorkGoalRate"])
                             };
-
-                            if (WPKQC.MonthSort.Equals("999999"))
+                            if (WPKQC.gbn == "P")
                             {
-                                WPKQC.SetColor = true;
-                                WPKQC.WorkMonth = "기간 합계";
+                                dgdGonsu.Items.Add(WPKQC);
                             }
-                            
-
-                            if (WPKQC.gbn.Equals("P"))
+                            if (WPKQC.gbn == "Q")
                             {
-                                dgdGonsu.Items.Add(WPKQC);                                                             
+                                dgdOut.Items.Add(WPKQC);
                             }
-                            else if (WPKQC.gbn.Equals("Q"))
-                            {
-                                dgdOut.Items.Add(WPKQC);                            
-                            }
-
-
-
+                            i++;
                         }
                     }
                 }
@@ -235,6 +237,154 @@ namespace WizMes_SungShinNQ
             finally
             {
                 DataStore.Instance.CloseConnection();
+            }
+        }
+
+        private void setGraphP(DataGrid dataGrid)
+        {
+            try
+            {
+                if (lvcChartP.Series != null)
+                {
+                    lvcChartP.Series.Clear();
+                }
+
+                ChartDTO chart = new ChartDTO();
+                chart.seriesCollection = new SeriesCollection();
+                chart.lineQty = new ChartValues<double>();
+                chart.varQty = new ChartValues<double>();
+                chart.Labels = new string[dataGrid.Items.Count];
+
+                int index = 0;
+                for (int i = 0; i < dataGrid.Items.Count; i++)
+                {
+                    var Rating = dataGrid.Items[i] as Win_prd_KPI_Q_CodeView;
+
+                    if (Rating != null)
+                    {
+                        chart.Labels[index] = Rating.WorkDate;
+                        index++;
+
+                        if (Rating.WorkQtyPerHour != null)
+                        {
+                            chart.lineQty.Add(Convert.ToInt32(Rating.WorkQtyPerHour.Replace(",", "")));
+                            //chart.lineQty.Add(Convert.ToInt32(Rating.Daily_WorkQty.Replace("," , "")));
+                        }
+                        else
+                        {
+                            chart.lineQty.Add(0);
+                        }
+
+                        //if (Rating.WorkQty != null)
+                        //{
+                        //    chart.varQty.Add(Convert.ToInt32(Rating.WorkQty.Replace(",", "")));
+                        //}
+                        //else
+                        //{
+                        //    chart.varQty.Add(0);
+                        //}
+                    }
+                }
+
+                chart.Formatter = data => data.Y.ToString("N0") + "(개)";
+
+                chart.seriesCollection.Add(new LineSeries
+                {
+                    Values = chart.lineQty,
+                    DataLabels = true,
+                    Title = "시간당 생산량",
+                    LabelPoint = chart.Formatter
+                });
+
+                //chart.seriesCollection.Add(new ColumnSeries
+                //{
+                //    Values = chart.varQty,
+                //    DataLabels = true,
+                //    Title = "생산량",
+                //    LabelPoint = chart.Formatter
+                //});
+
+                lvcChartP.DataContext = chart;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void setGraphQ(DataGrid dataGrid)
+        {
+            try
+            {
+                if (lvcChartQ.Series != null)
+                {
+                    lvcChartQ.Series.Clear();
+                }
+
+                ChartDTO chart2 = new ChartDTO();
+                chart2.seriesCollection = new SeriesCollection();
+                chart2.lineQty = new ChartValues<double>();
+                chart2.varQty = new ChartValues<double>();
+                chart2.Labels = new string[dataGrid.Items.Count];
+
+
+                int index = 0;
+                for (int i = 0; i < dataGrid.Items.Count; i++)
+                {
+                    var Rating = dataGrid.Items[i] as Win_prd_KPI_Q_CodeView;
+
+                    if (Rating != null)
+                    {
+                        chart2.Labels[index] = Rating.WorkDate;
+                        index++;
+
+                        if (Rating.DefectRate != null)
+                        {
+                            chart2.lineQty.Add(Convert.ToDouble(Rating.DefectRate));
+                        }
+                        else
+                        {
+                            chart2.lineQty.Add(0);
+                        }
+
+                        //if (Rating.DefectQty != null)
+                        //{
+                        //    chart2.varQty.Add(Convert.ToDouble(Rating.DefectQty));
+                        //}
+                        //else
+                        //{
+                        //    chart2.varQty.Add(0);
+                        //}
+                    }
+                }
+
+                chart2.PercentFormatter = data => data.Y + "(%)";
+                chart2.Formatter = data => data.Y + "(개)";
+
+                chart2.seriesCollection.Add(new LineSeries
+                {
+                    Values = chart2.lineQty,
+                    DataLabels = true,
+                    Title = "불량",
+                    LabelPoint = chart2.PercentFormatter
+                });
+
+                //chart2.seriesCollection.Add(new ColumnSeries
+                //{
+                //    Values = chart2.varQty,
+                //    DataLabels = true,
+                //    Title = "불량량",
+                //    LabelPoint = chart2.Formatter
+                //});
+
+
+
+                lvcChartQ.DataContext = chart2;
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
             }
         }
         #endregion
@@ -253,12 +403,26 @@ namespace WizMes_SungShinNQ
                     using (Loading lw = new Loading(FillGrid))
                     {
                         lw.ShowDialog();
-                        
+
+                        if (dgdGonsu.Items.Count > 0)
+                        {
+                            setGraphP(dgdGonsu);
+                        }
+                        if (dgdOut.Items.Count > 0)
+                        {
+
+                            setGraphQ(dgdOut);
+                        }
+
                         if (dgdGonsu.Items.Count <= 0 || dgdOut.Items.Count <= 0)
                         {
                             MessageBox.Show("조회된 내용이 없습니다.");
                         }
+
+
+
                         btnSearch.IsEnabled = true;
+
                     }
                 }
                 catch (Exception ee)
@@ -275,6 +439,7 @@ namespace WizMes_SungShinNQ
         {
             try
             {
+                //DataStore.Instance.InsertLogByFormS(this.GetType().Name, stDate, stTime, "E");
                 lib.ChildMenuClose(this.ToString());
             }
             catch (Exception ee)
@@ -307,7 +472,7 @@ namespace WizMes_SungShinNQ
 
                 if (ExpExc.DialogResult.HasValue)
                 {
-
+                    //DataStore.Instance.InsertLogByForm(this.GetType().Name, "E");
                     if (ExpExc.choice.Equals(dgdGonsu.Name))
                     {
                         if (ExpExc.Check.Equals("Y"))
@@ -345,77 +510,77 @@ namespace WizMes_SungShinNQ
             }
         }
 
-        private void lblBuyerArticleNoSrh_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private void lblBuyerArticleNo_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if (chkBuyerArticleNoSrh.IsChecked == true)
+            if (chkBuyerArticleNo.IsChecked == true)
             {
-                chkBuyerArticleNoSrh.IsChecked = false;
+                chkBuyerArticleNo.IsChecked = false;
             }
             else
             {
-                chkBuyerArticleNoSrh.IsChecked = true;
+                chkBuyerArticleNo.IsChecked = true;
             }
         }
         // 거래처 체크박스 이벤트
-        private void chkBuyerArticleNoSrh_Checked(object sender, RoutedEventArgs e)
+        private void chkBuyerArticleNo_Checked(object sender, RoutedEventArgs e)
         {
-            chkBuyerArticleNoSrh.IsChecked = true;
-            txtBuyerArticleNoSrh.IsEnabled = true;
-            btnBuyerArticleNoSrh.IsEnabled = true;
+            chkBuyerArticleNo.IsChecked = true;
+            txtBuyerArticleNoSearch.IsEnabled = true;
+            btnBuyerArticleNoSearch.IsEnabled = true;
         }
-        private void chkBuyerArticleNoSrh_UnChecked(object sender, RoutedEventArgs e)
+        private void chkBuyerArticleNo_UnChecked(object sender, RoutedEventArgs e)
         {
-            chkBuyerArticleNoSrh.IsChecked = false;
-            txtBuyerArticleNoSrh.IsEnabled = false;
-            btnBuyerArticleNoSrh.IsEnabled = false;
+            chkBuyerArticleNo.IsChecked = false;
+            txtBuyerArticleNoSearch.IsEnabled = false;
+            btnBuyerArticleNoSearch.IsEnabled = false;
         }
         // 거래처 텍스트박스 엔터 → 플러스파인더
-        private void txtBuyerArticleNoSrh_KeyDown(object sender, KeyEventArgs e)
+        private void txtBuyerArticleNoSearch_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
-                MainWindow.pf.ReturnCode(txtBuyerArticleNoSrh, 76, "");
+                MainWindow.pf.ReturnCode(txtBuyerArticleNoSearch, 76, "");
             }
         }
         // 거래처 플러스파인더 이벤트
-        private void btnBuyerArticleNoSrh_Click(object sender, RoutedEventArgs e)
+        private void btnBuyerArticleNoSearch_Click(object sender, RoutedEventArgs e)
         {
             // 거래처 : 0
-            MainWindow.pf.ReturnCode(txtBuyerArticleNoSrh, 76, "");
+            MainWindow.pf.ReturnCode(txtBuyerArticleNoSearch, 76, "");
         }
 
         //품명 라벨 클릭
-        private void lblArticleIDSrh_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private void LabelArticleSearch_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if (ChkArticleIDSrh.IsChecked == true)
+            if (CheckBoxArticleSearch.IsChecked == true)
             {
-                ChkArticleIDSrh.IsChecked = false;
+                CheckBoxArticleSearch.IsChecked = false;
             }
             else
             {
-                ChkArticleIDSrh.IsChecked = true;
+                CheckBoxArticleSearch.IsChecked = true;
             }
         }
 
-        private void ChkArticleIDSrh_Checked(object sender, RoutedEventArgs e)
+        private void CheckBoxArticleSearch_Checked(object sender, RoutedEventArgs e)
         {
-            txtArticleIDSrh.IsEnabled = true;
-            btnArticleIDSrh.IsEnabled = true;
+            TextBoxArticleSearch.IsEnabled = true;
+            ButtonArticleSearch.IsEnabled = true;
         }
 
-        private void ChkArticleIDSrh_Unchecked(object sender, RoutedEventArgs e)
+        private void CheckBoxArticleSearch_Unchecked(object sender, RoutedEventArgs e)
         {
-            txtArticleIDSrh.IsEnabled = false;
-            btnArticleIDSrh.IsEnabled = false;
+            TextBoxArticleSearch.IsEnabled = false;
+            ButtonArticleSearch.IsEnabled = false;
         }
 
-        private void txtArticleIDSrh_KeyDown(object sender, KeyEventArgs e)
+        private void TextBoxArticleSearch_KeyDown(object sender, KeyEventArgs e)
         {
             try
             {
                 if (e.Key == Key.Enter)
                 {
-                    pf.ReturnCode(txtArticleIDSrh, 77, txtArticleIDSrh.Text);
+                    pf.ReturnCode(TextBoxArticleSearch, 77, TextBoxArticleSearch.Text);
                 }
             }
             catch (Exception ee)
@@ -424,16 +589,31 @@ namespace WizMes_SungShinNQ
             }
         }
 
-        private void btnArticleIDSrh_Click(object sender, RoutedEventArgs e)
+        private void ButtonArticleSearch_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                pf.ReturnCode(txtArticleIDSrh, 77, txtArticleIDSrh.Text);
+                pf.ReturnCode(TextBoxArticleSearch, 77, TextBoxArticleSearch.Text);
             }
             catch (Exception ee)
             {
                 MessageBox.Show("예외처리 - " + ee.ToString());
             }
+        }
+        // 데이터피커 포맷으로 변경
+        private string DatePickerFormat(string str)
+        {
+            string result = "";
+
+            if (str.Length == 8)
+            {
+                if (!str.Trim().Equals(""))
+                {
+                    result = str.Substring(0, 4) + "-" + str.Substring(4, 2) + "-" + str.Substring(6, 2);
+                }
+            }
+
+            return result;
         }
 
         // 천마리 콤마, 소수점 버리기
@@ -452,57 +632,6 @@ namespace WizMes_SungShinNQ
         {
             return string.Format("{0:N1}", obj);
         }
-
-        private string stringFormatN2Truncate(object obj)
-        {
-            // 먼저 객체를 double로 변환
-            double value = Convert.ToDouble(obj);
-
-            // 소수점 2자리에서 버림 수행
-            value = Math.Truncate(value * 100) / 100;
-
-            // N2 형식으로 출력 (천 단위 구분자와 소수점 두 자리 포함)
-            return value.ToString("N2");
-        }
-
-        private string DateTypeHyphen(string DigitsDate)
-        {
-            string pattern1 = @"(\d{4})(\d{2})(\d{2})";
-            string pattern2 = @"(\d{4})(\d{2})(\d{2})(\d{4})(\d{2})(\d{2})";
-            string pattern3 = @"(\d{4})(\d{2})";
-
-            if (DigitsDate.Length == 8)
-            {
-                DigitsDate = Regex.Replace(DigitsDate, pattern1, "$1-$2-$3");
-            }
-            else if (DigitsDate.Length == 6)
-            {
-                DigitsDate = Regex.Replace(DigitsDate, pattern3, "$1-$2");
-            }
-            else if (DigitsDate.Length == 16)
-            {
-                DigitsDate = Regex.Replace(DigitsDate, pattern2, "$1-$2-$3 ~ $4-$5-$6");
-            }          
-            else if (DigitsDate.Length == 0)
-            {
-                DigitsDate = string.Empty;
-            }
-
-            return DigitsDate;
-        }
-
-        private string SetTimeColon(string time)
-        {
-            string conlonTime = string.Empty;
-
-            if (time.Length == 4)
-            {
-                conlonTime = time.Substring(0, 2) + ":" + time.Substring(1, 2);
-            }
-
-            return conlonTime;
-        }
-
     }
 
     #region CodeView
@@ -514,18 +643,18 @@ namespace WizMes_SungShinNQ
         }
 
         public int Num { get; set; }
-
+        public string gbn
+        {
+            get; set;
+        }
         public string GbnName { get; set; }
         public string WorkDate { get; set; }
         public string ArticleNo { get; internal set; }
         public string Article { get; internal set; }
         public string WorkQty { get; internal set; }
-        public string WorkMonth { get; set; }
         public string WorkTime { get; internal set; }
-        public string WorkDays { get; set; }
         public string WorkQtyPerHour { get; internal set; }
-        public string PerDayWorkQty { get; set; }
-        public string WorkMan { get; set; }
+        public string Daily_WorkQty { get; internal set; }
         public string WorkUpRate { get; set; }
         public string WorkGoalRate { get; set; }
         public string DefectQty { get; set; }
@@ -533,13 +662,21 @@ namespace WizMes_SungShinNQ
         public string DefectRate { get; set; }
         public string DefectUpRate { get; set; }
         public string DefectGoalRate { get; set; }
-        public string gbn { get; set; }
         public string Sort { get; set; }
-        public string Goal { get; set; }
-        public string MonthSort { get; set; }
-        public bool SetColor { get; set; } = false;
 
     }
+
+    public class ChartDTO
+    {
+        public SeriesCollection seriesCollection { get; set; }
+        public string[] Labels { get; set; }
+        public Func<ChartPoint, string> Formatter { get; set; }
+        public Func<ChartPoint, string> PercentFormatter { get; set; }
+        public ColumnSeries columnSeries { get; set; }
+        public ChartValues<double> lineQty { get; set; }
+        public ChartValues<double> varQty { get; set; }
+    }
+
 
     #endregion
 
