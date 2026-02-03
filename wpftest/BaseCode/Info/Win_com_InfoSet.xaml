@@ -12,7 +12,7 @@
             <RowDefinition Height="88*" />
             <RowDefinition Height="532*" />
         </Grid.RowDefinitions>
-        <Grid Grid.Row="0" Margin="1" Background="{DynamicResource WizMes_YoungNam}">
+        <Grid Grid.Row="0" Margin="1" Background="{DynamicResource WizMes_SungShinNQ}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="*" />
