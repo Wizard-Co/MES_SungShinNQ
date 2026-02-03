@@ -388,9 +388,9 @@ namespace WizMes_SungShinNQ
                  }
 
                  if(dgdLeft.Items.Count == 0 && dgdRight.Items.Count == 0)
-                  {
-                      MessageBox.Show("조회결과가 없습니다.", "확인");
-                  }
+                 {
+                     MessageBox.Show("조회결과가 없습니다.", "확인");
+                 }
 
             }
             catch (Exception ex)

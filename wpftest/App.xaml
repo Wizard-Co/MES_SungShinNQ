@@ -795,6 +795,8 @@
                 <Setter Property="VerticalContentAlignment" Value="Center"/>
                 <Setter Property="local:DatePickerMonthCalendar.IsMonthYear" Value="True" />
                 <Setter Property="local:DatePickerDateFormat.DateFormat" Value="yyyy-MM" />
+                <EventSetter Event="PreviewLostKeyboardFocus" Handler="SetDateAsText_LostFocus"/>
+                <EventSetter Event="PreviewKeyDown" Handler="SetDateAsText_KeyDown"/>
             </Style>
 
             <!-- 품질디자인 -->

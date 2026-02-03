@@ -554,9 +554,15 @@ namespace WizMes_SungShinNQ
 
             if (numbersOnly.Length == 8 &&
                 DateTime.TryParseExact(numbersOnly, "yyyyMMdd", null,
-                System.Globalization.DateTimeStyles.None, out DateTime result))
+                System.Globalization.DateTimeStyles.None, out DateTime yyyymmdd))
             {
-                dtp.SelectedDate = result;
+                dtp.SelectedDate = yyyymmdd;
+            }
+            else if (numbersOnly.Length == 6 &&
+                     DateTime.TryParseExact(numbersOnly + "01", "yyyyMMdd", null,
+                     System.Globalization.DateTimeStyles.None, out DateTime yyyymm))
+            {
+                dtp.SelectedDate = yyyymm;
             }
         }
     }

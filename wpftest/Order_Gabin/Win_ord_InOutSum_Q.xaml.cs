@@ -1,17 +1,17 @@
-﻿using WizMes_SungShinNQ.PopUP;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
-using WPF.MDI;
 using System.Windows.Shapes;
-using System.Windows.Media;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Windows.Threading;
+using WizMes_SungShinNQ.PopUp;
+using WizMes_SungShinNQ.PopUP;
+using WPF.MDI;
 
 namespace WizMes_SungShinNQ
 {
@@ -20,6 +20,9 @@ namespace WizMes_SungShinNQ
     /// </summary>
     public partial class Win_ord_InOutSum_Q : UserControl
     {
+        string stDate = string.Empty;
+        string stTime = string.Empty;
+
         Lib lib = new Lib();
         PlusFinder pf = new PlusFinder();
 
@@ -27,7 +30,6 @@ namespace WizMes_SungShinNQ
         int Clicked_row = 0;
         int Clicked_col = 0;
         List<Rectangle> PreRect = new List<Rectangle>();
-        List<string> GridHeaderList = new List<string>();
 
         //전역변수는 이럴때 쓰는거 아니겠어??!!?
         private DataTable PeriodDataTable = null;
@@ -44,6 +46,11 @@ namespace WizMes_SungShinNQ
         // 화면 첫 시작.
         private void Window_InOutTotalGrid_Loaded(object sender, RoutedEventArgs e)
         {
+            stDate = DateTime.Now.ToString("yyyyMMdd");
+            stTime = DateTime.Now.ToString("HHmm");
+
+            DataStore.Instance.InsertLogByFormS(this.GetType().Name, stDate, stTime, "S");
+
             First_Step();
             ComboBoxSetting();
         }
@@ -63,148 +70,78 @@ namespace WizMes_SungShinNQ
             this.DataContext = MC;
             //////////////////////////////////////
 
-            lblThisMonth.Content = DateTime.Now.ToString("yyyy-MM");
-            lblMinusOneMonth.Content = DateTime.Now.AddMonths(-1).ToString("yyyy-MM");
-            lblMinusTwoMonth.Content = DateTime.Now.AddMonths(-2).ToString("yyyy-MM");
 
             dtpFromDate.Text = DateTime.Now.ToString("yyyy-MM-dd");
             dtpToDate.Text = DateTime.Now.ToString("yyyy-MM-dd");
 
             txtblMessage.Visibility = Visibility.Hidden;
 
-            // 전부 노 체크 노 enable로 시작.
-            txtCustomer.IsEnabled = false;
-            txtArticle.IsEnabled = false;
-            btnCustomer.IsEnabled = false;
-            btnArticle.IsEnabled = false;
-          
-            cboInInspectGubun.IsEnabled = false;
-            chkInOutGubun.IsChecked = true;
-            chkDate.IsChecked = true;
+
         }
 
-        // 품명
-        private void chkArticle_Click(object sender, RoutedEventArgs e)
+        // 어제.(전일)
+        private void btnYesterday_Click(object sender, RoutedEventArgs e)
         {
-            if (chkArticle.IsChecked == true)
+            //string[] receiver = lib.BringYesterdayDatetime();
+
+            //dtpFromDate.Text = receiver[0];
+            //dtpToDate.Text = receiver[1];
+
+            if (dtpFromDate.SelectedDate != null)
             {
-                txtArticle.IsEnabled = true;
-                txtArticle.Focus();
-                btnArticle.IsEnabled = true;
+                dtpFromDate.SelectedDate = dtpFromDate.SelectedDate.Value.AddDays(-1);
+                dtpToDate.SelectedDate = dtpFromDate.SelectedDate;
             }
             else
             {
-                txtArticle.IsEnabled = false;
-                btnArticle.IsEnabled = false;
+                dtpFromDate.SelectedDate = DateTime.Today.AddDays(-1);
+                dtpToDate.SelectedDate = DateTime.Today.AddDays(-1);
             }
         }
-        // 품명
-        private void chkArticle_Click(object sender, MouseButtonEventArgs e)
+        // 오늘(금일)
+        private void btnToday_Click(object sender, RoutedEventArgs e)
         {
-            if (chkArticle.IsChecked == true)
-            {
-                chkArticle.IsChecked = false;
-                txtArticle.IsEnabled = false;
-                btnArticle.IsEnabled = false;
-            }
-            else
-            {
-                chkArticle.IsChecked = true;
-                txtArticle.IsEnabled = true;
-                txtArticle.Focus();
-                btnArticle.IsEnabled = true;
-            }
+            dtpFromDate.Text = DateTime.Now.ToString("yyyy-MM-dd");
+            dtpToDate.Text = DateTime.Now.ToString("yyyy-MM-dd");
         }
-        // 거래처
-        private void chkCustomer_Click(object sender, RoutedEventArgs e)
+        // 지난 달(전월)
+        private void btnLastMonth_Click(object sender, RoutedEventArgs e)
         {
-            if (chkCustomer.IsChecked == true)
+            //string[] receiver = lib.BringLastMonthDatetime();
+
+            //dtpFromDate.Text = receiver[0];
+            //dtpToDate.Text = receiver[1];
+
+            if (dtpFromDate.SelectedDate != null)
             {
-                txtCustomer.IsEnabled = true;
-                txtCustomer.Focus();
-                btnCustomer.IsEnabled = true;
+                DateTime ThatMonth1 = dtpFromDate.SelectedDate.Value.AddDays(-(dtpFromDate.SelectedDate.Value.Day - 1)); // 선택한 일자 달의 1일!
+
+                DateTime LastMonth1 = ThatMonth1.AddMonths(-1); // 저번달 1일
+                DateTime LastMonth31 = ThatMonth1.AddDays(-1); // 저번달 말일
+
+                dtpFromDate.SelectedDate = LastMonth1;
+                dtpToDate.SelectedDate = LastMonth31;
             }
-            else
-            {
-                txtCustomer.IsEnabled = false;
-                btnCustomer.IsEnabled = false;
-            }
+
         }
-        // 거래처
-        private void chkCustomer_Click(object sender, MouseButtonEventArgs e)
+        // 이번 달(금월)
+        private void btnThisMonth_Click(object sender, RoutedEventArgs e)
         {
-            if (chkCustomer.IsChecked == true)
-            {
-                chkCustomer.IsChecked = false;
-                txtCustomer.IsEnabled = false;
-                btnCustomer.IsEnabled = false;
-            }
-            else
-            {
-                chkCustomer.IsChecked = true;
-                txtCustomer.IsEnabled = true;
-                txtCustomer.Focus();
-                btnCustomer.IsEnabled = true;
-            }
+            string[] receiver = lib.BringThisMonthDatetime();
+
+            dtpFromDate.SelectedDate = DateTime.Parse(receiver[0]);
+            dtpToDate.SelectedDate = DateTime.Parse(receiver[1]);
         }
-        //입출고구분
-        private void chkInOutGubun_Click(object sender, RoutedEventArgs e)
-        {
-            if (chkInOutGubun.IsChecked == true)
-            {
-                cboInOutGubun.IsEnabled = true;
-                cboInOutGubun.Focus();
-            }
-            else { cboInOutGubun.IsEnabled = false; }
-        }
-        //입출고구분
-        private void chkInOutGubun_Click(object sender, MouseButtonEventArgs e)
-        {
-            if (chkInOutGubun.IsChecked == true)
-            {
-                chkInOutGubun.IsChecked = false;
-                cboInOutGubun.IsEnabled = false;
-            }
-            else
-            {
-                chkInOutGubun.IsChecked = true;
-                cboInOutGubun.IsEnabled = true;
-                cboInOutGubun.Focus();
-            }
-        }
-        //입고검수구분
-        private void chkInInspectGubun_Click(object sender, RoutedEventArgs e)
-        {
-            if (chkInInsepectGubun.IsChecked == true)
-            {
-                cboInInspectGubun.IsEnabled = true;
-                cboInInspectGubun.Focus();
-            }
-            else { cboInInspectGubun.IsEnabled = false; }
-        }
-        //입고검수구분
-        private void chkInInspectGubun_Click(object sender, MouseButtonEventArgs e)
-        {
-            if (chkInInsepectGubun.IsChecked == true)
-            {
-                chkInInsepectGubun.IsChecked = false;
-                cboInInspectGubun.IsEnabled = false;
-            }
-            else
-            {
-                chkInInsepectGubun.IsChecked = true;
-                cboInInspectGubun.IsEnabled = true;
-                cboInInspectGubun.Focus();
-            }
-        }
+
+
         #endregion
 
         #region 콤보박스 세팅
         // 콤보박스 세팅.
         private void ComboBoxSetting()
         {
-            cboInOutGubun.Items.Clear();
-            cboInInspectGubun.Items.Clear();
+            cboInOutGubunSrh.Items.Clear();
+            cboInInspectGubunSrh.Items.Clear();
 
             string[] DirectCombo = new string[2];
             DirectCombo[0] = "Y";
@@ -217,7 +154,7 @@ namespace WizMes_SungShinNQ
             DirectCombOList.Add(DirectCombo.ToArray());
             DirectCombOList.Add(DirectCombo1.ToArray());
 
-            ObservableCollection<CodeView> cbInInspectGubun = ComboBoxUtil.Instance.Direct_SetComboBox(DirectCombOList);
+            ObservableCollection<CodeView> cbInInspectGubunSrh = ComboBoxUtil.Instance.Direct_SetComboBox(DirectCombOList);
 
             DirectCombo = new string[2];
             DirectCombo[0] = "1";
@@ -230,17 +167,17 @@ namespace WizMes_SungShinNQ
             DirectCombOList.Add(DirectCombo.ToArray());
             DirectCombOList.Add(DirectCombo1.ToArray());
 
-            ObservableCollection<CodeView> cbInOutGubun = ComboBoxUtil.Instance.Direct_SetComboBox(DirectCombOList);
+            ObservableCollection<CodeView> cbInOutGubunSrh = ComboBoxUtil.Instance.Direct_SetComboBox(DirectCombOList);
 
-            this.cboInOutGubun.ItemsSource = cbInOutGubun;
-            this.cboInOutGubun.DisplayMemberPath = "code_name";
-            this.cboInOutGubun.SelectedValuePath = "code_id";
-            this.cboInOutGubun.SelectedIndex = 1;
+            this.cboInOutGubunSrh.ItemsSource = cbInOutGubunSrh;
+            this.cboInOutGubunSrh.DisplayMemberPath = "code_name";
+            this.cboInOutGubunSrh.SelectedValuePath = "code_id";
+            this.cboInOutGubunSrh.SelectedIndex = 0;
 
-            this.cboInInspectGubun.ItemsSource = cbInInspectGubun;
-            this.cboInInspectGubun.DisplayMemberPath = "code_name";
-            this.cboInInspectGubun.SelectedValuePath = "code_id";
-            this.cboInInspectGubun.SelectedIndex = 0;
+            this.cboInInspectGubunSrh.ItemsSource = cbInInspectGubunSrh;
+            this.cboInInspectGubunSrh.DisplayMemberPath = "code_name";
+            this.cboInInspectGubunSrh.SelectedValuePath = "code_id";
+            this.cboInInspectGubunSrh.SelectedIndex = 0;
 
         }
         #endregion
@@ -249,15 +186,15 @@ namespace WizMes_SungShinNQ
         //플러스 파인더
 
         //거래처
-        private void btnCustomer_Click(object sender, RoutedEventArgs e)
+        private void btnCustomIDSrh_Click(object sender, RoutedEventArgs e)
         {
-            pf.ReturnCode(txtCustomer, 0, "");  // 매출거래처만 표기되도록 변경(0 -> 68).
+            pf.ReturnCode(txtCustomIDSrh, 0, "");
         }
 
         // 품명
-        private void btnArticle_Click(object sender, RoutedEventArgs e)
+        private void btnArticleIDSrh_click(object sender, RoutedEventArgs e)
         {
-            pf.ReturnCode(txtArticle, 84, txtArticle.Text);
+            pf.ReturnCode(txtArticleIDSrh, 77, "");
         }
 
         #endregion
@@ -266,15 +203,28 @@ namespace WizMes_SungShinNQ
         // 검색(조회) 버튼 클릭
         private void btnSearch_Click(object sender, RoutedEventArgs e)
         {
-            //검색버튼 비활성화
+            if (tiMonth_H.IsSelected || tiMonth_V.IsSelected || lib.DatePickerCheck(dtpFromDate, dtpToDate, chkDateSrh) )
+            {
+                using (Loading ld = new Loading(beSearch))
+                {
+                    ld.ShowDialog();
+                }
+            }
+
+        }
+
+        private void beSearch()
+        {
+            //검색버튼 비활성화   
             btnSearch.IsEnabled = false;
 
             Dispatcher.BeginInvoke(new Action(() =>
-
             {
-                Thread.Sleep(2000);
 
-                //로직
+
+                Console.WriteLine();
+
+                DataStore.Instance.InsertLogByForm(this.GetType().Name, "R");
                 TabItem NowTI = tabconGrid.SelectedItem as TabItem;
 
                 if (NowTI.Header.ToString() == "기간집계") { FillGrid_Period(); }
@@ -282,80 +232,41 @@ namespace WizMes_SungShinNQ
                 else if (NowTI.Header.ToString() == "월별집계(세로)") { FillGrid_Month_V(); }
                 else if (NowTI.Header.ToString() == "월별집계(가로)") { FillGrid_Month_H(); }
 
-                for (int i = 0; i < 3; i++)
-                {
-                    //lib.Delay(10);
-                    Header_Content_Width_Adjust(NowTI.Header.ToString());
-                    //lib.Delay(10);
-                    Re_Header_Content_Width_Adjust(NowTI.Header.ToString());
-                }
+            }), System.Windows.Threading.DispatcherPriority.Background);      
 
-            }), System.Windows.Threading.DispatcherPriority.Background);
-
-
-
-            Dispatcher.BeginInvoke(new Action(() =>
-
-            {
-                btnSearch.IsEnabled = true;
-
-            }), System.Windows.Threading.DispatcherPriority.Background);
-            
+            btnSearch.IsEnabled = true;
         }
 
         #region 기간집계 조회
         //기간집계 조회
         private void FillGrid_Period()
         {
-            //클리어 후 데이터를 뿌려줘야 하니까
-            grdMerge_Period.Children.Clear();
-            grdPeriod.Items.Clear();
-            //총계 그리드
-            grdTotal.Items.Clear();
-            string SearchFromDate = dtpFromDate.ToString().Substring(0, 10).Replace("-", "");
-            string SearchToDate = dtpToDate.ToString().Substring(0, 10).Replace("-", "");         //기준일자
-            int ChkCustomID = 0;
-            if (chkCustomer.IsChecked == true) { ChkCustomID = 1; }
-            else { txtCustomer.Tag = ""; txtCustomer.Text = ""; }                                                      //거래처
-            int ChkArticleID = 0;
-            if (chkArticle.IsChecked == true) { ChkArticleID = 1; }
-            else { txtArticle.Tag = ""; txtArticle.Text = ""; }                                                       //품명
-            int nGubun = 0;
-            if (chkInOutGubun.IsChecked == true)
-            {
-                if (cboInOutGubun.SelectedValue.ToString() == "1") { nGubun = 1; }
-                if (cboInOutGubun.SelectedValue.ToString() == "2") { nGubun = 2; }
-            }                                                                                   //입출고구분
-            int nMainItem = 0;
-            if (chkMainInterestItem.IsChecked == true) { nMainItem = 1; }                       //주요관심품목
-            int nCustomItem = 0;
-            if (chkCustomsEnrollItem.IsChecked == true) { nCustomItem = 1; }                    //거래처등록품목
-            int chkInspect = 0;
-            string sInspect = string.Empty;
-            if (chkInInsepectGubun.IsChecked == true)
-            {
-                chkInspect = 1;
-                if (cboInInspectGubun.SelectedValue.ToString() == "Y") { sInspect = "Y"; }
-                if (cboInInspectGubun.SelectedValue.ToString() == "N") { sInspect = "N"; }
-            }                                                                                   //입고검수구분
+            //grdPeriod.Items.Clear();
+            grdPeriod.ItemsSource = null;
+            dgdPeriodTotal.Items.Clear();
+
+
 
             try
             {
                 Dictionary<string, object> sqlParameter = new Dictionary<string, object>();
-                sqlParameter.Add("ChkDate", chkDate.IsChecked == true ? 1: 0);
-                sqlParameter.Add("SDate", SearchFromDate);
-                sqlParameter.Add("EDate", SearchToDate);
-                sqlParameter.Add("ChkCustomID", ChkCustomID);
-                sqlParameter.Add("CustomID", ChkCustomID == 1 ? txtCustomer.Tag.ToString() : "");
-                sqlParameter.Add("ChkArticleID", chkArticle.IsChecked == true ? 1 : 0); //0);// ChkArticleID);
-                //sqlParameter.Add("ArticleID", chkArticle.IsChecked == true ? txtArticle.Tag.ToString() : string.Empty);//""); //txtArticle.Tag.ToString());
-                sqlParameter.Add("ArticleID", chkArticle.IsChecked == true ? "" : "");
-                sqlParameter.Add("nGubun", nGubun);
-                sqlParameter.Add("nMainItem", nMainItem);
-                sqlParameter.Add("nCustomItem", nCustomItem);
-                sqlParameter.Add("chkInspect", chkInspect);
-                sqlParameter.Add("sInspect", sInspect);
-                sqlParameter.Add("BuyerArticleNo", chkArticle.IsChecked == true ? txtArticle.Text.Trim() : "");
+                sqlParameter.Add("ChkDate", 1);
+                sqlParameter.Add("SDate", !lib.IsDatePickerNull(dtpFromDate) ? lib.ConvertDate(dtpFromDate) : "");
+                sqlParameter.Add("EDate", !lib.IsDatePickerNull(dtpToDate) ? lib.ConvertDate(dtpToDate) : "");
+
+                sqlParameter.Add("ChkCustomID", chkCustomIDSrh.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("CustomID", chkCustomIDSrh.IsChecked == true ? txtCustomIDSrh.Tag != null ? txtCustomIDSrh.Tag.ToString() : "" : "");
+
+                sqlParameter.Add("ChkBuyerArticleNo", chkBuyerArticleNoSrh.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("BuyerArticleNo", chkBuyerArticleNoSrh.IsChecked == true ? txtBuyerArticleNoSrh.Tag != null ? txtBuyerArticleNoSrh.Tag.ToString() : string.Empty : string.Empty);
+
+                sqlParameter.Add("ChkArticleID", chkArticleIDSrh.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("ArticleID", chkArticleIDSrh.IsChecked == true ? txtArticleIDSrh.Tag != null ? txtArticleIDSrh.Tag.ToString() : "" : "");
+
+                sqlParameter.Add("ChkOrder", chkOrderIDSrh.IsChecked == true ? rbnOrderNOSrh.IsChecked == true ? 1 : 2 : 0);
+                sqlParameter.Add("Order", chkOrderIDSrh.IsChecked == true ? !string.IsNullOrEmpty(txtOrderIDSrh.Text) ? txtOrderIDSrh.Text : "" : "");
+
+
 
                 DataSet ds = DataStore.Instance.ProcedureToDataSet("xp_Outware_sInOutwareSum_Period", sqlParameter, false);
 
@@ -372,363 +283,70 @@ namespace WizMes_SungShinNQ
                     }
                     else
                     {
-                        //grdMerge_Period.RowDefinitions.Clear();
 
+                        int i = 0;                    
                         DataRowCollection drc = dt.Rows;
-                        Style cellStyleLeft = new Style(typeof(TextBox));
-                        cellStyleLeft.Setters.Add(new Setter(TextBox.BorderThicknessProperty, new Thickness(0, 0, 1, 1)));
-                        cellStyleLeft.Setters.Add(new Setter(TextBox.BorderBrushProperty, System.Windows.Media.Brushes.Black));
-                        cellStyleLeft.Setters.Add(new Setter(TextBox.BackgroundProperty, System.Windows.Media.Brushes.White));
-                        cellStyleLeft.Setters.Add(new Setter(TextBox.VerticalContentAlignmentProperty, VerticalAlignment.Center));
-                        cellStyleLeft.Setters.Add(new Setter(TextBox.HorizontalContentAlignmentProperty, HorizontalAlignment.Left));
-                        cellStyleLeft.Setters.Add(new Setter(TextBox.FocusableProperty, true));
 
-                        Style cellStyleCenter = new Style(typeof(TextBox));
-                        cellStyleCenter.Setters.Add(new Setter(TextBox.BorderThicknessProperty, new Thickness(0, 0, 1, 1)));
-                        cellStyleCenter.Setters.Add(new Setter(TextBox.BorderBrushProperty, System.Windows.Media.Brushes.Black));
-                        cellStyleCenter.Setters.Add(new Setter(TextBox.BackgroundProperty, System.Windows.Media.Brushes.White));
-                        cellStyleCenter.Setters.Add(new Setter(TextBox.VerticalContentAlignmentProperty, VerticalAlignment.Center));
-                        cellStyleCenter.Setters.Add(new Setter(TextBox.HorizontalContentAlignmentProperty, HorizontalAlignment.Center));
-                        cellStyleCenter.Setters.Add(new Setter(TextBox.FocusableProperty, true));
+                        Win_ord_InOutSum_Total_QView total = new Win_ord_InOutSum_Total_QView();
+                        List<Win_ord_InOutSum_QView> lstRows = new List<Win_ord_InOutSum_QView>();
 
-                        Style cellStyleRight = new Style(typeof(TextBox));
-                        cellStyleRight.Setters.Add(new Setter(TextBox.BorderThicknessProperty, new Thickness(0, 0, 1, 1)));
-                        cellStyleRight.Setters.Add(new Setter(TextBox.BorderBrushProperty, System.Windows.Media.Brushes.Black));
-                        cellStyleRight.Setters.Add(new Setter(TextBox.BackgroundProperty, System.Windows.Media.Brushes.White));
-                        cellStyleRight.Setters.Add(new Setter(TextBox.VerticalContentAlignmentProperty, VerticalAlignment.Center));
-                        cellStyleRight.Setters.Add(new Setter(TextBox.HorizontalContentAlignmentProperty, HorizontalAlignment.Right));
-                        cellStyleRight.Setters.Add(new Setter(TextBox.FocusableProperty, true));
-
-
-                        string strOTemp = string.Empty;
-                        string str_O_Temp = string.Empty;
-
-                        string strPTemp = string.Empty;
-
-                        int k = 0;
-                        int m = 1; //var textbox02용
-                        int o = 1; //var textbox03용
-                        int p = 1; //var textbox04용
-
-                        var textbox03 = new TextBox();
-                        var textbox04 = new TextBox();
-
-                        
-
-                        for (int i = 0; drc.Count > i; i++)
+                        foreach (DataRow dr in drc)
                         {
-                            //k = 1 + i;
-                            var Win_ord_InOutSum_QView_Insert = new Win_ord_InOutSum_QView()
+                            i++;
+                            var PeriodItem = new Win_ord_InOutSum_QView
                             {
-                                //P_NUM = k,
-                                P_cls = drc[i]["cls"].ToString(),
-                                P_Gbn = drc[i]["Gbn"].ToString(),
-                                P_IODate = drc[i]["IODate"].ToString(),
-                                P_CustomID = drc[i]["CustomID"].ToString(),
-                                P_CustomName = drc[i]["CustomName"].ToString(),
-                                P_BuyerArticleNo = drc[i]["BuyerArticleNo"].ToString(),
-                                P_ArticleID = drc[i]["ArticleID"].ToString(),
-                                P_Article = drc[i]["Article"].ToString(),
-                                P_Roll = drc[i]["Roll"].ToString(),
-                                P_Qty = drc[i]["Qty"].ToString().Split('.')[0].Trim(),
-                                P_UnitClss = drc[i]["UnitClss"].ToString(),
-                                P_UnitClssName = drc[i]["UnitClssName"].ToString(),
-                                P_UnitPrice = drc[i]["UnitPrice"].ToString(),
-                                P_PriceClss = drc[i]["PriceClss"].ToString(),
-                                P_PriceClssName = drc[i]["PriceClssName"].ToString(),
-                                P_Amount = drc[i]["Amount"].ToString(),
-                                P_VatAmount = drc[i]["VatAmount"].ToString(),
-                                P_TotAmount = drc[i]["TotAmount"].ToString(),
-                                P_CustomRate = lib.returnNumStringTwo(drc[i]["CustomRate"].ToString()),
-                                P_CustomRateOrder = drc[i]["CustomRateOrder"].ToString(),
+                                P_NUM = i,
+                                P_Gbn = dr["Gbn"].ToString(),
+                                P_CustomName = dr["KCustom"].ToString(),
+                                P_OrderID = dr["OrderID"].ToString(),
+                                P_OrderNo = dr["OrderNo"].ToString(),
+                                P_BuyerArticleNo = dr["BuyerArticleNo"].ToString(),
+                                P_Article = dr["Article"].ToString(),
+                                P_Spec = dr["Spec"].ToString(),
+                                P_Roll = Lib.Instance.ToDecimal(dr["Roll"]),
+                                P_Qty = Lib.Instance.ToDecimal(dr["TotQty"]),
+                                P_UnitClssName = dr["UnitClssName"].ToString(),
+                                P_CustomRate = Lib.Instance.ToDecimal(dr["CustomRate"]),
+
                             };
 
-                            Win_ord_InOutSum_QView_Insert.P_Roll = lib.returnNumString(Win_ord_InOutSum_QView_Insert.P_Roll);
-                            Win_ord_InOutSum_QView_Insert.P_Qty = lib.returnNumString(Win_ord_InOutSum_QView_Insert.P_Qty);
-                            Win_ord_InOutSum_QView_Insert.P_UnitPrice = lib.returnNumString(Win_ord_InOutSum_QView_Insert.P_UnitPrice);
-                            Win_ord_InOutSum_QView_Insert.P_Amount = lib.returnNumString(Win_ord_InOutSum_QView_Insert.P_Amount);
-                            Win_ord_InOutSum_QView_Insert.P_VatAmount = lib.returnNumString(Win_ord_InOutSum_QView_Insert.P_VatAmount);
-                            Win_ord_InOutSum_QView_Insert.P_TotAmount = lib.returnNumString(Win_ord_InOutSum_QView_Insert.P_TotAmount);
-                            Win_ord_InOutSum_QView_Insert.P_CustomRate = lib.returnNumString(Win_ord_InOutSum_QView_Insert.P_CustomRate);
-
-                            if (Win_ord_InOutSum_QView_Insert.P_Article == "zzzzzzzzz")
+                            if (PeriodItem.P_Gbn.Equals("1"))
                             {
-                                Win_ord_InOutSum_QView_Insert.P_Article = "";
+                                PeriodItem.P_Gbn = "입고";
+                                total.P_TotalStuffRoll += PeriodItem.P_Roll;
+                                total.P_TotalStuffQty += PeriodItem.P_Qty;
+                                lstRows.Add(PeriodItem);
+
                             }
-
-                            
-
-                            RowDefinition row = new RowDefinition();
-                            row.Height = GridLength.Auto;
-                            grdMerge_Period.RowDefinitions.Add(row);
-
-
-                            //순번
-                            var textbox01 = new TextBox();
-                            textbox01.Text = k.ToString();
-                            textbox01.Style = cellStyleCenter;
-                            textbox01.IsReadOnly = true;
-                            textbox01.PreviewMouseDown += Textbox_Period_previewmousedown;
-                            textbox01.PreviewMouseUp += Textbox_Period_previewmouseup;
-
-                            grdMerge_Period.Children.Add(textbox01);
-                            Grid.SetRow(textbox01, i);
-                            Grid.SetColumn(textbox01, 0);
-
-
-                            //기간
-                            var textbox02 = new TextBox();
-                            textbox02.Text = SearchFromDate + "~" + SearchToDate;
-                            textbox02.Style = cellStyleCenter;
-                            textbox02.IsReadOnly = true;
-                            textbox02.PreviewMouseDown += Textbox_Period_previewmousedown;
-                            textbox02.PreviewMouseUp += Textbox_Period_previewmouseup;
-
-                            if ((i+1) != drc.Count) { m++; }
-
-                            else if ((i + 1) == drc.Count)
+                            else if (PeriodItem.P_Gbn.Equals("2"))
                             {
-                                grdMerge_Period.Children.Add(textbox02);
-                                Grid.SetRow(textbox02, 0);
-                                Grid.SetRowSpan(textbox02, m);
-                                Grid.SetColumn(textbox02, 1);
-
-                                m = 1;
+                                PeriodItem.P_Gbn = "출고";
+                                total.P_TotalOutRoll += PeriodItem.P_Roll;
+                                total.P_TotalOutQty += PeriodItem.P_Qty;
+                                lstRows.Add(PeriodItem);
                             }
-
-                            // textbox 03 시작지점.
-                            if (Win_ord_InOutSum_QView_Insert.P_Gbn == "1")
+                            else if (PeriodItem.P_Gbn.Equals("3"))
                             {
-                                if (Win_ord_InOutSum_QView_Insert.P_cls == "3")
-                                {
-                                    str_O_Temp = "입고 총계";
-                                    Win_ord_InOutSum_QView_Insert.P_Gbn = str_O_Temp;
-                                    grdTotal.Items.Add(Win_ord_InOutSum_QView_Insert);
-                                }
-                                else
-                                {
-                                    k++;
-                                    str_O_Temp = "입고";
-                                    Win_ord_InOutSum_QView_Insert.P_Gbn = str_O_Temp;
-                                    Win_ord_InOutSum_QView_Insert.P_NUM = k;
-                                    grdPeriod.Items.Add(Win_ord_InOutSum_QView_Insert);
-                                }
+                                PeriodItem.P_Color1 = true;
+                                PeriodItem.P_Gbn = string.Empty;
+                                PeriodItem.P_Article = "거래처 계";
+                                PeriodItem.P_CustomName = string.Empty;
+                                PeriodItem.P_Article_TextAlignment = TextAlignment.Center;
+                                lstRows.Add(PeriodItem);
                             }
-                            else if (Win_ord_InOutSum_QView_Insert.P_Gbn == "2")
+                            else if (PeriodItem.P_Gbn.Equals("4"))
                             {
-                                if (Win_ord_InOutSum_QView_Insert.P_cls == "3")
-                                {
-                                    str_O_Temp = "출고 총계";
-                                    Win_ord_InOutSum_QView_Insert.P_Gbn = str_O_Temp;
-                                    grdTotal.Items.Add(Win_ord_InOutSum_QView_Insert);
-                                }
-                                else
-                                {
-                                    //if (Win_ord_InOutSum_QView_Insert)
-                                    //{
-                                    //    str_O_Temp = "예외출고";
-                                    //    Win_ord_InOutSum_QView_Insert.P_Gbn = str_O_Temp;
-                                    //}
-                                    //else {
-                                    k++;
-                                    str_O_Temp = "출고";
-                                    Win_ord_InOutSum_QView_Insert.P_Gbn = str_O_Temp;
-                                    Win_ord_InOutSum_QView_Insert.P_NUM = k;
-                                    grdPeriod.Items.Add(Win_ord_InOutSum_QView_Insert);
-                                    //}
-                                }
+                                PeriodItem.P_Color2 = true;
+                                PeriodItem.P_Gbn = string.Empty;
+                                PeriodItem.P_CustomName = string.Empty;
+                                PeriodItem.P_Article_TextAlignment = TextAlignment.Center;
+                                lstRows.Add(PeriodItem);
                             }
-
-                            if (i == 0)
-                            {
-                                //구분
-                                textbox03.Text = str_O_Temp;
-                                textbox03.Style = cellStyleCenter;
-                                textbox03.IsReadOnly = true;
-                                textbox03.PreviewMouseDown += Textbox_Period_previewmousedown;
-                                textbox03.PreviewMouseUp += Textbox_Period_previewmouseup;
-
-                                grdMerge_Period.Children.Add(textbox03);
-                                Grid.SetRow(textbox03, i);
-                                Grid.SetColumn(textbox03, 2);
-                                strOTemp = str_O_Temp;
-                            }
-
-                            else if ((i + 1) == drc.Count)
-                            {
-                                o++;
-                                Grid.SetRowSpan(textbox03, o);
-                            }
-
-                            else
-                            {
-                                if (strOTemp.Equals(str_O_Temp))
-                                {
-                                    o++;
-                                }
-                                else
-                                {
-                                    Grid.SetRowSpan(textbox03, o);
-                                    o = 1;
-
-                                    //구분
-                                    textbox03 = new TextBox();
-                                    textbox03.Text = str_O_Temp;
-                                    textbox03.Style = cellStyleCenter;
-                                    textbox03.IsReadOnly = true;
-                                    textbox03.PreviewMouseDown += Textbox_Period_previewmousedown;
-                                    textbox03.PreviewMouseUp += Textbox_Period_previewmouseup;
-
-                                    grdMerge_Period.Children.Add(textbox03);
-                                    Grid.SetRow(textbox03, i);
-                                    Grid.SetColumn(textbox03, 2);
-                                    strOTemp = str_O_Temp;
-                                }
-                            }
-
-                            // textbox 04 시작지점.
-                            if (i == 0)
-                            {
-                                //거래처
-                                textbox04.Text = Win_ord_InOutSum_QView_Insert.P_CustomName;
-                                textbox04.Style = cellStyleLeft;
-                                textbox04.IsReadOnly = true;
-                                textbox04.PreviewMouseDown += Textbox_Period_previewmousedown;
-                                textbox04.PreviewMouseUp += Textbox_Period_previewmouseup;
-
-                                grdMerge_Period.Children.Add(textbox04);
-                                Grid.SetRow(textbox04, i);
-                                Grid.SetColumn(textbox04, 3);
-                                strPTemp = Win_ord_InOutSum_QView_Insert.P_CustomName;
-
-                                
-                            }
-                            else if ((i + 1) == drc.Count)
-                            {
-                                p++;
-                                Grid.SetRowSpan(textbox04, p);
-                            }
-                            else
-                            {
-                                if (strPTemp.Equals(Win_ord_InOutSum_QView_Insert.P_CustomName))
-                                {
-                                    p++;
-                                }
-                                else
-                                {
-                                    Grid.SetRowSpan(textbox04, p);
-                                    p = 1;
-
-                                    //거래처
-                                    textbox04 = new TextBox();
-                                    textbox04.Text = Win_ord_InOutSum_QView_Insert.P_CustomName;
-                                    textbox04.Style = cellStyleLeft;
-                                    textbox04.IsReadOnly = true;
-                                    textbox04.PreviewMouseDown += Textbox_Period_previewmousedown;
-                                    textbox04.PreviewMouseUp += Textbox_Period_previewmouseup;
-
-                                    grdMerge_Period.Children.Add(textbox04);
-                                    Grid.SetRow(textbox04, i);
-                                    Grid.SetColumn(textbox04, 3);
-                                    strPTemp = Win_ord_InOutSum_QView_Insert.P_CustomName;
-                                    
-                                }
-                            }
-
-                            //품번
-                            var textbox05 = new TextBox();
-                            textbox05.Text = Win_ord_InOutSum_QView_Insert.P_BuyerArticleNo;
-                            textbox05.Style = cellStyleLeft;
-                            textbox05.IsReadOnly = true;
-                            textbox05.PreviewMouseDown += Textbox_Period_previewmousedown;
-                            textbox05.PreviewMouseUp += Textbox_Period_previewmouseup;
-
-                            grdMerge_Period.Children.Add(textbox05);
-                            Grid.SetRow(textbox05, i);
-                            Grid.SetColumn(textbox05, 4);
-
-
-
-
-                            //품명
-                            var textbox06 = new TextBox();
-                            textbox06.Text = Win_ord_InOutSum_QView_Insert.P_Article;
-                            textbox06.Style = cellStyleLeft;
-                            textbox06.IsReadOnly = true;
-                            textbox06.PreviewMouseDown += Textbox_Period_previewmousedown;
-                            textbox06.PreviewMouseUp += Textbox_Period_previewmouseup;
-
-                            grdMerge_Period.Children.Add(textbox06);
-                            Grid.SetRow(textbox06, i);
-                            Grid.SetColumn(textbox06, 5);
-
-                            //품명코드
-                            var textbox07 = new TextBox();
-                            textbox07.Text = Win_ord_InOutSum_QView_Insert.P_ArticleID;
-                            textbox07.Style = cellStyleCenter;
-                            textbox07.PreviewMouseDown += Textbox_Period_previewmousedown;
-                            textbox07.PreviewMouseUp += Textbox_Period_previewmouseup;
-
-                            grdMerge_Period.Children.Add(textbox07);
-                            Grid.SetRow(textbox07, i);
-                            Grid.SetColumn(textbox07, 6);
-
-                            //건수
-                            var textbox08 = new TextBox();
-                            textbox08.Text = Win_ord_InOutSum_QView_Insert.P_Roll;
-                            textbox08.Style = cellStyleRight;
-                            textbox08.IsReadOnly = true;
-                            textbox08.PreviewMouseDown += Textbox_Period_previewmousedown;
-                            textbox08.PreviewMouseUp += Textbox_Period_previewmouseup;
-
-                            grdMerge_Period.Children.Add(textbox08);
-                            Grid.SetRow(textbox08, i);
-                            Grid.SetColumn(textbox08, 7);
-
-                            //수량
-                            var textbox09 = new TextBox();
-                            textbox09.Text = Win_ord_InOutSum_QView_Insert.P_Qty;
-                            textbox09.Style = cellStyleRight;
-                            textbox09.IsReadOnly = true;
-                            textbox09.PreviewMouseDown += Textbox_Period_previewmousedown;
-                            textbox09.PreviewMouseUp += Textbox_Period_previewmouseup;
-
-                            grdMerge_Period.Children.Add(textbox09);
-                            Grid.SetRow(textbox09, i);
-                            Grid.SetColumn(textbox09, 8);
-
-                            //단위
-                            var textbox10 = new TextBox();
-                            textbox10.Text = Win_ord_InOutSum_QView_Insert.P_UnitClssName;
-                            textbox10.Style = cellStyleCenter;
-                            textbox10.IsReadOnly = true;
-                            textbox10.PreviewMouseDown += Textbox_Period_previewmousedown;
-                            textbox10.PreviewMouseUp += Textbox_Period_previewmouseup;
-
-                            grdMerge_Period.Children.Add(textbox10);
-                            Grid.SetRow(textbox10, i);
-                            Grid.SetColumn(textbox10, 9);
-
-
-                            //점유율
-                            var textbox11 = new TextBox();
-                            double tb12 = Win_ord_InOutSum_QView_Insert.P_CustomRate.Equals("") ? 0 : Convert.ToDouble(Win_ord_InOutSum_QView_Insert.P_CustomRate);
-                            if ((Win_ord_InOutSum_QView_Insert.P_ArticleID == "") || (Win_ord_InOutSum_QView_Insert.P_ArticleID == "거래처계"))
-                            {
-                                textbox11.Text = String.Format("{0:0.##;0:#;#}", tb12);
-                            }
-                            else { textbox11.Text = ""; }
-                            textbox11.Style = cellStyleRight;
-                            textbox11.IsReadOnly = true;
-                            textbox11.PreviewMouseDown += Textbox_Period_previewmousedown;
-                            textbox11.PreviewMouseUp += Textbox_Period_previewmouseup;
-
-                            grdMerge_Period.Children.Add(textbox11);
-                            Grid.SetRow(textbox11, i);
-                            Grid.SetColumn(textbox11, 10);
-
-                            
                         }
+
+                        grdPeriod.ItemsSource = lstRows;
+                        dgdPeriodTotal.Items.Add(total);
+
                     }
                 }
             }
@@ -748,54 +366,30 @@ namespace WizMes_SungShinNQ
         //일일집계 조회
         private void FillGrid_Day()
         {
-            grdMerge_Days.Children.Clear();
-            grdMergeDays.Items.Clear();
-            grdTotal2.Items.Clear();
 
-            string SearchFromDate = dtpFromDate.ToString().Substring(0, 10).Replace("-", "");
-            string SearchToDate = dtpToDate.ToString().Substring(0, 10).Replace("-", "");         //기준일자
-            int ChkCustomID = 0;
-            if (chkCustomer.IsChecked == true) { ChkCustomID = 1; }
-            else { txtCustomer.Tag = ""; txtCustomer.Text = ""; }                                                      //거래처
-            int ChkArticleID = 0;
-            if (chkArticle.IsChecked == true) { ChkArticleID = 1; }
-            else { txtArticle.Tag = ""; txtArticle.Text = ""; }                                                       //품명
-            int nGubun = 0;
-            if (chkInOutGubun.IsChecked == true)
-            {
-                if (cboInOutGubun.SelectedValue.ToString() == "1") { nGubun = 1; }
-                if (cboInOutGubun.SelectedValue.ToString() == "2") { nGubun = 2; }
-            }                                                                                   //입출고구분
-            int nMainItem = 0;
-            if (chkMainInterestItem.IsChecked == true) { nMainItem = 1; }                       //주요관심품목
-            int nCustomItem = 0;
-            if (chkCustomsEnrollItem.IsChecked == true) { nCustomItem = 1; }                    //거래처등록품목
-            int chkInspect = 0;
-            string sInspect = string.Empty;
-            if (chkInInsepectGubun.IsChecked == true)
-            {
-                chkInspect = 1;
-                if (cboInInspectGubun.SelectedValue.ToString() == "Y") { sInspect = "Y"; }
-                if (cboInInspectGubun.SelectedValue.ToString() == "N") { sInspect = "N"; }
-            }                                                                                   //입고검수구분
+            grdMergeDays.ItemsSource = null;
+            dgdDaysOutTotal.Items.Clear();
+            dgdDaysStuffTotal.Items.Clear();
 
             try
             {
 
                 Dictionary<string, object> sqlParameter = new Dictionary<string, object>();
-                sqlParameter.Add("ChkDate", chkDate.IsChecked == true ? 1 : 0);
-                sqlParameter.Add("SDate", SearchFromDate);
-                sqlParameter.Add("EDate", SearchToDate);
-                sqlParameter.Add("ChkCustomID", ChkCustomID);
-                sqlParameter.Add("CustomID", txtCustomer.Tag.ToString());
-                sqlParameter.Add("ChkArticleID", chkArticle.IsChecked == true ? 1 : 0); // ChkArticleID);
-                sqlParameter.Add("ArticleID", chkArticle.IsChecked == true ? "" : string.Empty); // txtArticle.Tag.ToString());
-                sqlParameter.Add("nGubun", nGubun);
-                sqlParameter.Add("nMainItem", nMainItem);
-                sqlParameter.Add("nCustomItem", nCustomItem);
-                sqlParameter.Add("chkInspect", chkInspect);
-                sqlParameter.Add("sInspect", sInspect);
-                sqlParameter.Add("BuyerArticleNo", chkArticle.IsChecked == true ? txtArticle.Text.Trim() : "");
+                sqlParameter.Add("ChkDate", 1);
+                sqlParameter.Add("SDate", !lib.IsDatePickerNull(dtpFromDate) ? lib.ConvertDate(dtpFromDate) : "");
+                sqlParameter.Add("EDate", !lib.IsDatePickerNull(dtpToDate) ? lib.ConvertDate(dtpToDate) : "");
+
+                sqlParameter.Add("ChkCustomID", chkCustomIDSrh.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("CustomID", chkCustomIDSrh.IsChecked == true ? txtCustomIDSrh.Tag != null ? txtCustomIDSrh.Tag.ToString() : "" : "");
+
+                sqlParameter.Add("ChkBuyerArticleNo", chkBuyerArticleNoSrh.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("BuyerArticleNo", chkBuyerArticleNoSrh.IsChecked == true ? txtBuyerArticleNoSrh.Tag != null ? txtBuyerArticleNoSrh.Tag.ToString() : string.Empty : string.Empty);
+
+                sqlParameter.Add("ChkArticleID", chkArticleIDSrh.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("ArticleID", chkArticleIDSrh.IsChecked == true ? txtArticleIDSrh.Tag != null ? txtArticleIDSrh.Tag.ToString() : "" : "");
+
+                sqlParameter.Add("ChkOrder", chkOrderIDSrh.IsChecked == true ? rbnOrderNOSrh.IsChecked == true ? 1 : 2 : 0);
+                sqlParameter.Add("Order", chkOrderIDSrh.IsChecked == true ? !string.IsNullOrEmpty(txtOrderIDSrh.Text) ? txtOrderIDSrh.Text : "" : "");
 
                 DataSet ds = DataStore.Instance.ProcedureToDataSet("xp_Outware_sInOutwareSum_Day", sqlParameter, false);
 
@@ -812,413 +406,77 @@ namespace WizMes_SungShinNQ
                     }
                     else
                     {
-
-                        //grdMerge_Days.RowDefinitions.Clear();
-
                         DataRowCollection drc = dt.Rows;
-                        Style cellStyleLeft = new Style(typeof(TextBox));
-                        cellStyleLeft.Setters.Add(new Setter(TextBox.BorderThicknessProperty, new Thickness(0, 0, 1, 1)));
-                        cellStyleLeft.Setters.Add(new Setter(TextBox.BorderBrushProperty, System.Windows.Media.Brushes.Black));
-                        cellStyleLeft.Setters.Add(new Setter(TextBox.BackgroundProperty, System.Windows.Media.Brushes.White));
-                        cellStyleLeft.Setters.Add(new Setter(TextBox.VerticalContentAlignmentProperty, VerticalAlignment.Center));
-                        cellStyleLeft.Setters.Add(new Setter(TextBox.HorizontalContentAlignmentProperty, HorizontalAlignment.Left));
-                        cellStyleLeft.Setters.Add(new Setter(TextBox.FocusableProperty, true));
 
-                        Style cellStyleCenter = new Style(typeof(TextBox));
-                        cellStyleCenter.Setters.Add(new Setter(TextBox.BorderThicknessProperty, new Thickness(0, 0, 1, 1)));
-                        cellStyleCenter.Setters.Add(new Setter(TextBox.BorderBrushProperty, System.Windows.Media.Brushes.Black));
-                        cellStyleCenter.Setters.Add(new Setter(TextBox.BackgroundProperty, System.Windows.Media.Brushes.White));
-                        cellStyleCenter.Setters.Add(new Setter(TextBox.VerticalContentAlignmentProperty, VerticalAlignment.Center));
-                        cellStyleCenter.Setters.Add(new Setter(TextBox.HorizontalContentAlignmentProperty, HorizontalAlignment.Center));
-                        cellStyleCenter.Setters.Add(new Setter(TextBox.FocusableProperty, true));
 
-                        Style cellStyleRight = new Style(typeof(TextBox));
-                        cellStyleRight.Setters.Add(new Setter(TextBox.BorderThicknessProperty, new Thickness(0, 0, 1, 1)));
-                        cellStyleRight.Setters.Add(new Setter(TextBox.BorderBrushProperty, System.Windows.Media.Brushes.Black));
-                        cellStyleRight.Setters.Add(new Setter(TextBox.BackgroundProperty, System.Windows.Media.Brushes.White));
-                        cellStyleRight.Setters.Add(new Setter(TextBox.VerticalContentAlignmentProperty, VerticalAlignment.Center));
-                        cellStyleRight.Setters.Add(new Setter(TextBox.HorizontalContentAlignmentProperty, HorizontalAlignment.Right));
-                        cellStyleRight.Setters.Add(new Setter(TextBox.FocusableProperty, true));
+                        int i = 0;
 
-                        int k;
+                        Win_ord_InOutSum_Total_QView StuffTotal = new Win_ord_InOutSum_Total_QView();
+                        Win_ord_InOutSum_Total_QView OutTotal = new Win_ord_InOutSum_Total_QView();
+                        List<Win_ord_InOutSum_QView> lstRows = new List<Win_ord_InOutSum_QView>();
 
-                        var textbox02 = new TextBox();
-                        int m = 1;                      //var textbox02용
-                        string strMTemp = string.Empty; //var textbox02용
-
-                        var textbox03 = new TextBox();
-                        int o = 1;                      //var textbox03용
-                        string strOTemp = string.Empty; //var textbox03용
-
-                        var textbox04 = new TextBox();
-                        int p = 1;                      //var textbox04용
-                        string strPTemp = string.Empty; //var textbox04용
-                        
-                       
-                        k = 0;
-
-                        for (int i = 0; drc.Count > i; i++)
+                        foreach (DataRow dr in drc)
                         {
-                            var Win_ord_InOutSum_QView_Insert = new Win_ord_InOutSum_QView()
+                            i++;
+                            var DayItem = new Win_ord_InOutSum_QView
                             {
-                                //D_NUM = k,
-                                D_cls = drc[i]["cls"].ToString(),
-                                D_Gbn = drc[i]["Gbn"].ToString(),
-                                D_IODate = drc[i]["IODate"].ToString(),
-                                D_CustomID = drc[i]["CustomID"].ToString(),
-                                D_CustomName = drc[i]["CustomName"].ToString(),
-                                D_ArticleID = drc[i]["ArticleID"].ToString(),
-                                D_BuyerArticleNo = drc[i]["BuyerArticleNo"].ToString(),
-                                D_Article = drc[i]["Article"].ToString(),
-                                D_Roll = drc[i]["Roll"].ToString(),
-                                D_Qty = drc[i]["Qty"].ToString().Split('.')[0].Trim(),
-                                D_UnitClss = drc[i]["UnitClss"].ToString(),
-                                D_UnitClssName = drc[i]["UnitClssName"].ToString(),
-                                D_UnitPrice = drc[i]["UnitPrice"].ToString(),
-                                D_PriceClss = drc[i]["PriceClss"].ToString(),
-                                D_PriceClssName = drc[i]["PriceClssName"].ToString(),
-                                D_Amount = drc[i]["Amount"].ToString(),
-                                D_VatAmount = drc[i]["VatAmount"].ToString().Split('.')[0].Trim(),
-                                D_TotAmount = drc[i]["TotAmount"].ToString().Split('.')[0].Trim(),
-                                D_CustomRate = lib.returnNumStringTwo(drc[i]["CustomRate"].ToString()),
+                                D_NUM = i,
+                                D_IODate = lib.DateTypeHyphen(dr["IODate"].ToString()),
+                                D_Gbn = dr["Gbn"].ToString(),
+                                D_CustomName = dr["KCustom"].ToString(),
+                                D_OrderID = dr["OrderID"].ToString(),
+                                D_OrderNo = dr["OrderNo"].ToString(),
+                                D_BuyerArticleNo = dr["BuyerArticleNo"].ToString(),
+                                D_Article = dr["Article"].ToString(),
+                                D_Spec = dr["Spec"].ToString(),
+                                D_Roll = Lib.Instance.ToDecimal(dr["Roll"]),
+                                D_Qty = Lib.Instance.ToDecimal(dr["TotQty"]),
+                                D_UnitClssName = dr["UnitClssName"].ToString(),
+                                D_Amount = Lib.Instance.ToDecimal(dr["Amount"]),
+                                D_VatAmount = Lib.Instance.ToDecimal(dr["VatAmount"]),
+                                D_TotAmount = Lib.Instance.ToDecimal(dr["TotalAmount"]),
+                                D_CustomRate = Lib.Instance.ToDecimal(dr["CustomRate"])
+
                             };
 
-                            Win_ord_InOutSum_QView_Insert.D_Roll = lib.returnNumString(Win_ord_InOutSum_QView_Insert.D_Roll);
-                            Win_ord_InOutSum_QView_Insert.D_Qty = lib.returnNumString(Win_ord_InOutSum_QView_Insert.D_Qty);
-                            Win_ord_InOutSum_QView_Insert.D_UnitPrice = lib.returnNumString(Win_ord_InOutSum_QView_Insert.D_UnitPrice);
-                            Win_ord_InOutSum_QView_Insert.D_Amount = lib.returnNumStringZero(Win_ord_InOutSum_QView_Insert.D_Amount);
-                            Win_ord_InOutSum_QView_Insert.D_VatAmount = lib.returnNumString(Win_ord_InOutSum_QView_Insert.D_VatAmount);
-                            Win_ord_InOutSum_QView_Insert.D_TotAmount = lib.returnNumString(Win_ord_InOutSum_QView_Insert.D_TotAmount);
-                            Win_ord_InOutSum_QView_Insert.D_CustomRate = lib.returnNumString(Win_ord_InOutSum_QView_Insert.D_CustomRate);
+                            if (DayItem.D_Gbn.Equals("1"))
+                            {
+                                DayItem.D_Gbn = "입고";
+                                StuffTotal.D_TotalStuffRoll += DayItem.D_Roll;
+                                StuffTotal.D_TotalStuffQty += DayItem.D_Qty;
+                                StuffTotal.D_TotalStuffAmount += DayItem.D_Amount;
+                                StuffTotal.D_TotalStuffVatAmount += DayItem.D_VatAmount;
+                                StuffTotal.D_TotalStuffPrice += DayItem.D_TotAmount;
+                                lstRows.Add(DayItem);
+                            }
+                            else if (DayItem.D_Gbn.Equals("2"))
+                            {
+                                DayItem.D_Gbn = "출고";
+                                OutTotal.D_TotalOutRoll += DayItem.D_Roll;
+                                OutTotal.D_TotalOutQty += DayItem.D_Qty;
+                                OutTotal.D_TotalOutAmount += DayItem.D_Amount;
+                                OutTotal.D_TotalOutVatAmount += DayItem.D_VatAmount;
+                                OutTotal.D_TotalStuffPrice += DayItem.D_TotAmount;
+                                lstRows.Add(DayItem);
 
-                            if (Win_ord_InOutSum_QView_Insert.D_IODate == "99999999")
-                            {
-                                if (Win_ord_InOutSum_QView_Insert.D_Gbn == "1")
-                                {
-                                    Win_ord_InOutSum_QView_Insert.D_IODate = "입고총계";
-                                    grdTotal2.Items.Add(Win_ord_InOutSum_QView_Insert);
-                                }
-                                else if (Win_ord_InOutSum_QView_Insert.D_Gbn == "2")
-                                {
-                                    Win_ord_InOutSum_QView_Insert.D_IODate = "출고총계";
-                                    grdTotal2.Items.Add(Win_ord_InOutSum_QView_Insert);
-                                }
-                            }
-                            else
-                            {
-                                k++;
-                                Win_ord_InOutSum_QView_Insert.D_NUM = k;
-                            }
 
-                            if (Win_ord_InOutSum_QView_Insert.D_Gbn == "1")
-                            {
-                                Win_ord_InOutSum_QView_Insert.D_Gbn = "입고";
                             }
-                            else if (Win_ord_InOutSum_QView_Insert.D_Gbn == "2")
+                            else if (DayItem.D_Gbn.Equals("3"))
                             {
-                                Win_ord_InOutSum_QView_Insert.D_Gbn = "출고";
+                                DayItem.D_Color1 = true;
+                                DayItem.D_Gbn = string.Empty;
+                                DayItem.D_CustomName_TextAlignment = TextAlignment.Center;
+                                lstRows.Add(DayItem);
+
                             }
 
-                            if (Win_ord_InOutSum_QView_Insert.D_CustomName == "zzzzzzzzzzz")
-                            {
-                                Win_ord_InOutSum_QView_Insert.D_CustomName = "";
-                            }
-                            else if (Win_ord_InOutSum_QView_Insert.D_CustomName == "zzzzzzzzzzzzz")  //살짜기 더 김.
-                            {
-                                Win_ord_InOutSum_QView_Insert.D_CustomName = "일계";
-                            }
-
-                            if (Win_ord_InOutSum_QView_Insert.D_ArticleID == "99999")
-                            {
-                                Win_ord_InOutSum_QView_Insert.D_ArticleID = "";
-                            }
-
-                            if (Win_ord_InOutSum_QView_Insert.D_Article == "zzzzzzzzz")
-                            {
-                                Win_ord_InOutSum_QView_Insert.D_Article = "";
-                            }
-
-                            if (Win_ord_InOutSum_QView_Insert.D_Article == "zzzzzzzzzz")
-                            {
-                                Win_ord_InOutSum_QView_Insert.D_Article = "";
-                            }
-                            
-                            if (!Win_ord_InOutSum_QView_Insert.D_IODate.Equals("입고총계") && !Win_ord_InOutSum_QView_Insert.D_IODate.Equals("출고총계"))
-                            {
-                                RowDefinition row = new RowDefinition();
-                                row.Height = GridLength.Auto;
-                                grdMerge_Days.RowDefinitions.Add(row);
-                                grdMergeDays.Items.Add(Win_ord_InOutSum_QView_Insert);
-                            }
-
-                            //순번
-                            var textbox01 = new TextBox();
-                            textbox01.Text = k.ToString();
-                            textbox01.Style = cellStyleCenter;
-                            textbox01.IsReadOnly = true;
-                            textbox01.PreviewMouseDown += Textbox_Days_previewmousedown;
-                            textbox01.PreviewMouseUp += Textbox_Days_previewmouseup;
-
-                            grdMerge_Days.Children.Add(textbox01);
-                            Grid.SetRow(textbox01, i);
-                            Grid.SetColumn(textbox01, 0);
-
-
-                            // textbox 02 시작지점.
-                            if (i == 0)
-                            {
-                                //일자
-                                textbox02.Text = Win_ord_InOutSum_QView_Insert.D_IODate;
-                                textbox02.Style = cellStyleCenter;
-                                textbox02.IsReadOnly = true;
-                                textbox02.PreviewMouseDown += Textbox_Days_previewmousedown;
-                                textbox02.PreviewMouseUp += Textbox_Days_previewmouseup;
-
-                                grdMerge_Days.Children.Add(textbox02);
-                                Grid.SetRow(textbox02, i);
-                                Grid.SetColumn(textbox02, 1);
-                                strMTemp = Win_ord_InOutSum_QView_Insert.D_IODate;
-                            }
-                            else if ((i+1) == drc.Count)
-                            {
-                                m++;
-                                Grid.SetRowSpan(textbox02, m);
-                            }
-                            else
-                            {
-                                if (strMTemp.Equals(Win_ord_InOutSum_QView_Insert.D_IODate))
-                                {
-                                    m++;
-                                }
-                                else
-                                {
-                                    Grid.SetRowSpan(textbox02, m);
-                                    m = 1;
-
-                                    //일자
-                                    textbox02 = new TextBox();
-                                    textbox02.Text = Win_ord_InOutSum_QView_Insert.D_IODate;
-                                    textbox02.Style = cellStyleCenter;
-                                    textbox02.IsReadOnly = true;
-                                    textbox02.PreviewMouseDown += Textbox_Days_previewmousedown;
-                                    textbox02.PreviewMouseUp += Textbox_Days_previewmouseup;
-
-                                    grdMerge_Days.Children.Add(textbox02);
-                                    Grid.SetRow(textbox02, i);
-                                    Grid.SetColumn(textbox02, 1);
-                                    strMTemp = Win_ord_InOutSum_QView_Insert.D_IODate;
-                                }
-                            }
-
-
-                            // textbox 03 시작지점.
-                            if (i == 0)
-                            {
-                                //구분
-                                textbox03.Text = Win_ord_InOutSum_QView_Insert.D_Gbn;
-                                textbox03.Style = cellStyleCenter;
-                                textbox03.IsReadOnly = true;
-                                textbox03.PreviewMouseDown += Textbox_Days_previewmousedown;
-                                textbox03.PreviewMouseUp += Textbox_Days_previewmouseup;
-
-                                grdMerge_Days.Children.Add(textbox03);
-                                Grid.SetRow(textbox03, i);
-                                Grid.SetColumn(textbox03, 2);
-                                strOTemp = Win_ord_InOutSum_QView_Insert.D_Gbn;
-                            }
-                            else if ((i+1) == drc.Count)
-                            {
-                                o++;
-                                Grid.SetRowSpan(textbox03, o);
-                            }
-                            else
-                            {
-                                if (strOTemp.Equals(Win_ord_InOutSum_QView_Insert.D_Gbn))
-                                {
-                                    o++;
-                                }
-                                else
-                                {
-                                    Grid.SetRowSpan(textbox03, o);
-                                    o = 1;
-
-                                    //구분
-                                    textbox03 = new TextBox();
-                                    textbox03.Text = Win_ord_InOutSum_QView_Insert.D_Gbn;
-                                    textbox03.Style = cellStyleCenter;
-                                    textbox03.IsReadOnly = true;
-                                    textbox03.PreviewMouseDown += Textbox_Days_previewmousedown;
-                                    textbox03.PreviewMouseUp += Textbox_Days_previewmouseup;
-
-                                    grdMerge_Days.Children.Add(textbox03);
-                                    Grid.SetRow(textbox03, i);
-                                    Grid.SetColumn(textbox03, 2);
-                                    strOTemp = Win_ord_InOutSum_QView_Insert.D_Gbn;
-                                }
-                            }
-
-
-                            // textbox 04 시작지점.
-                            if (i == 0)
-                            {
-                                //거래처
-                                textbox04.Text = Win_ord_InOutSum_QView_Insert.D_CustomName;
-                                textbox04.Style = cellStyleLeft;
-                                textbox04.IsReadOnly = true;
-                                textbox04.PreviewMouseDown += Textbox_Days_previewmousedown;
-                                textbox04.PreviewMouseUp += Textbox_Days_previewmouseup;
-
-                                grdMerge_Days.Children.Add(textbox04);
-                                Grid.SetRow(textbox04, i);
-                                Grid.SetColumn(textbox04, 3);
-                                strPTemp = Win_ord_InOutSum_QView_Insert.D_CustomName;
-                            }
-                            else if ((i + 1) == drc.Count)
-                            {
-                                p++;
-                                Grid.SetRowSpan(textbox04, p);
-                            }
-                            else
-                            {
-                                if (strPTemp.Equals(Win_ord_InOutSum_QView_Insert.D_CustomName))
-                                {
-                                    p++;
-                                }
-                                else
-                                {
-                                    Grid.SetRowSpan(textbox04, p);
-                                    p = 1;
-
-                                    //거래처
-                                    textbox04 = new TextBox();
-                                    textbox04.Text = Win_ord_InOutSum_QView_Insert.D_CustomName;
-                                    textbox04.Style = cellStyleLeft;
-                                    textbox04.IsReadOnly = true;
-                                    textbox04.PreviewMouseDown += Textbox_Days_previewmousedown;
-                                    textbox04.PreviewMouseUp += Textbox_Days_previewmouseup;
-
-                                    grdMerge_Days.Children.Add(textbox04);
-                                    Grid.SetRow(textbox04, i);
-                                    Grid.SetColumn(textbox04, 3);
-                                    strPTemp = Win_ord_InOutSum_QView_Insert.D_CustomName;
-                                }
-                            }
-                            //품번
-                            var textbox05 = new TextBox();
-                            textbox05.Text = Win_ord_InOutSum_QView_Insert.D_BuyerArticleNo;
-                            textbox05.Style = cellStyleLeft;
-                            textbox05.IsReadOnly = true;
-                            textbox05.PreviewMouseDown += Textbox_Days_previewmousedown;
-                            textbox05.PreviewMouseUp += Textbox_Days_previewmouseup;
-
-                            grdMerge_Days.Children.Add(textbox05);
-                            Grid.SetRow(textbox05, i);
-                            Grid.SetColumn(textbox05, 4);
-
-
-                            //품명
-                            var textbox06 = new TextBox();
-                            textbox06.Text = Win_ord_InOutSum_QView_Insert.D_Article;
-                            textbox06.Style = cellStyleLeft;
-                            textbox06.IsReadOnly = true;
-                            textbox06.PreviewMouseDown += Textbox_Days_previewmousedown;
-                            textbox06.PreviewMouseUp += Textbox_Days_previewmouseup;
-
-                            grdMerge_Days.Children.Add(textbox06);
-                            Grid.SetRow(textbox06, i);
-                            Grid.SetColumn(textbox06, 5);
-
-
-                            //건수
-                            var textbox07 = new TextBox();
-                            textbox07.Text = Win_ord_InOutSum_QView_Insert.D_Roll;
-                            textbox07.Style = cellStyleRight;
-                            textbox07.IsReadOnly = true;
-                            textbox07.PreviewMouseDown += Textbox_Days_previewmousedown;
-                            textbox07.PreviewMouseUp += Textbox_Days_previewmouseup;
-
-                            grdMerge_Days.Children.Add(textbox07);
-                            Grid.SetRow(textbox07, i);
-                            Grid.SetColumn(textbox07, 6);
-
-
-                            //수량
-                            var textbox08 = new TextBox();
-                            textbox08.Text = Win_ord_InOutSum_QView_Insert.D_Qty;
-                            textbox08.Style = cellStyleRight;
-                            textbox08.IsReadOnly = true;
-                            textbox08.PreviewMouseDown += Textbox_Days_previewmousedown;
-                            textbox08.PreviewMouseUp += Textbox_Days_previewmouseup;
-
-                            grdMerge_Days.Children.Add(textbox08);
-                            Grid.SetRow(textbox08, i);
-                            Grid.SetColumn(textbox08, 7);
-
-                            //단위
-                            var textbox09 = new TextBox();
-                            textbox09.Text = Win_ord_InOutSum_QView_Insert.D_UnitClssName;
-                            textbox09.Style = cellStyleCenter;
-                            textbox09.IsReadOnly = true;
-                            textbox09.PreviewMouseDown += Textbox_Days_previewmousedown;
-                            textbox09.PreviewMouseUp += Textbox_Days_previewmouseup;
-
-                            grdMerge_Days.Children.Add(textbox09);
-                            Grid.SetRow(textbox09, i);
-                            Grid.SetColumn(textbox09, 8);
-
-
-                            //금액
-                            var textbox10 = new TextBox();
-                            textbox10.Text = Win_ord_InOutSum_QView_Insert.D_Amount;
-                            textbox10.Style = cellStyleRight;
-                            textbox10.IsReadOnly = true;
-                            textbox10.PreviewMouseDown += Textbox_Days_previewmousedown;
-                            textbox10.PreviewMouseUp += Textbox_Days_previewmouseup;
-
-                            grdMerge_Days.Children.Add(textbox10);
-                            Grid.SetRow(textbox10, i);
-                            Grid.SetColumn(textbox10, 9);
-
-
-                            //부가세
-                            var textbox11 = new TextBox();
-                            textbox11.Text = Win_ord_InOutSum_QView_Insert.D_VatAmount;
-                            textbox11.Style = cellStyleRight;
-                            textbox11.IsReadOnly = true;
-                            textbox11.PreviewMouseDown += Textbox_Days_previewmousedown;
-                            textbox11.PreviewMouseUp += Textbox_Days_previewmouseup;
-
-                            grdMerge_Days.Children.Add(textbox11);
-                            Grid.SetRow(textbox11, i);
-                            Grid.SetColumn(textbox11, 10);
-
-
-                            //합계금액
-                            var textbox12 = new TextBox();
-                            textbox12.Text = Win_ord_InOutSum_QView_Insert.D_TotAmount;
-                            textbox12.Style = cellStyleRight;
-                            textbox12.IsReadOnly = true;
-                            textbox12.PreviewMouseDown += Textbox_Days_previewmousedown;
-                            textbox12.PreviewMouseUp += Textbox_Days_previewmouseup;
-
-                            grdMerge_Days.Children.Add(textbox12);
-                            Grid.SetRow(textbox12, i);
-                            Grid.SetColumn(textbox12, 11);
-
-                            //점유율
-                            var textbox13 = new TextBox();
-                            double tb13 = Win_ord_InOutSum_QView_Insert.D_CustomRate.Equals("") ? 0 : Convert.ToDouble(Win_ord_InOutSum_QView_Insert.D_CustomRate);
-                            /*Convert.ToDouble(Win_ord_InOutSum_QView_Insert.D_CustomRate);*/
-                            textbox13.Text = String.Format("{0:0.##;0:#;#}", tb13);
-                            textbox13.Style = cellStyleRight;
-                            textbox13.IsReadOnly = true;
-                            textbox13.PreviewMouseDown += Textbox_Days_previewmousedown;
-                            textbox13.PreviewMouseUp += Textbox_Days_previewmouseup;
-
-                            grdMerge_Days.Children.Add(textbox13);
-                            Grid.SetRow(textbox13, i);
-                            Grid.SetColumn(textbox13, 12);
                         }
+
+
+                        grdMergeDays.ItemsSource = lstRows;
+                        dgdDaysStuffTotal.Items.Add(StuffTotal);
+                        dgdDaysOutTotal.Items.Add(OutTotal);
+
                     }
                 }
             }
@@ -1238,55 +496,29 @@ namespace WizMes_SungShinNQ
         //월별집계 (세로) 조회
         private void FillGrid_Month_V()
         {
-            grdMerge_Month_V.Children.Clear();
-            grdMergeMonth_V.Items.Clear();
-            grdTotal3.Items.Clear();
 
-            string SearchFromDate = dtpFromDate.ToString().Substring(0, 10).Replace("-", "");
-            string SearchToDate = dtpToDate.ToString().Substring(0, 10).Replace("-", "");         //기준일자
-            int ChkCustomID = 0;
-            if (chkCustomer.IsChecked == true) { ChkCustomID = 1; }
-            else { txtCustomer.Tag = ""; txtCustomer.Text = ""; }                                                      //거래처
-            int ChkArticleID = 0;
-            if (chkArticle.IsChecked == true) { ChkArticleID = 1; }
-            else { txtArticle.Tag = ""; txtArticle.Text = ""; }                                                       //품명
-            int nGubun = 0;
-            if (chkInOutGubun.IsChecked == true)
-            {
-                if (cboInOutGubun.SelectedValue.ToString() == "1") { nGubun = 1; }
-                if (cboInOutGubun.SelectedValue.ToString() == "2") { nGubun = 2; }
-            }                                                                                   //입출고구분
-            int nMainItem = 0;
-            if (chkMainInterestItem.IsChecked == true) { nMainItem = 1; }                       //주요관심품목
-            int nCustomItem = 0;
-            if (chkCustomsEnrollItem.IsChecked == true) { nCustomItem = 1; }                    //거래처등록품목
-            int chkInspect = 0;
-            string sInspect = string.Empty;
-            if (chkInInsepectGubun.IsChecked == true)
-            {
-                chkInspect = 1;
-                if (cboInInspectGubun.SelectedValue.ToString() == "Y") { sInspect = "Y"; }
-                if (cboInInspectGubun.SelectedValue.ToString() == "N") { sInspect = "N"; }
-            }                                                                                   //입고검수구분
+            grdMergeMonth_V.ItemsSource = null;
+            dgdMonthVtotal.Items.Clear();
 
             try
             {
 
                 Dictionary<string, object> sqlParameter = new Dictionary<string, object>();
-                sqlParameter.Add("ChkDate", chkDate.IsChecked == true ? 1 : 0);
-                sqlParameter.Add("SDate", SearchFromDate);
-                sqlParameter.Add("EDate", SearchToDate);
-                sqlParameter.Add("ChkCustomID", ChkCustomID);
-                sqlParameter.Add("CustomID", txtCustomer.Tag.ToString());
-                sqlParameter.Add("ChkArticleID", chkArticle.IsChecked == true ? 1 : 0);// ChkArticleID);
-                //sqlParameter.Add("ArticleID", chkArticle.IsChecked == true ? txtArticle.Tag.ToString() : string.Empty);//txtArticle.Tag.ToString());
-                sqlParameter.Add("ArticleID", chkArticle.IsChecked == true ? "" : string.Empty);
-                sqlParameter.Add("nGubun", nGubun);
-                sqlParameter.Add("nMainItem", nMainItem);
-                sqlParameter.Add("nCustomItem", nCustomItem);
-                sqlParameter.Add("chkInspect", chkInspect);
-                sqlParameter.Add("sInspect", sInspect);
-                sqlParameter.Add("BuyerArticleNo", chkArticle.IsChecked == true ? txtArticle.Text.Trim() : "");
+                sqlParameter.Add("ChkDate", 1);
+                sqlParameter.Add("SDate", !lib.IsDatePickerNull(dtpFromDate) ? lib.ConvertDate(dtpFromDate) : "");
+                sqlParameter.Add("EDate", !lib.IsDatePickerNull(dtpToDate) ? lib.ConvertDate(dtpToDate) : "");
+
+                sqlParameter.Add("ChkCustomID", chkCustomIDSrh.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("CustomID", chkCustomIDSrh.IsChecked == true ? txtCustomIDSrh.Tag != null ? txtCustomIDSrh.Tag.ToString() : "" : "");
+
+                sqlParameter.Add("ChkBuyerArticleNo", chkBuyerArticleNoSrh.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("BuyerArticleNo", chkBuyerArticleNoSrh.IsChecked == true ? txtBuyerArticleNoSrh.Tag != null ? txtBuyerArticleNoSrh.Tag.ToString() : string.Empty : string.Empty);
+
+                sqlParameter.Add("ChkArticleID", chkArticleIDSrh.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("ArticleID", chkArticleIDSrh.IsChecked == true ? txtArticleIDSrh.Tag != null ? txtArticleIDSrh.Tag.ToString() : "" : "");
+
+                sqlParameter.Add("ChkOrder", chkOrderIDSrh.IsChecked == true ? rbnOrderNOSrh.IsChecked == true ? 1 : 2 : 0);
+                sqlParameter.Add("Order", chkOrderIDSrh.IsChecked == true ? !string.IsNullOrEmpty(txtOrderIDSrh.Text) ? txtOrderIDSrh.Text : "" : "");
 
                 DataSet ds = DataStore.Instance.ProcedureToDataSet("xp_Outware_sInOutwareSum_Month", sqlParameter, false);
 
@@ -1306,357 +538,58 @@ namespace WizMes_SungShinNQ
                         //grdMerge_Month_V.RowDefinitions.Clear();
 
                         DataRowCollection drc = dt.Rows;
-                        Style cellStyleLeft = new Style(typeof(TextBox));
-                        cellStyleLeft.Setters.Add(new Setter(TextBox.BorderThicknessProperty, new Thickness(0, 0, 1, 1)));
-                        cellStyleLeft.Setters.Add(new Setter(TextBox.BorderBrushProperty, System.Windows.Media.Brushes.Black));
-                        cellStyleLeft.Setters.Add(new Setter(TextBox.BackgroundProperty, System.Windows.Media.Brushes.White));
-                        cellStyleLeft.Setters.Add(new Setter(TextBox.VerticalContentAlignmentProperty, VerticalAlignment.Center));
-                        cellStyleLeft.Setters.Add(new Setter(TextBox.HorizontalContentAlignmentProperty, HorizontalAlignment.Left));
-                        cellStyleLeft.Setters.Add(new Setter(TextBox.FocusableProperty, true));
+                        int i = 0;                  
 
-                        Style cellStyleCenter = new Style(typeof(TextBox));
-                        cellStyleCenter.Setters.Add(new Setter(TextBox.BorderThicknessProperty, new Thickness(0, 0, 1, 1)));
-                        cellStyleCenter.Setters.Add(new Setter(TextBox.BorderBrushProperty, System.Windows.Media.Brushes.Black));
-                        cellStyleCenter.Setters.Add(new Setter(TextBox.BackgroundProperty, System.Windows.Media.Brushes.White));
-                        cellStyleCenter.Setters.Add(new Setter(TextBox.VerticalContentAlignmentProperty, VerticalAlignment.Center));
-                        cellStyleCenter.Setters.Add(new Setter(TextBox.HorizontalContentAlignmentProperty, HorizontalAlignment.Center));
-                        cellStyleCenter.Setters.Add(new Setter(TextBox.FocusableProperty, true));
-
-                        Style cellStyleRight = new Style(typeof(TextBox));
-                        cellStyleRight.Setters.Add(new Setter(TextBox.BorderThicknessProperty, new Thickness(0, 0, 1, 1)));
-                        cellStyleRight.Setters.Add(new Setter(TextBox.BorderBrushProperty, System.Windows.Media.Brushes.Black));
-                        cellStyleRight.Setters.Add(new Setter(TextBox.BackgroundProperty, System.Windows.Media.Brushes.White));
-                        cellStyleRight.Setters.Add(new Setter(TextBox.VerticalContentAlignmentProperty, VerticalAlignment.Center));
-                        cellStyleRight.Setters.Add(new Setter(TextBox.HorizontalContentAlignmentProperty, HorizontalAlignment.Right));
-                        cellStyleRight.Setters.Add(new Setter(TextBox.FocusableProperty, true));
-
-
-                        int k = 0;
-
-                        var textbox02 = new TextBox();
-                        int m = 1;                      //var textbox02용
-                        string strMTemp = string.Empty; //var textbox02용
-
-                        var textbox03 = new TextBox();
-                        int o = 1;                      //var textbox03용
-                        string strOTemp = string.Empty; //var textbox03용
-
-                        var textbox04 = new TextBox();
-                        int p = 1;                      //var textbox04용
-                        string strPTemp = string.Empty; //var textbox04용
-
-                        
-
-                        for (int i = 0; drc.Count > i; i++)
+                        List<Win_ord_InOutSum_QView> lstRows = new List<Win_ord_InOutSum_QView>();
+                        Win_ord_InOutSum_Total_QView total = new Win_ord_InOutSum_Total_QView();
+                        foreach (DataRow dr in drc)
                         {
-                            //k = 1 + i;
-                            var Win_ord_InOutSum_QView_Insert = new Win_ord_InOutSum_QView()
+                            i++; ;
+                            var MonthHItem = new Win_ord_InOutSum_QView
                             {
-                                //V_NUM = k,
-                                V_cls = drc[i]["cls"].ToString(),
-                                V_Gbn = drc[i]["Gbn"].ToString(),
-                                V_IODate = drc[i]["IODate"].ToString(),
-                                V_CustomID = drc[i]["CustomID"].ToString(),
-                                V_CustomName = drc[i]["CustomName"].ToString(),
-                                V_BuyerArticleNo = drc[i]["BuyerArticleNo"].ToString(),
-                                V_ArticleID = drc[i]["ArticleID"].ToString(),
-                                V_Article = drc[i]["Article"].ToString(),
-                                V_Roll = drc[i]["Roll"].ToString(),
-                                V_Qty = drc[i]["Qty"].ToString().Split('.')[0].Trim(),
-                                V_UnitClss = drc[i]["UnitClss"].ToString(),
-                                V_UnitClssName = drc[i]["UnitClssName"].ToString(),
-                                V_UnitPrice = drc[i]["UnitPrice"].ToString(),
-                                V_PriceClss = drc[i]["PriceClss"].ToString(),
-                                V_PriceClssName = drc[i]["PriceClssName"].ToString(),
-                                V_Amount = drc[i]["Amount"].ToString(),
-                                V_VatAmount = drc[i]["VatAmount"].ToString().Split('.')[0].Trim(),
-                                V_TotAmount = drc[i]["TotAmount"].ToString().Split('.')[0].Trim(),
-                                V_CustomRate = lib.returnNumStringTwo(drc[i]["CustomRate"].ToString()),
-                                V_CustomRateOrder = drc[i]["CustomRateOrder"].ToString(),
-                                V_RN = drc[i]["RN"].ToString()
+                                V_NUM = i,
+                                V_IODate = lib.DateTypeHyphen(dr["IODate"].ToString()),
+                                V_Gbn = dr["Gbn"].ToString(),
+                                V_CustomName = dr["KCustom"].ToString(),
+                                V_BuyerArticleNo = dr["BuyerArticleNo"].ToString(),
+                                V_Article = dr["Article"].ToString(),
+                                V_Spec = dr["Spec"].ToString(),
+                                V_Roll = Lib.Instance.ToDecimal(dr["Roll"]),
+                                V_Qty = Lib.Instance.ToDecimal(dr["TotQty"]),
+                                V_UnitClssName = dr["UnitClssName"].ToString(),
+                                V_CustomRate = Lib.Instance.ToDecimal(dr["CustomRate"])
                             };
 
-                            Win_ord_InOutSum_QView_Insert.V_Roll = lib.returnNumString(Win_ord_InOutSum_QView_Insert.V_Roll);
-                            Win_ord_InOutSum_QView_Insert.V_Qty = lib.returnNumString(Win_ord_InOutSum_QView_Insert.V_Qty);
-                            Win_ord_InOutSum_QView_Insert.V_UnitPrice = lib.returnNumString(Win_ord_InOutSum_QView_Insert.V_UnitPrice);
-                            Win_ord_InOutSum_QView_Insert.V_Amount = lib.returnNumString(Win_ord_InOutSum_QView_Insert.V_Amount);
-                            Win_ord_InOutSum_QView_Insert.V_VatAmount = lib.returnNumString(Win_ord_InOutSum_QView_Insert.V_VatAmount);
-                            Win_ord_InOutSum_QView_Insert.V_TotAmount = lib.returnNumString(Win_ord_InOutSum_QView_Insert.V_TotAmount);
-                            Win_ord_InOutSum_QView_Insert.V_CustomRate = lib.returnNumString(Win_ord_InOutSum_QView_Insert.V_CustomRate);
-
-                            if (Win_ord_InOutSum_QView_Insert.V_IODate == "99999999")
+                            if (MonthHItem.V_Gbn.Equals("1"))
                             {
-                                if (Win_ord_InOutSum_QView_Insert.V_Gbn == "2")
-                                {
-                                    Win_ord_InOutSum_QView_Insert.V_IODate = "출고 총계";
-                                    grdTotal3.Items.Add(Win_ord_InOutSum_QView_Insert);
-                                }
-                                else if (Win_ord_InOutSum_QView_Insert.V_Gbn == "1")
-                                {
-                                    Win_ord_InOutSum_QView_Insert.V_IODate = "입고 총계";
-                                    grdTotal3.Items.Add(Win_ord_InOutSum_QView_Insert);
-                                }
+                                MonthHItem.V_Gbn = "입고";                
+                                lstRows.Add(MonthHItem);
                             }
-                            else
+                            else if (MonthHItem.V_Gbn.Equals("2"))
                             {
-                                k++;
-                                Win_ord_InOutSum_QView_Insert.V_NUM = k;
+                                MonthHItem.V_Gbn = "출고";                   
+                                lstRows.Add(MonthHItem);
                             }
-
-                            if (Win_ord_InOutSum_QView_Insert.V_Gbn == "1")
+                            else if (MonthHItem.V_Gbn.Equals("3"))
                             {
-                                Win_ord_InOutSum_QView_Insert.V_Gbn = "입고";
+                                MonthHItem.V_Color1 = true;
+                                MonthHItem.V_Gbn = string.Empty;
+                                MonthHItem.V_Article = "거래처 계";
+                                MonthHItem.V_Article_TextAlignment = TextAlignment.Center;
+                                MonthHItem.V_CustomName = string.Empty;
+                                total.V_TotalStuffRoll += MonthHItem.V_Roll;
+                                total.V_TotalStuffQty += MonthHItem.V_Qty;
+                                total.V_TotalOutRoll += MonthHItem.V_Roll;
+                                total.V_TotalOutQty += MonthHItem.V_Qty;
+                                lstRows.Add(MonthHItem);
                             }
-                            else if (Win_ord_InOutSum_QView_Insert.V_Gbn == "2")
-                            {
-                                Win_ord_InOutSum_QView_Insert.V_Gbn = "출고";
-                            }
-
-                            if (Win_ord_InOutSum_QView_Insert.V_Article == "zzzzzzzzz")
-                            {
-                                if ((Win_ord_InOutSum_QView_Insert.V_IODate == "출고 총계") ||
-                                        (Win_ord_InOutSum_QView_Insert.V_IODate == "입고 총계"))
-                                {
-                                    Win_ord_InOutSum_QView_Insert.V_Article = "";
-                                }
-                                else
-                                {
-                                    Win_ord_InOutSum_QView_Insert.V_Article = "거래처 계";
-                                }
-                            }
-
-                            if (Win_ord_InOutSum_QView_Insert.V_cls == "1")
-                            {
-                                Win_ord_InOutSum_QView_Insert.V_CustomRate = "0";
-                            }
-
-
-                            if (!(Win_ord_InOutSum_QView_Insert.V_IODate.Equals("출고 총계")) &&
-                                        (!Win_ord_InOutSum_QView_Insert.V_IODate.Equals("입고 총계")))
-                            {
-                                RowDefinition row = new RowDefinition();
-                                row.Height = GridLength.Auto;
-                                grdMerge_Month_V.RowDefinitions.Add(row);
-                                grdMergeMonth_V.Items.Add(Win_ord_InOutSum_QView_Insert);
-                            }
-                            
-
-                            //순번
-                            var textbox01 = new TextBox();
-                            textbox01.Text = k.ToString();
-                            textbox01.Style = cellStyleCenter;
-                            textbox01.IsReadOnly = true;
-
-                            grdMerge_Month_V.Children.Add(textbox01);
-                            Grid.SetRow(textbox01, i);
-                            Grid.SetColumn(textbox01, 0);
-
-
-                            // textbox 02 시작지점.
-                            if (i == 0)
-                            {
-                                //월 
-                                textbox02.Text = Win_ord_InOutSum_QView_Insert.V_IODate;
-                                textbox02.Style = cellStyleCenter;
-                                textbox02.IsReadOnly = true;
-
-                                grdMerge_Month_V.Children.Add(textbox02);
-                                Grid.SetRow(textbox02, i);
-                                Grid.SetColumn(textbox02, 1);
-                                strMTemp = Win_ord_InOutSum_QView_Insert.V_IODate;
-                            }
-                            else if ((i+1) == drc.Count)
-                            {
-                                m++;
-                                Grid.SetRowSpan(textbox02, m);
-                            }
-                            else
-                            {
-                                if (strMTemp.Equals(Win_ord_InOutSum_QView_Insert.V_IODate))
-                                {
-                                    m++;
-                                }
-                                else
-                                {
-                                    Grid.SetRowSpan(textbox02, m);
-                                    m = 1;
-
-                                    //월
-                                    textbox02 = new TextBox();
-                                    textbox02.Text = Win_ord_InOutSum_QView_Insert.V_IODate;
-                                    textbox02.Style = cellStyleCenter;
-                                    textbox02.IsReadOnly = true;
-
-                                    grdMerge_Month_V.Children.Add(textbox02);
-                                    Grid.SetRow(textbox02, i);
-                                    Grid.SetColumn(textbox02, 1);
-                                    strMTemp = Win_ord_InOutSum_QView_Insert.V_IODate;
-                                }
-                            }
-
-
-                            // textbox 03 시작지점.
-                            if (i == 0)
-                            {
-                                //구분
-                                textbox03.Text = Win_ord_InOutSum_QView_Insert.V_Gbn;
-                                textbox03.Style = cellStyleCenter;
-                                textbox03.IsReadOnly = true;
-
-                                grdMerge_Month_V.Children.Add(textbox03);
-                                Grid.SetRow(textbox03, i);
-                                Grid.SetColumn(textbox03, 2);
-                                strOTemp = Win_ord_InOutSum_QView_Insert.V_Gbn;
-                            }
-                            else if ((i + 1) == drc.Count)
-                            {
-                                o++;
-                                Grid.SetRowSpan(textbox03, o);
-                            }
-                            else
-                            {
-                                if (strOTemp.Equals(Win_ord_InOutSum_QView_Insert.V_Gbn))
-                                {
-                                    o++;
-                                }
-                                else
-                                {
-                                    Grid.SetRowSpan(textbox03, o);
-                                    o = 1;
-
-                                    //구분
-                                    textbox03 = new TextBox();
-                                    textbox03.Text = Win_ord_InOutSum_QView_Insert.V_Gbn;
-                                    textbox03.Style = cellStyleCenter;
-                                    textbox03.IsReadOnly = true;
-
-                                    grdMerge_Month_V.Children.Add(textbox03);
-                                    Grid.SetRow(textbox03, i);
-                                    Grid.SetColumn(textbox03, 2);
-                                    strOTemp = Win_ord_InOutSum_QView_Insert.V_Gbn;
-                                }
-                            }
-
-
-                            // textbox 04 시작지점.
-                            if (i == 0)
-                            {
-                                //거래처
-                                textbox04.Text = Win_ord_InOutSum_QView_Insert.V_CustomName;
-                                textbox04.Style = cellStyleLeft;
-                                textbox04.IsReadOnly = true;
-
-                                grdMerge_Month_V.Children.Add(textbox04);
-                                Grid.SetRow(textbox04, i);
-                                Grid.SetColumn(textbox04, 3);
-                                strPTemp = Win_ord_InOutSum_QView_Insert.V_CustomName;
-                            }
-                            else if ((i + 1) == drc.Count)
-                            {
-                                p++;
-                                Grid.SetRowSpan(textbox04, p);
-                            }
-                            else
-                            {
-                                if (strPTemp.Equals(Win_ord_InOutSum_QView_Insert.V_CustomName))
-                                {
-                                    p++;
-                                }
-                                else
-                                {
-                                    Grid.SetRowSpan(textbox04, p);
-                                    p = 1;
-
-                                    //거래처
-                                    textbox04 = new TextBox();
-                                    textbox04.Text = Win_ord_InOutSum_QView_Insert.V_CustomName;
-                                    textbox04.Style = cellStyleLeft;
-                                    textbox04.IsReadOnly = true;
-
-                                    grdMerge_Month_V.Children.Add(textbox04);
-                                    Grid.SetRow(textbox04, i);
-                                    Grid.SetColumn(textbox04, 3);
-                                    strPTemp = Win_ord_InOutSum_QView_Insert.V_CustomName;
-                                }
-                            }
-
-                            //품번
-                            var textbox05 = new TextBox();
-                            textbox05.Text = Win_ord_InOutSum_QView_Insert.V_BuyerArticleNo;
-                            textbox05.Style = cellStyleLeft;
-                            textbox05.IsReadOnly = true;
-
-                            grdMerge_Month_V.Children.Add(textbox05);
-                            Grid.SetRow(textbox05, i);
-                            Grid.SetColumn(textbox05, 4);
-
-
-                            //품명
-                            var textbox06 = new TextBox();
-                            textbox06.Text = Win_ord_InOutSum_QView_Insert.V_Article;
-                            textbox06.Style = cellStyleLeft;
-                            textbox06.IsReadOnly = true;
-
-                            grdMerge_Month_V.Children.Add(textbox06);
-                            Grid.SetRow(textbox06, i);
-                            Grid.SetColumn(textbox06, 5);
-
-
-                            //품명코드
-                            var textbox07 = new TextBox();
-                            textbox07.Text = Win_ord_InOutSum_QView_Insert.V_ArticleID;
-                            textbox07.Style = cellStyleCenter;
-                            textbox07.IsReadOnly = true;
-
-                            grdMerge_Month_V.Children.Add(textbox07);
-                            Grid.SetRow(textbox07, i);
-                            Grid.SetColumn(textbox07, 6);
-
-                            //건수
-                            var textbox08 = new TextBox();
-                            textbox08.Text = Win_ord_InOutSum_QView_Insert.V_Roll;
-                            textbox08.Style = cellStyleRight;
-                            textbox08.IsReadOnly = true;
-
-                            grdMerge_Month_V.Children.Add(textbox08);
-                            Grid.SetRow(textbox08, i);
-                            Grid.SetColumn(textbox08, 7);
-
-
-                            //수량
-                            var textbox09 = new TextBox();
-                            textbox09.Text = Win_ord_InOutSum_QView_Insert.V_Qty;
-                            textbox09.Style = cellStyleRight;
-                            textbox09.IsReadOnly = true;
-
-                            grdMerge_Month_V.Children.Add(textbox09);
-                            Grid.SetRow(textbox09, i);
-                            Grid.SetColumn(textbox09, 8);
-
-                            //단위
-                            var textbox10 = new TextBox();
-                            textbox10.Text = Win_ord_InOutSum_QView_Insert.V_UnitClssName;
-                            textbox10.Style = cellStyleCenter;
-                            textbox10.IsReadOnly = true;
-
-                            grdMerge_Month_V.Children.Add(textbox10);
-                            Grid.SetRow(textbox10, i);
-                            Grid.SetColumn(textbox10, 9);
-
-
-                            //점유율
-                            var textbox11 = new TextBox();
-                            double tb11 = Win_ord_InOutSum_QView_Insert.V_CustomRate.Equals("") ? 0 : Convert.ToDouble(Win_ord_InOutSum_QView_Insert.V_CustomRate);
-                            /*Convert.ToDouble(Win_ord_InOutSum_QView_Insert.V_CustomRate);*/
-                            textbox11.Text = String.Format("{0:0.##;0:#;#}", tb11);
-                            textbox11.Style = cellStyleRight;
-                            textbox11.IsReadOnly = true;
-
-                            grdMerge_Month_V.Children.Add(textbox11);
-                            Grid.SetRow(textbox11, i);
-                            Grid.SetColumn(textbox11, 10);
 
                         }
+
+                        grdMergeMonth_V.ItemsSource = lstRows;
+                        dgdMonthVtotal.Items.Add(total);
+
+
                     }
                 }
             }
@@ -1676,52 +609,29 @@ namespace WizMes_SungShinNQ
         // 월별집계 (가로) (최근 3개월)
         private void FillGrid_Month_H()
         {
-            grdMerge_Month_H.Children.Clear();
-            grdMergeMonth_H.Items.Clear();
-            grdTotal4.Items.Clear();
-
-            string SearchToDate = DateTime.Now.ToString("yyyy-MM-dd").Substring(0, 10).Replace("-", "");         //오늘날짜 자동세팅
-            int ChkCustomID = 0;
-            if (chkCustomer.IsChecked == true) { ChkCustomID = 1; }
-            else { txtCustomer.Tag = ""; txtCustomer.Text = ""; }                                                      //거래처
-            int ChkArticleID = 0;
-            if (chkArticle.IsChecked == true) { ChkArticleID = 1; }
-            else { txtArticle.Tag = ""; txtArticle.Text = ""; }                                                       //품명
-            int nGubun = 0;
-            if (chkInOutGubun.IsChecked == true)
-            {
-                if (cboInOutGubun.SelectedValue.ToString() == "1") { nGubun = 1; }
-                if (cboInOutGubun.SelectedValue.ToString() == "2") { nGubun = 2; }
-            }                                                                                   //입출고구분
-            int nMainItem = 0;
-            if (chkMainInterestItem.IsChecked == true) { nMainItem = 1; }                       //주요관심품목
-            int nCustomItem = 0;
-            if (chkCustomsEnrollItem.IsChecked == true) { nCustomItem = 1; }                    //거래처등록품목
-            int chkInspect = 0;
-            string sInspect = string.Empty;
-            if (chkInInsepectGubun.IsChecked == true)
-            {
-                chkInspect = 1;
-                if (cboInInspectGubun.SelectedValue.ToString() == "Y") { sInspect = "Y"; }
-                if (cboInInspectGubun.SelectedValue.ToString() == "N") { sInspect = "N"; }
-            }                                                                                   //입고검수구분
 
             try
             {
+                grdMergeMonth_H.ItemsSource = null;
+                dgdMonthHOutTotal.Items.Clear();
+                dgdMonthHStuffTotal.Items.Clear();
 
                 Dictionary<string, object> sqlParameter = new Dictionary<string, object>();
-                sqlParameter.Add("ChkDate", chkDate.IsChecked == true ? 1 : 0);
-                sqlParameter.Add("EDate", SearchToDate);
-                sqlParameter.Add("ChkCustomID", ChkCustomID);
-                sqlParameter.Add("CustomID", txtCustomer.Tag.ToString());
-                sqlParameter.Add("ChkArticleID", chkArticle.IsChecked == true ? 1 : 0);// ChkArticleID);
-                sqlParameter.Add("ArticleID", chkArticle.IsChecked == true ? "" : string.Empty);// txtArticle.Tag.ToString());
-                sqlParameter.Add("nGubun", nGubun);
-                sqlParameter.Add("nMainItem", nMainItem);
-                sqlParameter.Add("nCustomItem", nCustomItem);
-                sqlParameter.Add("chkInspect", chkInspect);
-                sqlParameter.Add("sInspect", sInspect);
-                sqlParameter.Add("BuyerArticleNo", chkArticle.IsChecked == true ? txtArticle.Text.Trim() : "");
+                sqlParameter.Add("ChkDate", 1);
+                sqlParameter.Add("SDate", !lib.IsDatePickerNull(dtpFromDate) ? lib.ConvertDate(dtpFromDate) : "");
+                sqlParameter.Add("EDate", !lib.IsDatePickerNull(dtpToDate) ? lib.ConvertDate(dtpToDate) : "");
+
+                sqlParameter.Add("ChkCustomID", chkCustomIDSrh.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("CustomID", chkCustomIDSrh.IsChecked == true ? txtCustomIDSrh.Tag != null ? txtCustomIDSrh.Tag.ToString() : "" : "");
+
+                sqlParameter.Add("ChkBuyerArticleNo", chkBuyerArticleNoSrh.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("BuyerArticleNo", chkBuyerArticleNoSrh.IsChecked == true ? txtBuyerArticleNoSrh.Tag != null ? txtBuyerArticleNoSrh.Tag.ToString() : string.Empty : string.Empty);
+
+                sqlParameter.Add("ChkArticleID", chkArticleIDSrh.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("ArticleID", chkArticleIDSrh.IsChecked == true ? txtArticleIDSrh.Tag != null ? txtArticleIDSrh.Tag.ToString() : "" : "");
+
+                sqlParameter.Add("ChkOrder", chkOrderIDSrh.IsChecked == true ? rbnOrderNOSrh.IsChecked == true ? 1 : 2 : 0);
+                sqlParameter.Add("OrderID", chkOrderIDSrh.IsChecked == true ? !string.IsNullOrEmpty(txtOrderIDSrh.Text) ? txtOrderIDSrh.Text : "" : "");
 
                 DataSet ds = DataStore.Instance.ProcedureToDataSet("xp_Outware_sInOutwareSum_MonthSpread3", sqlParameter, false);
 
@@ -1741,390 +651,86 @@ namespace WizMes_SungShinNQ
                         //grdMerge_Month_H.RowDefinitions.Clear();
 
                         DataRowCollection drc = dt.Rows;
-                        Style cellStyleLeft = new Style(typeof(TextBox));
-                        cellStyleLeft.Setters.Add(new Setter(TextBox.BorderThicknessProperty, new Thickness(0, 0, 1, 1)));
-                        cellStyleLeft.Setters.Add(new Setter(TextBox.BorderBrushProperty, System.Windows.Media.Brushes.Black));
-                        cellStyleLeft.Setters.Add(new Setter(TextBox.BackgroundProperty, System.Windows.Media.Brushes.White));
-                        cellStyleLeft.Setters.Add(new Setter(TextBox.VerticalContentAlignmentProperty, VerticalAlignment.Center));
-                        cellStyleLeft.Setters.Add(new Setter(TextBox.HorizontalContentAlignmentProperty, HorizontalAlignment.Left));
-                        cellStyleLeft.Setters.Add(new Setter(TextBox.FocusableProperty, true));
 
-                        Style cellStyleCenter = new Style(typeof(TextBox));
-                        cellStyleCenter.Setters.Add(new Setter(TextBox.BorderThicknessProperty, new Thickness(0, 0, 1, 1)));
-                        cellStyleCenter.Setters.Add(new Setter(TextBox.BorderBrushProperty, System.Windows.Media.Brushes.Black));
-                        cellStyleCenter.Setters.Add(new Setter(TextBox.BackgroundProperty, System.Windows.Media.Brushes.White));
-                        cellStyleCenter.Setters.Add(new Setter(TextBox.VerticalContentAlignmentProperty, VerticalAlignment.Center));
-                        cellStyleCenter.Setters.Add(new Setter(TextBox.HorizontalContentAlignmentProperty, HorizontalAlignment.Center));
-                        cellStyleCenter.Setters.Add(new Setter(TextBox.FocusableProperty, true));
+                        int i = 0; 
 
-                        Style cellStyleRight = new Style(typeof(TextBox));
-                        cellStyleRight.Setters.Add(new Setter(TextBox.BorderThicknessProperty, new Thickness(0, 0, 1, 1)));
-                        cellStyleRight.Setters.Add(new Setter(TextBox.BorderBrushProperty, System.Windows.Media.Brushes.Black));
-                        cellStyleRight.Setters.Add(new Setter(TextBox.BackgroundProperty, System.Windows.Media.Brushes.White));
-                        cellStyleRight.Setters.Add(new Setter(TextBox.VerticalContentAlignmentProperty, VerticalAlignment.Center));
-                        cellStyleRight.Setters.Add(new Setter(TextBox.HorizontalContentAlignmentProperty, HorizontalAlignment.Right));
-                        cellStyleRight.Setters.Add(new Setter(TextBox.FocusableProperty, true));
-
-                        int k = 0;
-
-                        var textbox02 = new TextBox();
-                        int m = 1;                      //var textbox02용
-                        string strMTemp = string.Empty; //var textbox02용
-
-                        var textbox03 = new TextBox();
-                        int o = 1;                      //var textbox03용
-                        string strOTemp = string.Empty; //var textbox03용
-
-                        
-
-                        for (int i = 0; drc.Count > i; i++)
+                        List<Win_ord_InOutSum_QView> lstRows = new List<Win_ord_InOutSum_QView>();
+                        Win_ord_InOutSum_Total_QView StuffTotal = new Win_ord_InOutSum_Total_QView();
+                        Win_ord_InOutSum_Total_QView OutTotal = new Win_ord_InOutSum_Total_QView();
+                        foreach (DataRow dr in drc)
                         {
-                            //k = 2 + i;
-                            var Win_ord_InOutSum_QView_Insert = new Win_ord_InOutSum_QView()
+                            i++;
+                            var MonthHItem = new Win_ord_InOutSum_QView
                             {
-                                H_NUM = (i+1),
-                                H_cls = drc[i]["cls"].ToString(),
-                                H_Gbn = drc[i]["Gbn"].ToString(),
-                                H_CustomID = drc[i]["CustomID"].ToString(),
-                                H_CustomName = drc[i]["CustomName"].ToString(),
-                                H_BuyerArticleNo = drc[i]["BuyerArticleNo"].ToString(),
-                                H_ArticleID = drc[i]["ArticleID"].ToString(),
-                                H_Article = drc[i]["Article"].ToString(),
-                                H_UnitClss = drc[i]["UnitClss"].ToString(),
-                                H_UnitClssName = drc[i]["UnitClssName"].ToString(),
-                                H_UnitPrice = drc[i]["UnitPrice"].ToString(),
-                                H_PriceClss = drc[i]["PriceClss"].ToString(),
-                                H_PriceClssName = drc[i]["PriceClssName"].ToString(),
-                                //H_YYYYMM1 = drc[i]["YYYYMM1"].ToString(),
-                                //H_YYYYMM2 = drc[i]["YYYYMM2"].ToString(),
-                                //H_YYYYMM3 = drc[i]["YYYYMM3"].ToString(),
-                                //H_YYYYMM4 = drc[i]["YYYYMM4"].ToString(),
-                                //H_YYYYMM5 = drc[i]["YYYYMM5"].ToString(),
-                                //H_YYYYMM6 = drc[i]["YYYYMM6"].ToString(),
-                                //H_YYYYMM7 = drc[i]["YYYYMM7"].ToString(),
-                                //H_YYYYMM8 = drc[i]["YYYYMM8"].ToString(),
-                                //H_YYYYMM9 = drc[i]["YYYYMM9"].ToString(),
+                                H_NUM = i,
+                                H_Gbn = dr["Gbn"].ToString(),
+                                H_CustomName = dr["KCustom"].ToString(),
+                                H_Article = dr["Article"].ToString(),
+                                H_BuyerArticleNo = dr["BuyerArticleNo"].ToString(),
+                                H_Spec = dr["Spec"].ToString(),
+                                H_UnitClssName = dr["UnitClssName"].ToString(),
 
-                                H_YYYYMM10 = drc[i]["YYYYMM10"].ToString(),
-                                H_roll10 = drc[i]["roll10"].ToString(),
-                                H_Qty10 = drc[i]["Qty10"].ToString().Split('.')[0].Trim(),
-                                H_Amount10 = drc[i]["Amount10"].ToString(),
-                                H_VatAmount10 = drc[i]["VatAmount10"].ToString(),
-
-                                H_YYYYMM11 = drc[i]["YYYYMM11"].ToString(),
-                                H_roll11 = drc[i]["roll11"].ToString(),
-                                H_Qty11 = drc[i]["Qty11"].ToString().Split('.')[0].Trim(),
-                                H_Amount11 = drc[i]["Amount11"].ToString(),
-                                H_VatAmount11 = drc[i]["VatAmount11"].ToString(),
-
-                                H_YYYYMM12 = drc[i]["YYYYMM12"].ToString(),
-                                H_roll12 = drc[i]["roll12"].ToString(),
-                                H_Qty12 = drc[i]["Qty12"].ToString().Split('.')[0].Trim(),
-                                H_Amount12 = drc[i]["Amount12"].ToString(),
-                                H_VatAmount12 = drc[i]["VatAmount12"].ToString(),
-
-                                H_roll13 = drc[i]["roll13"].ToString(),
-                                H_Qty13 = drc[i]["Qty13"].ToString().Split('.')[0].Trim(),
-                                H_Amount13 = drc[i]["Amount13"].ToString(),
-                                H_VatAmount13 = drc[i]["VatAmount13"].ToString(),
-
-                                H_RN = drc[i]["RN"].ToString(),
-                                H_CustomRate = lib.returnNumStringTwo(drc[i]["CustomRate"].ToString()),
-                                H_CustomAmount = drc[i]["CustomAmount"].ToString(),
-                                H_AllTotalAmount = drc[i]["AllTotalAmount"].ToString(),
+                                H_TotalMonthRoll = Lib.Instance.ToDecimal(dr["TotalRoll"]),
+                                H_TotalMonthQty = Lib.Instance.ToDecimal(dr["TotalQty"]),
+                                H_TotalMonthAmount = Lib.Instance.ToDecimal(dr["TotalAmount"]),
+                                H_BaseMonthRoll = Lib.Instance.ToDecimal(dr["BaseMonthRoll"]),
+                                H_BaseMonthQty = Lib.Instance.ToDecimal(dr["BaseMonthQty"]),
+                                H_BaseMonthAmount = Lib.Instance.ToDecimal(dr["BaseMonthAmount"]),
+                                H_Add1MonthRoll = Lib.Instance.ToDecimal(dr["Add1MonthRoll"]),
+                                H_Add1MonthQty = Lib.Instance.ToDecimal(dr["Add1MonthQty"]),
+                                H_Add1MonthAmount = Lib.Instance.ToDecimal(dr["Add1MonthAmount"]),
+                                H_Add2MonthRoll = Lib.Instance.ToDecimal(dr["Add2MonthRoll"]),
+                                H_Add2MonthQty = Lib.Instance.ToDecimal(dr["Add2MonthQty"]),
+                                H_Add2MonthAmount = Lib.Instance.ToDecimal(dr["Add2MonthAmount"]),
                             };
 
-                            Win_ord_InOutSum_QView_Insert.H_UnitPrice = lib.returnNumString(Win_ord_InOutSum_QView_Insert.H_UnitPrice);
-
-                            Win_ord_InOutSum_QView_Insert.H_roll10 = lib.returnNumString(Win_ord_InOutSum_QView_Insert.H_roll10);
-                            Win_ord_InOutSum_QView_Insert.H_Qty10 = lib.returnNumString(Win_ord_InOutSum_QView_Insert.H_Qty10);
-                            Win_ord_InOutSum_QView_Insert.H_Amount10 = lib.returnNumString(Win_ord_InOutSum_QView_Insert.H_Amount10);
-                            Win_ord_InOutSum_QView_Insert.H_VatAmount10 = lib.returnNumString(Win_ord_InOutSum_QView_Insert.H_VatAmount10);
-                            Win_ord_InOutSum_QView_Insert.H_roll11 = lib.returnNumString(Win_ord_InOutSum_QView_Insert.H_roll11);
-                            Win_ord_InOutSum_QView_Insert.H_Qty11 = lib.returnNumString(Win_ord_InOutSum_QView_Insert.H_Qty11);
-                            Win_ord_InOutSum_QView_Insert.H_Amount11 = lib.returnNumString(Win_ord_InOutSum_QView_Insert.H_Amount11);
-                            Win_ord_InOutSum_QView_Insert.H_VatAmount11 = lib.returnNumString(Win_ord_InOutSum_QView_Insert.H_VatAmount11);
-
-                            Win_ord_InOutSum_QView_Insert.H_roll12 = lib.returnNumString(Win_ord_InOutSum_QView_Insert.H_roll12);
-                            Win_ord_InOutSum_QView_Insert.H_Qty12 = lib.returnNumString(Win_ord_InOutSum_QView_Insert.H_Qty12);
-                            Win_ord_InOutSum_QView_Insert.H_Amount12 = lib.returnNumString(Win_ord_InOutSum_QView_Insert.H_Amount12);
-                            Win_ord_InOutSum_QView_Insert.H_VatAmount12 = lib.returnNumString(Win_ord_InOutSum_QView_Insert.H_VatAmount12);
-                            Win_ord_InOutSum_QView_Insert.H_roll13 = lib.returnNumString(Win_ord_InOutSum_QView_Insert.H_roll13);
-                            Win_ord_InOutSum_QView_Insert.H_Qty13 = lib.returnNumString(Win_ord_InOutSum_QView_Insert.H_Qty13);
-                            Win_ord_InOutSum_QView_Insert.H_Amount13 = lib.returnNumString(Win_ord_InOutSum_QView_Insert.H_Amount13);
-                            Win_ord_InOutSum_QView_Insert.H_VatAmount13 = lib.returnNumString(Win_ord_InOutSum_QView_Insert.H_VatAmount13);
-
-                            Win_ord_InOutSum_QView_Insert.H_RN = lib.returnNumString(Win_ord_InOutSum_QView_Insert.H_RN);
-                            Win_ord_InOutSum_QView_Insert.H_CustomRate = lib.returnNumString(Win_ord_InOutSum_QView_Insert.H_CustomRate);
-                            Win_ord_InOutSum_QView_Insert.H_CustomAmount = lib.returnNumString(Win_ord_InOutSum_QView_Insert.H_CustomAmount);
-                            Win_ord_InOutSum_QView_Insert.H_AllTotalAmount = lib.returnNumString(Win_ord_InOutSum_QView_Insert.H_AllTotalAmount);
-
-                            if (Win_ord_InOutSum_QView_Insert.H_Gbn == "1")
+                            if (MonthHItem.H_Gbn.Equals("2"))       //화면디자인이 출고가 먼저 나와야 하기에..
                             {
-                                if (Win_ord_InOutSum_QView_Insert.H_cls == "3")
-                                {
-                                    Win_ord_InOutSum_QView_Insert.H_Gbn = "입고총계";
-                                    grdTotal4.Items.Add(Win_ord_InOutSum_QView_Insert);
-                                }
-                                else
-                                {
-                                    Win_ord_InOutSum_QView_Insert.H_Gbn = "입고";
-                                }
+                                MonthHItem.H_Gbn = "출고";
+                                OutTotal.H_TotalOutRoll += MonthHItem.H_TotalMonthRoll;
+                                OutTotal.H_TotalOutQty += MonthHItem.H_TotalMonthQty;
+
+                                OutTotal.H_TotalBaseOutRoll += MonthHItem.H_BaseMonthRoll;
+                                OutTotal.H_TotalBaseOutQty += MonthHItem.H_BaseMonthQty;
+
+                                OutTotal.H_TotalAdd1OutRoll += MonthHItem.H_Add1MonthRoll;
+                                OutTotal.H_TotalAdd1OutQty += MonthHItem.H_Add1MonthQty;
+                                OutTotal.H_TotalAdd2OutRoll += MonthHItem.H_Add2MonthRoll;
+                                OutTotal.H_TotalAdd2OutQty += MonthHItem.H_Add2MonthQty;
+                                lstRows.Add(MonthHItem);
+
                             }
-                            else if (Win_ord_InOutSum_QView_Insert.H_Gbn == "2")
+                            else if (MonthHItem.H_Gbn.Equals("1"))
                             {
-                                if (Win_ord_InOutSum_QView_Insert.H_cls == "3")
-                                {
-                                    Win_ord_InOutSum_QView_Insert.H_Gbn = "출고총계";
-                                    grdTotal4.Items.Add(Win_ord_InOutSum_QView_Insert);
-                                }
-                                else
-                                {
-                                    Win_ord_InOutSum_QView_Insert.H_Gbn = "출고";
-                                }
-                            }
+                                MonthHItem.H_Gbn = "입고";
+                                StuffTotal.H_TotalStuffRoll += MonthHItem.H_TotalMonthRoll;
+                                StuffTotal.H_TotalStuffQty += MonthHItem.H_TotalMonthQty;
 
-                            if(!Win_ord_InOutSum_QView_Insert.H_Gbn.Equals("입고총계") && !Win_ord_InOutSum_QView_Insert.H_Gbn.Equals("출고총계"))
+                                StuffTotal.H_TotalBaseStuffRoll += MonthHItem.H_BaseMonthRoll;
+                                StuffTotal.H_TotalBaseStuffQty += MonthHItem.H_BaseMonthQty;
+
+                                StuffTotal.H_TotalAdd1StuffRoll += MonthHItem.H_Add1MonthRoll;
+                                StuffTotal.H_TotalAdd1StuffQty += MonthHItem.H_Add1MonthQty;
+                                StuffTotal.H_TotalAdd2StuffRoll += MonthHItem.H_Add2MonthRoll;
+                                StuffTotal.H_TotalAdd2StuffQty += MonthHItem.H_Add2MonthQty;
+                                lstRows.Add(MonthHItem);
+
+                            }
+                            else if (MonthHItem.H_Gbn.Equals("3") || MonthHItem.H_Gbn.Equals("4"))
                             {
-                                Win_ord_InOutSum_QView_Insert.H_NUM = (i+1);
-                                RowDefinition row = new RowDefinition();
-                                row.Height = GridLength.Auto;
-                                grdMerge_Month_H.RowDefinitions.Add(row);
-                                grdMergeMonth_H.Items.Add(Win_ord_InOutSum_QView_Insert);
-                            }
-
-
-                            //순번
-                            var textbox01 = new TextBox();
-                            textbox01.Text = (i+1).ToString();
-                            textbox01.Style = cellStyleCenter;
-                            textbox01.IsReadOnly = true;
-
-                            grdMerge_Month_H.Children.Add(textbox01);
-                            Grid.SetRow(textbox01, i);
-                            Grid.SetColumn(textbox01, 0);
-
-
-                            // textbox 02 시작지점.
-                            if (i == 0)
-                            {
-                                //구분
-                                textbox02.Text = Win_ord_InOutSum_QView_Insert.H_Gbn;
-                                textbox02.Style = cellStyleCenter;
-                                textbox02.IsReadOnly = true;
-
-                                grdMerge_Month_H.Children.Add(textbox02);
-                                Grid.SetRow(textbox02, i);
-                                Grid.SetColumn(textbox02, 1);
-                                strMTemp = Win_ord_InOutSum_QView_Insert.H_Gbn;
-                            }
-                            else if ((i+1) == drc.Count)
-                            {
-                                m++;
-                                Grid.SetRowSpan(textbox02, m);
-                            }
-                            else
-                            {
-                                if (strMTemp.Equals(Win_ord_InOutSum_QView_Insert.H_Gbn))
-                                {
-                                    m++;
-                                }
-                                else
-                                {
-                                    Grid.SetRowSpan(textbox02, m);
-                                    m = 1;
-
-                                    //구분
-                                    textbox02 = new TextBox();
-                                    textbox02.Text = Win_ord_InOutSum_QView_Insert.H_Gbn;
-                                    textbox02.Style = cellStyleCenter;
-                                    textbox02.IsReadOnly = true;
-
-                                    grdMerge_Month_H.Children.Add(textbox02);
-                                    Grid.SetRow(textbox02, i);
-                                    Grid.SetColumn(textbox02, 1);
-                                    strMTemp = Win_ord_InOutSum_QView_Insert.H_Gbn;
-                                }
-                            }
-
-
-                            // textbox 03 시작지점.
-                            if (i == 0)
-                            {
-                                //거래처
-                                textbox03.Text = Win_ord_InOutSum_QView_Insert.H_CustomName;
-                                textbox03.Style = cellStyleLeft;
-                                textbox03.IsReadOnly = true;
-
-                                grdMerge_Month_H.Children.Add(textbox03);
-                                Grid.SetRow(textbox03, i);
-                                Grid.SetColumn(textbox03, 2);
-                                strOTemp = Win_ord_InOutSum_QView_Insert.H_CustomName;
-                            }
-                            else if ((i+1) == drc.Count)
-                            {
-                                o++;
-                                Grid.SetRowSpan(textbox03, o);
-                            }
-                            else
-                            {
-                                if (strOTemp.Equals(Win_ord_InOutSum_QView_Insert.H_CustomName))
-                                {
-                                    o++;
-                                }
-                                else
-                                {
-                                    Grid.SetRowSpan(textbox03, o);
-                                    o = 1;
-
-                                    //거래처
-                                    textbox03 = new TextBox();
-                                    textbox03.Text = Win_ord_InOutSum_QView_Insert.H_CustomName;
-                                    textbox03.Style = cellStyleLeft;
-                                    textbox03.IsReadOnly = true;
-
-                                    grdMerge_Month_H.Children.Add(textbox03);
-                                    Grid.SetRow(textbox03, i);
-                                    Grid.SetColumn(textbox03, 2);
-                                    strOTemp = Win_ord_InOutSum_QView_Insert.H_CustomName;
-                                }
-                            }
-
-
-                            //품번
-                            var textbox04 = new TextBox();
-                            textbox04.Text = Win_ord_InOutSum_QView_Insert.H_BuyerArticleNo;
-                            textbox04.Style = cellStyleLeft;
-                            textbox04.IsReadOnly = true;
-
-                            grdMerge_Month_H.Children.Add(textbox04);
-                            Grid.SetRow(textbox04, i);
-                            Grid.SetColumn(textbox04, 3);
-
-
-                            //품명
-                            var textbox05 = new TextBox();
-                            textbox05.Text = Win_ord_InOutSum_QView_Insert.H_Article;
-                            textbox05.Style = cellStyleLeft;
-                            textbox05.IsReadOnly = true;
-
-                            grdMerge_Month_H.Children.Add(textbox05);
-                            Grid.SetRow(textbox05, i);
-                            Grid.SetColumn(textbox05, 4);
-
-
-                            //단위
-                            var textbox06 = new TextBox();
-                            textbox06.Text = Win_ord_InOutSum_QView_Insert.H_UnitClssName;
-                            textbox06.Style = cellStyleCenter;
-                            textbox06.IsReadOnly = true;
-
-                            grdMerge_Month_H.Children.Add(textbox06);
-                            Grid.SetRow(textbox06, i);
-                            Grid.SetColumn(textbox06, 5);
-
-                            //var textbox06 = new TextBox();
-                            //textbox06.Text = Win_ord_InOutSum_QView_Insert.H_PriceClssName;
-                            //textbox06.Style = cellStyle;
-
-                            //grdMerge_Month_H.Children.Add(textbox06);
-                            //Grid.SetRow(textbox06, i);
-                            //Grid.SetColumn(textbox06, 5);
-
-                            //점유율
-                            var textbox07 = new TextBox();
-                            double tb07 = Win_ord_InOutSum_QView_Insert.H_CustomRate.Equals("") ? 0 : Convert.ToDouble(Win_ord_InOutSum_QView_Insert.H_CustomRate);
-                            /* Convert.ToDouble(Win_ord_InOutSum_QView_Insert.H_CustomRate);*/
-                            textbox07.Text = String.Format("{0:0.##;0:#;#}", tb07);
-                            textbox07.Style = cellStyleRight;
-                            textbox07.IsReadOnly = true;
-
-                            grdMerge_Month_H.Children.Add(textbox07);
-                            Grid.SetRow(textbox07, i);
-                            Grid.SetColumn(textbox07, 6);
-
-                            //건수
-                            var textbox08 = new TextBox();
-                            textbox08.Text = Win_ord_InOutSum_QView_Insert.H_roll13;
-                            textbox08.Style = cellStyleRight;
-                            textbox08.IsReadOnly = true;
-
-                            grdMerge_Month_H.Children.Add(textbox08);
-                            Grid.SetRow(textbox08, i);
-                            Grid.SetColumn(textbox08, 7);
-
-                            //수량
-                            var textbox09 = new TextBox();
-                            textbox09.Text = Win_ord_InOutSum_QView_Insert.H_Qty13;
-                            textbox09.Style = cellStyleRight;
-                            textbox09.IsReadOnly = true;
-
-                            grdMerge_Month_H.Children.Add(textbox09);
-                            Grid.SetRow(textbox09, i);
-                            Grid.SetColumn(textbox09, 8);
-
-                            //건수
-                            var textbox10 = new TextBox();
-                            textbox10.Text = Win_ord_InOutSum_QView_Insert.H_roll10;
-                            textbox10.Style = cellStyleRight;
-                            textbox10.IsReadOnly = true;
-
-                            grdMerge_Month_H.Children.Add(textbox10);
-                            Grid.SetRow(textbox10, i);
-                            Grid.SetColumn(textbox10, 9);
-
-                            //수량
-                            var textbox11 = new TextBox();
-                            textbox11.Text = Win_ord_InOutSum_QView_Insert.H_Qty10;
-                            textbox11.Style = cellStyleRight;
-                            textbox11.IsReadOnly = true;
-
-                            grdMerge_Month_H.Children.Add(textbox11);
-                            Grid.SetRow(textbox11, i);
-                            Grid.SetColumn(textbox11, 10);
-
-                            //건수
-                            var textbox12 = new TextBox();
-                            textbox12.Text = Win_ord_InOutSum_QView_Insert.H_roll11;
-                            textbox12.Style = cellStyleRight;
-                            textbox12.IsReadOnly = true;
-
-                            grdMerge_Month_H.Children.Add(textbox12);
-                            Grid.SetRow(textbox12, i);
-                            Grid.SetColumn(textbox12, 11);
-
-                            //수량
-                            var textbox13 = new TextBox();
-                            textbox13.Text = Win_ord_InOutSum_QView_Insert.H_Qty11;
-                            textbox13.Style = cellStyleRight;
-                            textbox13.IsReadOnly = true;
-
-                            grdMerge_Month_H.Children.Add(textbox13);
-                            Grid.SetRow(textbox13, i);
-                            Grid.SetColumn(textbox13, 12);
-
-                            //건수
-                            var textbox14 = new TextBox();
-                            textbox14.Text = Win_ord_InOutSum_QView_Insert.H_roll12;
-                            textbox14.Style = cellStyleRight;
-                            textbox14.IsReadOnly = true;
-
-                            grdMerge_Month_H.Children.Add(textbox14);
-                            Grid.SetRow(textbox14, i);
-                            Grid.SetColumn(textbox14, 13);
-
-                            //수량
-                            var textbox15 = new TextBox();
-                            textbox15.Text = Win_ord_InOutSum_QView_Insert.H_Qty12;
-                            textbox15.Style = cellStyleRight;
-                            textbox15.IsReadOnly = true;
-
-                            grdMerge_Month_H.Children.Add(textbox15);
-                            Grid.SetRow(textbox15, i);
-                            Grid.SetColumn(textbox15, 14);
-
+                                MonthHItem.H_Color1 = true;
+                                MonthHItem.H_Gbn = string.Empty;
+                                MonthHItem.H_CustomName = string.Empty;
+                                MonthHItem.H_Article_TextAlignment = TextAlignment.Center;
+                                lstRows.Add(MonthHItem);
+                            }                    
                         }
 
+                        grdMergeMonth_H.ItemsSource = lstRows;                       
+
+                        dgdMonthHOutTotal.Items.Add(OutTotal);
+                        dgdMonthHStuffTotal.Items.Add(StuffTotal);
+                  
                     }
                 }
             }
@@ -2145,33 +751,100 @@ namespace WizMes_SungShinNQ
         // 탬 컨트롤 셀렉션 체인지 이벤트.
         private void tabconGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            string sNowTI = ((sender as TabControl).SelectedItem as TabItem).Header as string;
+            if (e.Source != sender)
+                return;
+            if (dtpFromDate == null || dtpToDate == null)
+                return;
 
-            switch (sNowTI)
+            // 먼저 닫기
+            dtpFromDate.IsDropDownOpen = false;
+            dtpToDate.IsDropDownOpen = false;
+
+            string sNowTI = ((sender as TabControl).SelectedItem as TabItem)?.Header as string;
+            if (string.IsNullOrEmpty(sNowTI))
+                return;
+
+            Dispatcher.BeginInvoke(new Action(() =>
             {
-                case "기간집계":
-                    txtblMessage.Visibility = Visibility.Hidden;
-                    dtpFromDate.IsEnabled = true;
-                    dtpToDate.IsEnabled = true;
-                    break;
-                case "일일집계":
-                    txtblMessage.Visibility = Visibility.Hidden;
-                    dtpFromDate.IsEnabled = true;
-                    dtpToDate.IsEnabled = true;
-                    break;
-                case "월별집계(세로)":
-                    txtblMessage.Visibility = Visibility.Hidden;
-                    dtpFromDate.IsEnabled = true;
-                    dtpToDate.IsEnabled = true;
-                    break;
-                case "월별집계(가로)":
-                    txtblMessage.Visibility = Visibility.Visible;
-                    dtpFromDate.IsEnabled = false;
-                    dtpToDate.IsEnabled = false;
-                    break;
-                default: return;
-            }
+                Style newStyle;
+
+                switch (sNowTI)
+                {
+                    case "기간집계":  
+                    case "일일집계":
+                        txtblMessage.Visibility = Visibility.Hidden;
+                        dtpFromDate.IsEnabled = true;
+                        dtpToDate.IsEnabled = true;
+                        dtpToDate.Visibility = Visibility.Visible;
+                        newStyle = FindResource("DatePickerSearch") as Style;
+                        // 일별 버튼 표시
+                        btnToday.Visibility = Visibility.Visible;
+                        btnYesterday.Visibility = Visibility.Visible;
+                        btnThisMonth.Visibility = Visibility.Visible;
+                        btnLastMonth.Visibility = Visibility.Visible;
+                        break;
+
+                    case "월별집계(세로)":
+                    case "월별집계(가로)":
+                        txtblMessage.Visibility = (sNowTI == "월별집계(가로)") ? Visibility.Visible : Visibility.Hidden;
+                        dtpFromDate.IsEnabled = true;
+                        dtpToDate.IsEnabled = true;
+                        dtpToDate.Visibility = Visibility.Hidden;
+                        newStyle = FindResource("DatePickerMonthYearSearch") as Style;
+                        // 일별 버튼 숨김
+                        btnToday.Visibility = Visibility.Hidden;
+                        btnYesterday.Visibility = Visibility.Hidden;
+                        btnThisMonth.Visibility = Visibility.Visible;
+                        btnLastMonth.Visibility = Visibility.Visible;
+                        break;
+
+                    default:
+                        return;
+                }
+
+                dtpFromDate.Style = newStyle;
+                dtpToDate.Style = newStyle;
+
+                // Popup 바깥 클릭 감지
+                var popup1 = dtpFromDate.Template.FindName("PART_Popup", dtpFromDate) as Popup;
+                var popup2 = dtpToDate.Template.FindName("PART_Popup", dtpToDate) as Popup;
+                if (popup1 != null)
+                    popup1.StaysOpen = false;
+                if (popup2 != null)
+                    popup2.StaysOpen = false;
+
+            }), DispatcherPriority.Background);
         }
+
+        //private void tabconGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        //{
+        //    string sNowTI = ((sender as TabControl).SelectedItem as TabItem).Header as string;
+
+        //    switch (sNowTI)
+        //    {
+        //        case "기간집계":
+        //            txtblMessage.Visibility = Visibility.Hidden;
+        //            dtpFromDate.IsEnabled = true;
+        //            dtpToDate.IsEnabled = true;
+        //            break;
+        //        case "일일집계":
+        //            txtblMessage.Visibility = Visibility.Hidden;
+        //            dtpFromDate.IsEnabled = true;
+        //            dtpToDate.IsEnabled = true;
+        //            break;
+        //        case "월별집계(세로)":
+        //            txtblMessage.Visibility = Visibility.Hidden;
+        //            dtpFromDate.IsEnabled = true;
+        //            dtpToDate.IsEnabled = true;
+        //            break;
+        //        case "월별집계(가로)":
+        //            txtblMessage.Visibility = Visibility.Visible;
+        //            dtpFromDate.IsEnabled = true;
+        //            dtpToDate.IsEnabled = true;
+        //            break;
+        //        default: return;
+        //    }
+        //}
 
 
         #endregion
@@ -2180,6 +853,8 @@ namespace WizMes_SungShinNQ
         //닫기 버튼 클릭.
         private void btnClose_Click(object sender, RoutedEventArgs e)
         {
+            DataStore.Instance.InsertLogByFormS(this.GetType().Name, stDate, stTime, "E");
+
             int i = 0;
             foreach (MenuViewModel mvm in MainWindow.mMenulist)
             {
@@ -2206,86 +881,51 @@ namespace WizMes_SungShinNQ
             string Listname2 = string.Empty;
             DataTable choicedt = null;
             Lib lib2 = new Lib();
-            
-            //if(PeriodDataTable != null)
-            //{
+
+            if (PeriodDataTable != null)
+            {
                 switch (sNowTI)
                 {
                     case "기간집계":
-                        if (PeriodDataTable != null)
+                        if (PeriodDataTable.Rows.Count < 1)
                         {
-                            if (PeriodDataTable.Rows.Count < 1)
-                            {
-                                MessageBox.Show("먼저 기간집계를 검색해 주세요.");
-                                return;
-                            }
-                            Listname1 = "기간집계";
-                            Listname2 = "PeriodData";
-                            choicedt = PeriodDataTable;
-                            makeHeaderList_Period();
+                            MessageBox.Show("먼저 기간집계를 검색해 주세요.");
+                            return;
                         }
-                        else
-                        {
-                            MessageBox.Show("엑설로 변환할 자료가 없습니다.");
-                        }
-
-                    break;
+                        Listname1 = "기간집계";
+                        Listname2 = "PeriodData";
+                        choicedt = PeriodDataTable;
+                        break;
                     case "일일집계":
-                        if (DaysDataTable != null)
+                        if (DaysDataTable.Rows.Count < 1)
                         {
-                            if (DaysDataTable.Rows.Count < 1)
-                            {
-                                MessageBox.Show("먼저 일일집계를 검색해 주세요.");
-                                return;
-                            }
-                            Listname1 = "일일집계";
-                            Listname2 = "DayData";
-                            choicedt = DaysDataTable;
-                            makeHeaderList_Daily();
+                            MessageBox.Show("먼저 일일집계를 검색해 주세요.");
+                            return;
                         }
-                        else
-                        {
-                            MessageBox.Show("엑설로 변환할 자료가 없습니다.");
-                        }
-                    break;
+                        Listname1 = "일일집계";
+                        Listname2 = "DayData";
+                        choicedt = DaysDataTable;
+                        break;
                     case "월별집계(세로)":
-                        if (MonthDataTable != null)
+                        if (MonthDataTable.Rows.Count < 1)
                         {
-                            if (MonthDataTable.Rows.Count < 1)
-                            {
-                                MessageBox.Show("먼저 월별(세로)집계를 검색해 주세요.");
-                                return;
-                            }
-                            Listname1 = "월(세로)집계";
-                            Listname2 = "MonthData";
-                            choicedt = MonthDataTable;
-                            makeHeaderList_MontlySero();
+                            MessageBox.Show("먼저 월별(세로)집계를 검색해 주세요.");
+                            return;
                         }
-                        else
-                        {
-                            MessageBox.Show("엑설로 변환할 자료가 없습니다.");
-                        }
-                    break;
+                        Listname1 = "월(세로)집계";
+                        Listname2 = "MonthData";
+                        choicedt = MonthDataTable;
+                        break;
                     case "월별집계(가로)":
-                        if (SpreadMonthDataTable != null)
+                        if (SpreadMonthDataTable.Rows.Count < 1)
                         {
-
-                            if (SpreadMonthDataTable.Rows.Count < 1)
-                            {
-                                MessageBox.Show("먼저 월별(가로)집계를 검색해 주세요.");
-                                return;
-                            }
-                            Listname1 = "월(가로)집계";
-                            Listname2 = "SpreadMonthData";
-                            choicedt = SpreadMonthDataTable;
-                            makeHeaderList_MontlyGaro();
+                            MessageBox.Show("먼저 월별(가로)집계를 검색해 주세요.");
+                            return;
                         }
-                        else
-                        {
-                            MessageBox.Show("엑설로 변환할 자료가 없습니다.");
-                        }
-
-                    break;
+                        Listname1 = "월(가로)집계";
+                        Listname2 = "SpreadMonthData";
+                        choicedt = SpreadMonthDataTable;
+                        break;
                     default: return;
                 }
 
@@ -2305,9 +945,9 @@ namespace WizMes_SungShinNQ
                     if (ExpExc.choice.Equals(Listname2))
                     {
                         Name = Listname2;
-
-                        if (lib2.GenerateExcelKorColumnHeader(choicedt, Name, GridHeaderList))
+                        if (lib2.GenerateExcel(choicedt, Name))
                         {
+                            DataStore.Instance.InsertLogByForm(this.GetType().Name, "E");
                             lib2.excel.Visible = true;
                             lib2.ReleaseExcelObject(lib2.excel);
                         }
@@ -2320,11 +960,11 @@ namespace WizMes_SungShinNQ
                         }
                     }
                 }
-            //}
-            //else
-            //{
-            //    MessageBox.Show("엑설로 변환할 자료가 없습니다.");
-            //}
+            }
+            else
+            {
+                MessageBox.Show("엑설로 변환할 자료가 없습니다.");
+            }
 
             lib2 = null;
         }
@@ -2336,576 +976,137 @@ namespace WizMes_SungShinNQ
         #endregion
 
 
-        #region 그리드 SELECT 시 BACKGROUND 그리기.
-        // 일반 그리드는 select의 개념이 없습니다.
-        // 그래서 클릭했을때, DataGrid처럼 파란 background를 그려주지 않습니다.
-        // 그렇기에, 일반 그리드는 일일히 그려주어야 합니다.
-        /// <summary>
-        /// //////////////////////////////////////////////////////////////
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
 
-        private void Textbox_Period_previewmousedown(object sender, MouseButtonEventArgs e)
+
+
+
+
+        private void DataGrid_SizeChange(object sender, SizeChangedEventArgs e)
         {
-            if (PreRect.Count != 0)
+            DataGrid dgs = sender as DataGrid;
+            if (dgs.ColumnHeaderHeight == 0)
             {
-                for (int k = 0; k < grdMerge_Period.ColumnDefinitions.Count; k++)
-                {
-                    grdMerge_Period.Children.Remove(PreRect[k]);
-                }
+                dgs.ColumnHeaderHeight = 1;
             }
+            double a = e.NewSize.Height / 100;
+            double b = e.PreviousSize.Height / 100;
+            double c = a / b;
 
-            var point = Mouse.GetPosition(grdMerge_Period);
-
-            Clicked_row = 0;
-            Clicked_col = 0;
-            double accumulatedHeight = 0.0;
-            double accumulatedWidth = 0.0;
-
-            foreach (var rowDefinition in grdMerge_Period.RowDefinitions)
+            if (c != double.PositiveInfinity && c != 0 && double.IsNaN(c) == false)
             {
-                accumulatedHeight += rowDefinition.ActualHeight;
-                if (accumulatedHeight >= point.Y)
-                    break;
-                Clicked_row++;
-            }
-            foreach (var columnDefinition in grdMerge_Period.ColumnDefinitions)
-            {
-                accumulatedWidth += columnDefinition.ActualWidth;
-                if (accumulatedWidth >= point.X)
-                    break;
-                Clicked_col++;
+                dgs.ColumnHeaderHeight = dgs.ColumnHeaderHeight * c;
+                dgs.FontSize = dgs.FontSize * c;
             }
         }
 
-
-        private void Textbox_Period_previewmouseup(object sender, MouseButtonEventArgs e)
-        {
-            // selected row
-            for (int k = 0; k < grdMerge_Period.ColumnDefinitions.Count; k++)
-            {
-                Rectangle rect = new Rectangle
-                {
-                    Height = grdMerge_Period.RowDefinitions[Clicked_row].ActualHeight,
-                    Width = grdMerge_Period.ColumnDefinitions[k].ActualWidth,
-                    Fill = new SolidColorBrush(Colors.Blue),
-                    Opacity = 0.4
-                };
-
-                PreRect.Insert(k, rect);
-
-                Grid.SetColumn(rect, k);
-                Grid.SetRow(rect, Clicked_row);
-                grdMerge_Period.Children.Add(rect);
-            }
-
-            // cell 클릭 용
-            //Grid.SetColumn(rect, Clicked_col);
-            //Grid.SetRow(rect, Clicked_row);
-            //grdMerge_Period.Children.Add(rect);           
-        }
-
-        private void Textbox_Days_previewmousedown(object sender, MouseButtonEventArgs e)
-        {
-            try
-            {
-                if (PreRect.Count != 0)
-                {
-                    for (int k = 0; k < grdMerge_Days.ColumnDefinitions.Count; k++)
-                    {
-                        grdMerge_Days.Children.Remove(PreRect[k]);
-                    }
-                }
-
-                var point = Mouse.GetPosition(grdMerge_Days);
-
-                Clicked_row = 0;
-                Clicked_col = 0;
-                double accumulatedHeight = 0.0;
-                double accumulatedWidth = 0.0;
-
-                foreach (var rowDefinition in grdMerge_Days.RowDefinitions)
-                {
-                    accumulatedHeight += rowDefinition.ActualHeight;
-                    if (accumulatedHeight >= point.Y)
-                        break;
-                    Clicked_row++;
-                }
-                foreach (var columnDefinition in grdMerge_Period.ColumnDefinitions)
-                {
-                    accumulatedWidth += columnDefinition.ActualWidth;
-                    if (accumulatedWidth >= point.X)
-                        break;
-                    Clicked_col++;
-                }
-            }
-            catch (Exception ex)
-            {
-                //MessageBox.Show(ex.ToString());
-            }
-            finally
-            {
-                DataStore.Instance.CloseConnection();
-            }
-        }
-
-
-        private void Textbox_Days_previewmouseup(object sender, MouseButtonEventArgs e)
-        {
-            // selected row
-            for (int k = 0; k < grdMerge_Days.ColumnDefinitions.Count; k++)
-            {
-                Rectangle rect = new Rectangle
-                {
-                    Height = grdMerge_Days.RowDefinitions[Clicked_row].ActualHeight,
-                    Width = grdMerge_Days.ColumnDefinitions[k].ActualWidth,
-                    Fill = new SolidColorBrush(Colors.Blue),
-                    Opacity = 0.4
-                };
-
-                PreRect.Insert(k, rect);
-
-                Grid.SetColumn(rect, k);
-                Grid.SetRow(rect, Clicked_row);
-                grdMerge_Days.Children.Add(rect);
-            }
-
-            // cell 클릭 용
-            //Grid.SetColumn(rect, Clicked_col);
-            //Grid.SetRow(rect, Clicked_row);
-            //grdMerge_Period.Children.Add(rect);           
-        }
-
-
-
-        private void Textbox_Month_V_previewmousedown(object sender, MouseButtonEventArgs e)
-        {
-            if (PreRect.Count != 0)
-            {
-                for (int k = 0; k < grdMerge_Month_V.ColumnDefinitions.Count; k++)
-                {
-                    grdMerge_Month_V.Children.Remove(PreRect[k]);
-                }
-            }
-
-            var point = Mouse.GetPosition(grdMerge_Month_V);
-
-            Clicked_row = 0;
-            Clicked_col = 0;
-            double accumulatedHeight = 0.0;
-            double accumulatedWidth = 0.0;
-
-            foreach (var rowDefinition in grdMerge_Month_V.RowDefinitions)
-            {
-                accumulatedHeight += rowDefinition.ActualHeight;
-                if (accumulatedHeight >= point.Y)
-                    break;
-                Clicked_row++;
-            }
-            foreach (var columnDefinition in grdMerge_Month_V.ColumnDefinitions)
-            {
-                accumulatedWidth += columnDefinition.ActualWidth;
-                if (accumulatedWidth >= point.X)
-                    break;
-                Clicked_col++;
-            }
-        }
-
-
-        private void Textbox_Month_V_previewmouseup(object sender, MouseButtonEventArgs e)
-        {
-            // selected row
-            for (int k = 0; k < grdMerge_Month_V.ColumnDefinitions.Count; k++)
-            {
-                Rectangle rect = new Rectangle
-                {
-                    Height = grdMerge_Month_V.RowDefinitions[Clicked_row].ActualHeight,
-                    Width = grdMerge_Month_V.ColumnDefinitions[k].ActualWidth,
-                    Fill = new SolidColorBrush(Colors.Blue),
-                    Opacity = 0.4
-                };
-
-                PreRect.Insert(k, rect);
-
-                Grid.SetColumn(rect, k);
-                Grid.SetRow(rect, Clicked_row);
-                grdMerge_Month_V.Children.Add(rect);
-            }
-        }
-
-
-        private void Textbox_Month_H_previewmousedown(object sender, MouseButtonEventArgs e)
-        {
-            if (PreRect.Count != 0)
-            {
-                for (int k = 0; k < grdMerge_Month_H.ColumnDefinitions.Count; k++)
-                {
-                    grdMerge_Month_H.Children.Remove(PreRect[k]);
-                }
-            }
-
-            var point = Mouse.GetPosition(grdMerge_Month_H);
-
-            Clicked_row = 0;
-            Clicked_col = 0;
-            double accumulatedHeight = 0.0;
-            double accumulatedWidth = 0.0;
-
-            foreach (var rowDefinition in grdMerge_Month_H.RowDefinitions)
-            {
-                accumulatedHeight += rowDefinition.ActualHeight;
-                if (accumulatedHeight >= point.Y)
-                    break;
-                Clicked_row++;
-            }
-            foreach (var columnDefinition in grdMerge_Month_H.ColumnDefinitions)
-            {
-                accumulatedWidth += columnDefinition.ActualWidth;
-                if (accumulatedWidth >= point.X)
-                    break;
-                Clicked_col++;
-            }
-        }
-
-
-        private void Textbox_Month_H_previewmouseup(object sender, MouseButtonEventArgs e)
-        {
-            // selected row
-            for (int k = 0; k < grdMerge_Month_H.ColumnDefinitions.Count; k++)
-            {
-                Rectangle rect = new Rectangle
-                {
-                    Height = grdMerge_Month_H.RowDefinitions[Clicked_row].ActualHeight,
-                    Width = grdMerge_Month_H.ColumnDefinitions[k].ActualWidth,
-                    Fill = new SolidColorBrush(Colors.Blue),
-                    Opacity = 0.4
-                };
-
-                PreRect.Insert(k, rect);
-
-                Grid.SetColumn(rect, k);
-                Grid.SetRow(rect, Clicked_row);
-                grdMerge_Month_H.Children.Add(rect);
-            }
-        }
-
-
-        #endregion
-
-
-        private void Header_Content_Width_Adjust(string nowti)
-        {
-            if (nowti == "기간집계")
-            {
-                for (int i = 0; i < grdMerge_Period.ColumnDefinitions.Count; i++)
-                {
-                    double ContentWidth = grdMerge_Period.ColumnDefinitions[i].ActualWidth;
-                    grdHeader_Period.ColumnDefinitions[i].Width = new GridLength(ContentWidth, GridUnitType.Star);
-                }
-            }
-            else if (nowti == "일일집계")
-            {
-                for (int i = 0; i < grdMerge_Days.ColumnDefinitions.Count; i++)
-                {
-                    double ContentWidth = grdMerge_Days.ColumnDefinitions[i].ActualWidth;
-                    grdHeader_Days.ColumnDefinitions[i].Width = new GridLength(ContentWidth, GridUnitType.Star);
-                }
-            }
-            else if (nowti == "월별집계(세로)")
-            {
-                for (int i = 0; i < grdMerge_Month_V.ColumnDefinitions.Count; i++)
-                {
-                    double ContentWidth = grdMerge_Month_V.ColumnDefinitions[i].ActualWidth;
-                    grdHeader_Month_V.ColumnDefinitions[i].Width = new GridLength(ContentWidth, GridUnitType.Star);
-                }
-            }
-            else if (nowti == "월별집계(가로)")
-            {
-                for (int i = 0; i < grdMerge_Month_H.ColumnDefinitions.Count; i++)
-                {
-                    double ContentWidth = grdMerge_Month_H.ColumnDefinitions[i].ActualWidth;
-                    grdHeader_Month_H.ColumnDefinitions[i].Width = new GridLength(ContentWidth, GridUnitType.Star);
-                }
-            }
-        }
-
-
-        private void Re_Header_Content_Width_Adjust(string nowti)
-        {
-            //if (nowti == "기간집계")
-            //{
-            //    for (int i = 0; i < grdMerge_Period.ColumnDefinitions.Count; i++)
-            //    {
-            //        double ContentWidth = grdMerge_Period.ColumnDefinitions[i].ActualWidth;
-            //        grdHeader_Period.ColumnDefinitions[i].Width = new GridLength(ContentWidth, GridUnitType.Star);
-            //    }
-            //}
-            if (nowti == "일일집계")
-            {
-                for (int i = 0; i < grdMerge_Days.ColumnDefinitions.Count; i++)
-                {
-                    double ContentWidth = grdMerge_Days.ColumnDefinitions[i].ActualWidth;
-                    double HeaderWidth = grdHeader_Days.ColumnDefinitions[i].ActualWidth;
-                    if ((ContentWidth + 1) < HeaderWidth)
-                    {
-                        grdMerge_Days.ColumnDefinitions[i].Width = new GridLength(HeaderWidth, GridUnitType.Pixel);
-                    }
-                }
-            }
-            //else if (nowti == "월별집계(세로)")
-            //{
-            //    for (int i = 0; i < grdMerge_Month_V.ColumnDefinitions.Count; i++)
-            //    {
-            //        double ContentWidth = grdMerge_Month_V.ColumnDefinitions[i].ActualWidth;
-            //        grdHeader_Month_V.ColumnDefinitions[i].Width = new GridLength(ContentWidth, GridUnitType.Star);
-            //    }
-            //}
-            else if (nowti == "월별집계(가로)")
-            {
-                for (int i = 0; i < grdMerge_Month_H.ColumnDefinitions.Count; i++)
-                {
-                    double ContentWidth = grdMerge_Month_H.ColumnDefinitions[i].ActualWidth;
-                    double HeaderWidth = grdHeader_Month_H.ColumnDefinitions[i].ActualWidth;
-                    if ((ContentWidth + 1) < HeaderWidth)
-                    {
-                        grdMerge_Month_H.ColumnDefinitions[i].Width = new GridLength(HeaderWidth, GridUnitType.Pixel);
-                    }
-                }
-            }
-        }
-
-        private void makeHeaderList_Period()
-        {
-            GridHeaderList.Clear();
-            GridHeaderList.Add("계구분");
-            GridHeaderList.Add("입출구분");
-            GridHeaderList.Add("기간");
-            GridHeaderList.Add("거래처코드");
-            GridHeaderList.Add("거래처");
-            GridHeaderList.Add("품목코드");
-            GridHeaderList.Add("품명");
-            GridHeaderList.Add("고객사품번");
-            GridHeaderList.Add("건수");
-            GridHeaderList.Add("수량");
-            GridHeaderList.Add("단위구분");
-            GridHeaderList.Add("단위");
-            GridHeaderList.Add("단가");
-            GridHeaderList.Add("화폐코드");
-            GridHeaderList.Add("화폐단위");
-            GridHeaderList.Add("금액");
-            GridHeaderList.Add("부가세");
-            GridHeaderList.Add("합계금액");
-            GridHeaderList.Add("점유율");
-            GridHeaderList.Add("수주점유율");
-
-        }
-
-        private void makeHeaderList_Daily()
-        {
-            GridHeaderList.Clear();
-            GridHeaderList.Add("계구분");
-            GridHeaderList.Add("입출구분");
-            GridHeaderList.Add("일자");
-            GridHeaderList.Add("거래처코드");
-            GridHeaderList.Add("거래처");
-            GridHeaderList.Add("품목코드");
-            GridHeaderList.Add("품명");
-            GridHeaderList.Add("고객사품번");
-            GridHeaderList.Add("건수");
-            GridHeaderList.Add("수량");
-            GridHeaderList.Add("단위구분");
-            GridHeaderList.Add("단위");
-            GridHeaderList.Add("단가");
-            GridHeaderList.Add("화폐코드");
-            GridHeaderList.Add("화폐단위");
-            GridHeaderList.Add("금액");
-            GridHeaderList.Add("부가세");
-            GridHeaderList.Add("합계금액");
-            GridHeaderList.Add("점유율");
-            GridHeaderList.Add("수주점유율");
-
-        }
-
-        private void makeHeaderList_MontlySero()
-        {
-            GridHeaderList.Clear();
-            GridHeaderList.Add("계구분");
-            GridHeaderList.Add("입출구분");
-            GridHeaderList.Add("월");
-            GridHeaderList.Add("품목코드");
-            GridHeaderList.Add("품명");
-            GridHeaderList.Add("고객사품번");
-            GridHeaderList.Add("거래처코드");
-            GridHeaderList.Add("거래처");
-            
-            GridHeaderList.Add("건수");
-            GridHeaderList.Add("수량");
-            GridHeaderList.Add("단위구분");
-            GridHeaderList.Add("단위");
-            GridHeaderList.Add("단가");
-            GridHeaderList.Add("화폐코드");
-            GridHeaderList.Add("화폐단위");
-            GridHeaderList.Add("금액");
-            GridHeaderList.Add("부가세");
-            GridHeaderList.Add("합계금액");
-            GridHeaderList.Add("점유율");
-            GridHeaderList.Add("수주점유율");
-
-        }
-
-        private void makeHeaderList_MontlyGaro()
-        {
-            GridHeaderList.Clear();
-            GridHeaderList.Add("계구분");
-            GridHeaderList.Add("입출구분");
-            GridHeaderList.Add("거래처코드");
-            GridHeaderList.Add("거래처");
-            GridHeaderList.Add("품목코드");
-            GridHeaderList.Add("품명");
-            GridHeaderList.Add("고객사품번");
-            GridHeaderList.Add("단위구분");
-            GridHeaderList.Add("단위");
-            GridHeaderList.Add("단가");
-            GridHeaderList.Add("화폐코드");
-            GridHeaderList.Add("화폐단위");
-            //GridHeaderList.Add("시작월");
-            //GridHeaderList.Add("시작월+1");
-            //GridHeaderList.Add("시작월+2");
-            //GridHeaderList.Add("시작월+3");
-            //GridHeaderList.Add("시작월+4");
-            //GridHeaderList.Add("시작월+5");
-            //GridHeaderList.Add("시작월+6");
-            //GridHeaderList.Add("시작월+7");
-            //GridHeaderList.Add("시작월+8");
-            //GridHeaderList.Add("시작월+9");
-            GridHeaderList.Add("두달전");
-            GridHeaderList.Add("건수");
-            GridHeaderList.Add("수량");
-            GridHeaderList.Add("금액");
-            GridHeaderList.Add("부가세");
-            GridHeaderList.Add("한달전");
-            GridHeaderList.Add("건수");
-            GridHeaderList.Add("수량");
-            GridHeaderList.Add("금액");
-            GridHeaderList.Add("부가세");
-            GridHeaderList.Add("현재월");
-            GridHeaderList.Add("건수");
-            GridHeaderList.Add("수량");
-            GridHeaderList.Add("금액");
-            GridHeaderList.Add("부가세");
-
-            GridHeaderList.Add("합계건수");
-            GridHeaderList.Add("합계수량");
-            GridHeaderList.Add("합계금액");
-            GridHeaderList.Add("합계부가세");
-
-            GridHeaderList.Add("점유율");
-            GridHeaderList.Add("수주점유율");
-            GridHeaderList.Add("거래처금액계");
-            GridHeaderList.Add("입/출고금액계");
-
-        }
-        private void txtCustomer_KeyDown(object sender, KeyEventArgs e)
+        private void CommonPlusfinder_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
-                btnCustomer_Click(null, null);
+                TextBox txtbox = sender as TextBox;
+                if (txtbox != null)
+                {
+                    if (txtbox.Name.Contains("CustomID"))
+                    {
+                        pf.ReturnCode(txtbox, 0, "");
+
+                    }
+                    else if (txtbox.Name.Contains("BuyerArticleNo"))
+                    {
+                        pf.ReturnCode(txtbox, 76, "");
+                    }
+                    else if (txtbox.Name.Contains("ArticleID"))
+                    {
+                        pf.ReturnCode(txtbox, 77, "");
+                    }
+                }
             }
         }
 
-        private void txtArticle_KeyDown(object sender, KeyEventArgs e)
+        private void CommonPlusfinder_Click(object sender, RoutedEventArgs e)
         {
-            if (e.Key == Key.Enter)
+            TextBox txtbox = sender as TextBox;
+            if (txtbox != null)
             {
-                btnArticle_Click(null, null);
+                if (txtbox.Name.Contains("CustomID"))
+                {
+                    pf.ReturnCode(txtbox, 0, "");
+
+                }
+                else if (txtbox.Name.Contains("BuyerArticleNo"))
+                {
+                    pf.ReturnCode(txtbox, 76, "");
+                }
+                else if (txtbox.Name.Contains("ArticleID"))
+                {
+                    pf.ReturnCode(txtbox, 77, "");
+                }
             }
         }
 
-        private void grdPeriod_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
 
+        private void CommonControl_Click(object sender, MouseButtonEventArgs e)
+        {
+            lib.CommonControl_Click(sender, e);
         }
 
-        private void grdMergeDays_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void CommonControl_Click(object sender, RoutedEventArgs e)
         {
-
+            lib.CommonControl_Click(sender, e);
         }
 
-        private void grdMergeMonth_V_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void rbnOrderNOSrh_Click(object sender, RoutedEventArgs e)
         {
-
+            tblOrderIDSrh.Text = "OrderNo";
+            dtcOrderID_P.Visibility = Visibility.Hidden;
+            dtcOrderID_D.Visibility = Visibility.Hidden;
+            dtcOrderNo_P.Visibility = Visibility.Visible;
+            dtcOrderNo_D.Visibility = Visibility.Visible;
         }
 
-        private void grdPeriod_SelectionChanged_1(object sender, SelectionChangedEventArgs e)
+        private void rbnOrderIDSrh_Click(object sender, RoutedEventArgs e)
         {
-
+            tblOrderIDSrh.Text = "관리번호";
+            dtcOrderID_P.Visibility = Visibility.Visible;
+            dtcOrderID_D.Visibility = Visibility.Visible;
+            dtcOrderNo_P.Visibility = Visibility.Hidden;
+            dtcOrderNo_D.Visibility = Visibility.Hidden;
         }
 
-        //전일
-        private void btnYesterDay_Click(object sender, RoutedEventArgs e)
-        {
-            DateTime[] SearchDate = lib.BringLastDayDateTimeContinue(dtpToDate.SelectedDate.Value);
 
-            dtpFromDate.SelectedDate = SearchDate[0];
-            dtpToDate.SelectedDate = SearchDate[1];
+
+        // 천 단위 콤마, 소수점 버리기
+        private string stringFormatN0(object obj)
+        {
+            return string.Format("{0:N0}", obj);
         }
 
-        //금일
-        private void btnToday_Click(object sender, RoutedEventArgs e)
+        // 천 단위 콤마, 소수점 두자리
+        private string stringFormatN2(object obj)
         {
-            dtpFromDate.SelectedDate = DateTime.Today;
-            dtpToDate.SelectedDate = DateTime.Today;
+            return string.Format("{0:N2}", obj);
         }
 
-        // 전월 버튼 클릭 이벤트
-        private void btnLastMonth_Click(object sender, RoutedEventArgs e)
+        // Int로 변환
+        private int ConvertInt(string str)
         {
-            DateTime[] SearchDate = lib.BringLastMonthContinue(dtpFromDate.SelectedDate.Value);
+            int result = 0;
+            int chkInt = 0;
 
-            dtpFromDate.SelectedDate = SearchDate[0];
-            dtpToDate.SelectedDate = SearchDate[1];
-        }
-
-        // 금월 버튼 클릭 이벤트
-        private void btnThisMonth_Click(object sender, RoutedEventArgs e)
-        {
-            dtpFromDate.SelectedDate = lib.BringThisMonthDatetimeList()[0];
-            dtpToDate.SelectedDate = lib.BringThisMonthDatetimeList()[1];
-        }
-
-        private void chkDate_Click(object sender, RoutedEventArgs e)
-        {
-            if (chkDate.IsChecked == true)
+            if (!str.Trim().Equals(""))
             {
-                chkDate.IsChecked = true;
-                dtpFromDate.IsEnabled = true;
-                dtpToDate.IsEnabled = true;
-            }
-            else
-            {
-                chkDate.IsChecked = false;
-                dtpFromDate.IsEnabled = false;
-                dtpToDate.IsEnabled = false;
+                str = str.Replace(",", "");
+
+                if (Int32.TryParse(str, out chkInt) == true)
+                {
+                    result = Int32.Parse(str);
+                }
             }
 
+            return result;
         }
 
-        private void lblDate_Click(object sender, MouseButtonEventArgs e)
-        {
-            if(chkDate.IsChecked == true)
-            {
-                chkDate.IsChecked = false;
-                dtpFromDate.IsEnabled = false;
-                dtpToDate.IsEnabled = false;
-            }
-            else
-            {
-                chkDate.IsChecked = true;
-                dtpFromDate.IsEnabled = true;
-                dtpToDate.IsEnabled = true;
-            }
-        }
+
     }
 
 
@@ -2944,26 +1145,31 @@ namespace WizMes_SungShinNQ
         public string P_IODate { get; set; }
         public string P_CustomID { get; set; }
         public string P_CustomName { get; set; }
-
+        public string P_OrderID { get; set; }
+        public string P_OrderNo { get; set; }
         public string P_Sabun { get; set; }
 
         public string P_BuyerArticleNo { get; set; }
         public string P_ArticleID { get; set; }
         public string P_Article { get; set; }
-        public string P_Roll { get; set; }
-        public string P_Qty { get; set; }
+        public TextAlignment P_Article_TextAlignment { get; set; } = TextAlignment.Left;
+        public string P_Spec { get; set; }
+        public decimal? P_Roll { get; set; }
+        public decimal? P_Qty { get; set; }
         public string P_UnitClss { get; set; }
 
         public string P_UnitClssName { get; set; }
-        public string P_UnitPrice { get; set; }
+        public decimal? P_UnitPrice { get; set; }
         public string P_PriceClss { get; set; }
         public string P_PriceClssName { get; set; }
-        public string P_Amount { get; set; }
+        public decimal? P_Amount { get; set; }
 
-        public string P_VatAmount { get; set; }
-        public string P_TotAmount { get; set; }
-        public string P_CustomRate { get; set; }
-        public string P_CustomRateOrder { get; set; }
+        public decimal? P_VatAmount { get; set; }
+        public decimal? P_TotAmount { get; set; }
+        public decimal? P_CustomRate { get; set; }
+        public decimal? P_CustomRateOrder { get; set; }
+        public bool P_Color1 { get; set; } = false;
+        public bool P_Color2 { get; set; } = false;
 
 
 
@@ -2974,26 +1180,32 @@ namespace WizMes_SungShinNQ
         public string D_IODate { get; set; }
         public string D_CustomID { get; set; }
         public string D_CustomName { get; set; }
+        public TextAlignment D_CustomName_TextAlignment { get; set; } = TextAlignment.Left;
+        public string D_OrderID { get; set; }
+        public string D_OrderNo { get; set; }
 
         public string D_BuyerArticleNo { get; set; }
         public string D_ArticleID { get; set; }
         public string D_Article { get; set; }
-        public string D_Roll { get; set; }
-        public string D_Qty { get; set; }
+        public string D_Spec { get; set; }
+        public decimal? D_Roll { get; set; }
+        public decimal? D_Qty { get; set; }
         public string D_UnitClss { get; set; }
 
         public string D_Sabun { get; set; }
 
         public string D_UnitClssName { get; set; }
-        public string D_UnitPrice { get; set; }
+        public decimal? D_UnitPrice { get; set; }
         public string D_PriceClss { get; set; }
         public string D_PriceClssName { get; set; }
-        public string D_Amount { get; set; }
+        public decimal? D_Amount { get; set; }
 
-        public string D_VatAmount { get; set; }
-        public string D_TotAmount { get; set; }
-        public string D_CustomRate { get; set; }
-        public string D_CustomRateOrder { get; set; }
+        public decimal? D_VatAmount { get; set; }
+        public decimal? D_TotAmount { get; set; }
+        public decimal? D_CustomRate { get; set; }
+        public decimal? D_CustomRateOrder { get; set; }
+        public bool D_Color1 { get; set; } = false;
+        public bool D_Color2 { get; set; } = false;
 
 
         // 조회 - 월별집계용 _V ( V_ (V_Month))
@@ -3003,27 +1215,34 @@ namespace WizMes_SungShinNQ
         public string V_IODate { get; set; }
         public string V_CustomID { get; set; }
         public string V_CustomName { get; set; }
+        public string V_OrderID { get; set; }
+        public string V_OrderNo { get; set; }
 
         public string V_BuyerArticleNo { get; set; }
         public string V_ArticleID { get; set; }
         public string V_Article { get; set; }
-        public string V_Roll { get; set; }
-        public string V_Qty { get; set; }
+        public TextAlignment V_Article_TextAlignment { get; set; } = TextAlignment.Left;
+        public string V_Spec { get; set; }  
+        public decimal? V_Roll { get; set; }
+        public decimal? V_Qty { get; set; }
         public string V_UnitClss { get; set; }
 
         public string V_Sabun { get; set; }
 
         public string V_UnitClssName { get; set; }
-        public string V_UnitPrice { get; set; }
+        public decimal? V_UnitPrice { get; set; }
         public string V_PriceClss { get; set; }
         public string V_PriceClssName { get; set; }
-        public string V_Amount { get; set; }
+        public decimal? V_Amount { get; set; }
 
-        public string V_VatAmount { get; set; }
-        public string V_TotAmount { get; set; }
-        public string V_CustomRate { get; set; }
-        public string V_CustomRateOrder { get; set; }
+        public decimal? V_VatAmount { get; set; }
+        public decimal? V_TotAmount { get; set; }
+        public decimal? V_CustomRate { get; set; }
+        public decimal? V_CustomRateOrder { get; set; }
         public string V_RN { get; set; }
+
+        public bool V_Color1 { get; set; } = false;
+        public bool V_Color2 { get; set; } = false;
 
 
 
@@ -3033,13 +1252,14 @@ namespace WizMes_SungShinNQ
         public string H_Gbn { get; set; }
         public string H_CustomID { get; set; }
         public string H_CustomName { get; set; }
-
         public string H_BuyerArticleNo { get; set; }
         public string H_ArticleID { get; set; }
         public string H_Article { get; set; }
+        public TextAlignment H_Article_TextAlignment { get; set; } = TextAlignment.Left;
+        public string H_Spec { get; set; }
         public string H_UnitClss { get; set; }
         public string H_UnitClssName { get; set; }
-        public string H_UnitPrice { get; set; }
+        public decimal? H_UnitPrice { get; set; }
 
         public string H_Sabun { get; set; }
 
@@ -3084,6 +1304,21 @@ namespace WizMes_SungShinNQ
         public string H_CustomRate { get; set; }
         public string H_CustomAmount { get; set; }
         public string H_AllTotalAmount { get; set; }
+
+        public decimal? H_TotalMonthQty { get; set; }
+        public decimal? H_TotalMonthRoll { get; set; }
+        public decimal? H_TotalMonthAmount { get; set; }
+        public decimal? H_BaseMonthQty { get; set; }
+        public decimal? H_BaseMonthRoll { get; set; }
+        public decimal? H_BaseMonthAmount { get; set; }
+        public decimal? H_Add1MonthQty { get; set; }
+        public decimal? H_Add1MonthRoll { get; set; }
+        public decimal? H_Add1MonthAmount { get; set; }
+        public decimal? H_Add2MonthQty { get; set; }
+        public decimal? H_Add2MonthRoll { get; set; }
+        public decimal? H_Add2MonthAmount { get; set; }
+        public bool H_Color1 { get; set; } = false;
+        public bool H_Color2 { get; set; } = false;
 
 
         public List<P_listmodel> P_listmodel { get; set; }
@@ -3188,6 +1423,56 @@ namespace WizMes_SungShinNQ
         public string H_roll13 { get; set; }
         public string H_Qty13 { get; set; }
 
+    }
+
+    public class Win_ord_InOutSum_Total_QView : BaseView
+    {
+        public decimal? P_TotalOutRoll { get; set; } = 0m;
+        public decimal? P_TotalOutQty { get; set; } = 0m;
+        public decimal? P_TotalStuffRoll { get; set; } = 0m;
+        public decimal? P_TotalStuffQty { get; set; } = 0m;
+
+        public decimal? D_TotalOutRoll { get; set; } = 0m; 
+        public decimal? D_TotalOutQty { get; set; } = 0m;
+        public decimal? D_TotalOutAmount { get; set; } = 0m;
+        public decimal? D_TotalOutVatAmount { get; set; } = 0m;
+        public decimal? D_TotalOutPrice { get; set; } = 0m;
+        public decimal? D_TotalStuffRoll { get; set; } = 0m;
+        public decimal? D_TotalStuffQty { get; set; } = 0m;
+        public decimal? D_TotalStuffAmount { get; set; } = 0m;
+        public decimal? D_TotalStuffVatAmount { get; set; } = 0m;
+        public decimal? D_TotalStuffPrice { get; set; } = 0m;
+        public bool D_Color1 { get; set; } = false;
+        public bool D_Color2 { get; set; } = false;
+
+        public decimal? V_TotalOutRoll { get; set; } = 0m;
+        public decimal? V_TotalOutQty { get; set; } = 0m;
+        public decimal? V_TotalStuffRoll { get; set; } = 0m;
+        public decimal? V_TotalStuffQty { get; set; } = 0m;
+        public bool V_Color1 { get; set; } = false;
+        public bool V_Color2 { get; set; } = false;
+
+        public decimal? H_TotalOutRoll { get; set; } = 0m;
+        public decimal? H_TotalOutQty { get; set; } = 0m;
+        public decimal? H_TotalStuffRoll { get; set; } = 0m;
+        public decimal? H_TotalStuffQty { get; set; } = 0m;
+
+        public decimal? H_TotalBaseOutRoll { get; set; } = 0m;
+        public decimal? H_TotalBaseOutQty { get; set; } = 0m;
+        public decimal? H_TotalBaseStuffRoll { get; set; } = 0m;
+        public decimal? H_TotalBaseStuffQty { get; set; } = 0m;
+
+        public decimal? H_TotalAdd1OutRoll { get; set; } = 0m;
+        public decimal? H_TotalAdd1OutQty { get; set; } = 0m;
+        public decimal? H_TotalAdd1StuffRoll { get; set; } = 0m;
+        public decimal? H_TotalAdd1StuffQty { get; set; } = 0m;
+
+        public decimal? H_TotalAdd2OutRoll { get; set; } = 0m;
+        public decimal? H_TotalAdd2OutQty { get; set; } = 0m;
+        public decimal? H_TotalAdd2StuffRoll { get; set; } = 0m;
+        public decimal? H_TotalAdd2StuffQty { get; set; } = 0m;
+        public bool H_Color1 { get; set; } = false;
+        public bool H_Color2 { get; set; } = false;
     }
 
 
