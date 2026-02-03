@@ -210,13 +210,13 @@ namespace WizMes_SungShinNQ
                                 DefectQty = stringFormatN0(dr["DefectQty"]),
                                 DefectWorkQty = stringFormatN0(dr["DefectWorkQty"]),
                                 DefectRate = stringFormatN2(dr["DefectRate"]),
-                                DefectUpRate = stringFormatN1(dr["DefectUpRate"]),
-                                DefectGoalRate = stringFormatN1(dr["DefectGoalRate"]),
+                                DefectUpRate = stringFormatN0(dr["DefectUpRate"]),
+                                DefectGoalRate = stringFormatN0(dr["DefectGoalRate"]),
                                 gbn = dr["gbn"].ToString(),
 
                                 Sort = dr["Sort"].ToString(),
-                                WorkUpRate = stringFormatN1(dr["WorkUpRate"]),
-                                WorkGoalRate = stringFormatN1(dr["WorkGoalRate"])
+                                WorkUpRate = stringFormatN0(dr["WorkUpRate"]),
+                                WorkGoalRate = stringFormatN0(dr["WorkGoalRate"])
                             };
                             if (WPKQC.gbn == "P")
                             {
