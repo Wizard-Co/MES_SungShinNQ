@@ -562,12 +562,16 @@ namespace WizMes_SungShinNQ
 
                             if (MonthHItem.V_Gbn.Equals("1"))
                             {
-                                MonthHItem.V_Gbn = "입고";                
+                                MonthHItem.V_Gbn = "입고";
+                                total.V_TotalStuffRoll += MonthHItem.V_Roll;
+                                total.V_TotalStuffQty += MonthHItem.V_Qty;
                                 lstRows.Add(MonthHItem);
                             }
                             else if (MonthHItem.V_Gbn.Equals("2"))
                             {
-                                MonthHItem.V_Gbn = "출고";                   
+                                MonthHItem.V_Gbn = "출고";
+                                total.V_TotalOutRoll += MonthHItem.V_Roll;
+                                total.V_TotalOutQty += MonthHItem.V_Qty;
                                 lstRows.Add(MonthHItem);
                             }
                             else if (MonthHItem.V_Gbn.Equals("3"))
@@ -577,10 +581,6 @@ namespace WizMes_SungShinNQ
                                 MonthHItem.V_Article = "거래처 계";
                                 MonthHItem.V_Article_TextAlignment = TextAlignment.Center;
                                 MonthHItem.V_CustomName = string.Empty;
-                                total.V_TotalStuffRoll += MonthHItem.V_Roll;
-                                total.V_TotalStuffQty += MonthHItem.V_Qty;
-                                total.V_TotalOutRoll += MonthHItem.V_Roll;
-                                total.V_TotalOutQty += MonthHItem.V_Qty;
                                 lstRows.Add(MonthHItem);
                             }
 

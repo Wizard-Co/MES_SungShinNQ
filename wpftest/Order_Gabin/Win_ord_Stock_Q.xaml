@@ -245,7 +245,7 @@
                     </Button>
                 </Grid>
                 <!-- 인쇄 버튼 -->
-                <Grid  Grid.Row="1" >
+                <Grid  Grid.Row="1" Visibility="Hidden">
                     <Button x:Name="btnPrint"  Margin="1" Click="btnPrint_Click"  >
                         <StackPanel Orientation="Horizontal">
                             <Image Source="{DynamicResource btiPrint}" Style="{DynamicResource imgSize}" VerticalAlignment="Center" />

@@ -297,7 +297,7 @@
                     </Button>
                 </Grid>
                 <!-- 인쇄 버튼 -->
-                <Grid Grid.Column="0" Grid.Row="1" >
+                <Grid Grid.Column="0" Grid.Row="1" Visibility="Hidden">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="7*"/>
                         <ColumnDefinition Width="3*"/>

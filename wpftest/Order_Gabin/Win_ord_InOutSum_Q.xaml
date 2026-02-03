@@ -427,7 +427,7 @@
                                   ElementStyle="{StaticResource DataGridCellRight}"/>
                                 <DataGridTextColumn Header="단위" Binding="{Binding P_UnitClssName}" Width="*"
                                   ElementStyle="{StaticResource DataGridCellCenter}"/>
-                                <DataGridTextColumn Header="점유율" Binding="{Binding P_CustomRate, Converter={StaticResource NumberConverter},ConverterParameter=1}" Width="*"
+                                <DataGridTextColumn Header="점유율" Binding="{Binding P_CustomRate, Converter={StaticResource NumberConverter},ConverterParameter=2}" Width="*"
                                   ElementStyle="{StaticResource DataGridCellRight}"/>
                             </DataGrid.Columns>
                         </DataGrid>
@@ -511,9 +511,9 @@
                                          ElementStyle="{StaticResource DataGridCellRight}"/>
                                 <DataGridTextColumn Header="부가세" Binding="{Binding D_VatAmount, Converter={StaticResource NumberConverter}}" Width="*"
                                          ElementStyle="{StaticResource DataGridCellRight}"/>
-                                <DataGridTextColumn Header="합계" Binding="{Binding D_TotAmount, Converter={StaticResource NumberConverter}}" Width="*"
+                                <DataGridTextColumn Header="총금액" Binding="{Binding D_TotAmount, Converter={StaticResource NumberConverter}}" Width="*"
                                          ElementStyle="{StaticResource DataGridCellRight}"/>
-                                <DataGridTextColumn Header="점유율" Binding="{Binding D_CustomRate, Converter={StaticResource NumberConverter}}" Width="*"
+                                <DataGridTextColumn Header="점유율" Binding="{Binding D_CustomRate, Converter={StaticResource NumberConverter},ConverterParameter=2}" Width="*"
                                          ElementStyle="{StaticResource DataGridCellRight}"/>
                             </DataGrid.Columns>
                         </DataGrid>
