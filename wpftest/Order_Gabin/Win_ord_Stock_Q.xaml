@@ -209,7 +209,8 @@
                     <CheckBox x:Name="chkAutoInOutItemsIncloud" Content="자동입출고건 포함" Margin="0,0,0,3" />
                     <CheckBox x:Name="chkOptimumStockBelowSee"  Content="적정재고량 미달건 조회" Margin="0,0,0,3" />
                     <CheckBox x:Name="chkMainInterestItemsSee" Content="주요관심품목만 보기" Margin="0,0,0,3" />
-                    <CheckBox x:Name="chkRegistItemsByCustomer" Content="거래처별 등록 품목" Visibility="Hidden" />
+                    <CheckBox x:Name="chkRegistItemsByCustomer" Content="거래처별 등록 품목" Visibility="Collapsed" />
+                    <CheckBox x:Name="chkUseClssArticle" Content="사용안함품목 포함"  Margin="0,0,0,3"/>
                 </StackPanel>
             </Label>
 

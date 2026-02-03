@@ -541,6 +541,8 @@ namespace WizMes_SungShinNQ
                 sqlParameter.Add("nBuyerArticleNo", chkArticle.IsChecked == true ? 1 : 0); //일단 빈값
                 sqlParameter.Add("BuyerArticleNo", txtArticle.Text);
 
+                sqlParameter.Add("chkUseClssArticle", chkUseClssArticle.IsChecked == true ? 1 : 0);
+
 
                 DataSet ds = DataStore.Instance.ProcedureToDataSet("xp_Subul_sStockList", sqlParameter, false);
                 DataTable dt = null;
