@@ -418,10 +418,17 @@ namespace WizMes_SungShinNQ
                     if (dt.Rows.Count > 0)
                     {
                         DataRowCollection drc = dt.Rows;
+                        int cntCls1 = 0;
+
 
                         for (int i = 0; i < drc.Count; i++)
                         {
                             DataRow dr = drc[i];
+
+                            if (dr["cls"].ToString().Equals("1") || dr["cls"].ToString().Equals("2"))
+                            {
+                                cntCls1++;                                
+                            }
 
                             var WinMcSubul = new Win_prd_PartSubul_Q_CodeView()
                             {
@@ -443,8 +450,11 @@ namespace WizMes_SungShinNQ
                                 Remark = dr["Remark"].ToString(),
                                 StockQty = stringFormatN0(dr["StockQty"]),
                                 ForUse = dr["ForUse"].ToString(),
-                                ForUseName = dr["ForUseName"].ToString()
+                                ForUseName = dr["ForUseName"].ToString(),
+                                Cnt = cntCls1.ToString()
                             };
+
+                            
 
                             if (WinMcSubul.cls.Equals("6"))
                             {
@@ -658,5 +668,7 @@ namespace WizMes_SungShinNQ
         public string StockQty { get; set; }
         public string ForUse { get; set; }
         public string ForUseName { get; set; }
+        public string Cnt { get; set; }
+
     }
 }

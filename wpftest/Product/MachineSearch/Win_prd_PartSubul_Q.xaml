@@ -427,9 +427,14 @@
                         Header="" />
                     <DataGridTextColumn
                         Width="*"
+                        Binding="{Binding Cnt}"
+                        CellStyle="{StaticResource DataGridCellAndCentering}"
+                        Header="건수" />
+                    <DataGridTextColumn
+                        Width="*"
                         Binding="{Binding RemainQty}"
                         CellStyle="{StaticResource DataGridCellAndCentering}"
-                        Header="이전재고량" />
+                        Header="이월수량" />
                     <DataGridTextColumn
                         Width="*"
                         Binding="{Binding StuffQty}"
