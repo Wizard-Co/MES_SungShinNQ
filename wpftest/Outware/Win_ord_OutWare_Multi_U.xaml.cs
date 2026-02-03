@@ -2295,6 +2295,7 @@ namespace WizMes_SungShinNQ
                         sqlParameter.Add("DvlyCustomID", outData.DvlyCustomID ?? outData.CustomID);
                         sqlParameter.Add("LossRate", outData.LossRate);
                         sqlParameter.Add("LossQty", outData.LossQty);
+                        sqlParameter.Add("ArticleID", outData.ArticleID);
 
                         if (strFlag.Equals("I"))
                         {
