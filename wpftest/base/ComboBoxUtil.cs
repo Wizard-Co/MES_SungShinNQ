@@ -243,6 +243,48 @@ namespace WizMes_SungShinNQ
             return retunCollection;
         }
 
+        public ObservableCollection<CodeView> GetDefectID()
+        {
+            ObservableCollection<CodeView> retunCollection = new ObservableCollection<CodeView>();
+            string sql = "SELECT DefectID, Kdefect  ";
+            sql += "FROM mt_Defect                  ";
+            sql += "WHERE  UseClss <> '*'           ";
+
+            try
+            {
+                DataSet ds = DataStore.Instance.QueryToDataSet(sql);
+                if (ds != null && ds.Tables.Count > 0)
+                {
+                    DataTable dt = ds.Tables[0];
+                    if (dt.Rows.Count == 0) { }
+                    else
+                    {
+                        DataRowCollection drc = dt.Rows;
+
+                        foreach (DataRow item in drc)
+                        {
+
+                            CodeView mCodeView = new CodeView()
+                            {
+                                code_id = item["DefectID"].ToString().Trim(),
+                                code_name = item["KDefect"].ToString().Trim(),                                
+                            };
+                            retunCollection.Add(mCodeView);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("콤보박스 생성 중 오류 발생 : " + ex.ToString());
+            }
+            finally
+            {
+                DataStore.Instance.CloseConnection();
+            }
+
+            return retunCollection;
+        }
 
 
         /// <summary>

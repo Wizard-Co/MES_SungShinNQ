@@ -1001,9 +1001,41 @@ namespace WizMes_SungShinNQ
 
         private void CommonPlusfinder_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter)
+            try
             {
-                TextBox txtbox = sender as TextBox;
+                if (e.Key == Key.Enter)
+                {
+                    TextBox txtbox = sender as TextBox;
+                    if (txtbox != null)
+                    {
+                        if (txtbox.Name.Contains("CustomID"))
+                        {
+                            pf.ReturnCode(txtbox, 0, "");
+
+                        }
+                        else if (txtbox.Name.Contains("BuyerArticleNo"))
+                        {
+                            pf.ReturnCode(txtbox, 76, "");
+                        }
+                        else if (txtbox.Name.Contains("ArticleID"))
+                        {
+                            pf.ReturnCode(txtbox, 77, "");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+
+        }
+
+        private void CommonPlusfinder_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                TextBox txtbox = Lib.Instance.FindSiblingControl<TextBox>(sender as Button);
                 if (txtbox != null)
                 {
                     if (txtbox.Name.Contains("CustomID"))
@@ -1021,27 +1053,11 @@ namespace WizMes_SungShinNQ
                     }
                 }
             }
-        }
-
-        private void CommonPlusfinder_Click(object sender, RoutedEventArgs e)
-        {
-            TextBox txtbox = sender as TextBox;
-            if (txtbox != null)
+            catch (Exception ex)
             {
-                if (txtbox.Name.Contains("CustomID"))
-                {
-                    pf.ReturnCode(txtbox, 0, "");
-
-                }
-                else if (txtbox.Name.Contains("BuyerArticleNo"))
-                {
-                    pf.ReturnCode(txtbox, 76, "");
-                }
-                else if (txtbox.Name.Contains("ArticleID"))
-                {
-                    pf.ReturnCode(txtbox, 77, "");
-                }
+                MessageBox.Show(ex.ToString());
             }
+
         }
 
 

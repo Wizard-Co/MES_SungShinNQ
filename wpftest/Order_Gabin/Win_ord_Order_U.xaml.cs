@@ -86,6 +86,7 @@ namespace WizMes_SungShinNQ
             cboWorkSrh.ItemsSource = ovcWork;
             cboWorkSrh.DisplayMemberPath = "code_name";
             cboWorkSrh.SelectedValuePath = "code_id";
+            cboWorkSrh.SelectedIndex = 0;
 
             ObservableCollection<CodeView> oveOrderForm = ComboBoxUtil.Instance.Gf_DB_CM_GetComCodeDataset(null, "ORDFRM", "Y", "", "");
             cboOrderForm.ItemsSource = oveOrderForm;
@@ -105,6 +106,7 @@ namespace WizMes_SungShinNQ
             cboOrderClassSrh.ItemsSource = ovcOrderClss;
             cboOrderClassSrh.DisplayMemberPath = "code_name";
             cboOrderClassSrh.SelectedValuePath = "code_id";
+            cboOrderClassSrh.SelectedIndex = 0;
 
             ObservableCollection<CodeView> ovcWorkUnitClss = ComboBoxUtil.Instance.Gf_DB_CM_GetComCodeDataset(null, "CMMUNIT", "Y", "", "");
             //cboWorkUnitClss.ItemsSource = ovcWorkUnitClss;
@@ -984,8 +986,8 @@ namespace WizMes_SungShinNQ
                 sqlParameter.Add("ChkCloseClss", chkCloseClssSrh.IsChecked == true ? 1 : 0);
                 sqlParameter.Add("CloseClss", chkCloseClssSrh.IsChecked == true ? (cboCloseClssSrh.SelectedValue != null ? cboCloseClssSrh.SelectedValue.ToString() : "") : "");
 
-                sqlParameter.Add("ChkReworkOrderYN", chkReworkOrderYN.IsChecked == true ? 1 : 0);
-                sqlParameter.Add("ReworkOrderYN", chkReworkOrderYN.IsChecked == true ? cboReworkOrderYnSrh.SelectedValue?.ToString() ?? string.Empty : string.Empty);
+                sqlParameter.Add("ChkReworkOrderYN", chkReworkOrderYNSrh.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("ReworkOrderYN", chkReworkOrderYNSrh.IsChecked == true ? cboReworkOrderYnSrh.SelectedValue?.ToString() ?? string.Empty : string.Empty);
 
 
                 DataSet ds = DataStore.Instance.ProcedureToDataSet("xp_Order_sDraftOrder", sqlParameter, false);
@@ -1687,6 +1689,7 @@ namespace WizMes_SungShinNQ
                         //txtBuyerArticleNO.Text = articleData.BuyerArticleNo;
                         //품명 대입
                         txtBuyerArticleNO.Text = articleData.Article;
+                        txtSpec.Text = articleData.Spec;
                         //단가 대입
                         txtUnitPrice.Text = lib.returnNumStringOne(articleData.OutUnitPrice);
 
@@ -1729,6 +1732,7 @@ namespace WizMes_SungShinNQ
                     //txtBuyerArticleNO.Text = articleData.BuyerArticleNo;
                     //품명 대입
                     txtBuyerArticleNO.Text = articleData.Article;
+                    txtSpec.Text = articleData.Spec;
                     //단가 대입
                     txtUnitPrice.Text = lib.returnNumStringOne(articleData.OutUnitPrice);
                 }

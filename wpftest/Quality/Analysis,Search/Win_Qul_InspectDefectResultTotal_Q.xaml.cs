@@ -648,9 +648,43 @@ namespace WizMes_SungShinNQ
 
         private void CommonPlusfinder_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter)
+            try
             {
-                TextBox txtbox = sender as TextBox;
+                if (e.Key == Key.Enter)
+                {
+                    TextBox txtbox = sender as TextBox;
+                    if (txtbox != null)
+                    {
+                        if (txtbox.Name.Contains("ArticleID"))
+                        {
+                            pf.ReturnCode(txtbox, 77, "");
+
+                        }
+                        else if (txtbox.Name.Contains("BuyerArticleNo"))
+                        {
+                            pf.ReturnCode(txtbox, 76, "");
+
+                        }
+                        else if (txtbox.Name.Contains("CustomID"))
+                        {
+                            pf.ReturnCode(txtbox, 0, "");
+                        }
+
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show("오류 발생, 오류 내용 : " + ex.ToString());
+            }
+  
+        }
+
+        private void CommonPlusfinder_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                TextBox txtbox = Lib.Instance.FindSiblingControl<TextBox>(sender as Button);
                 if (txtbox != null)
                 {
                     if (txtbox.Name.Contains("ArticleID"))
@@ -667,31 +701,13 @@ namespace WizMes_SungShinNQ
                     {
                         pf.ReturnCode(txtbox, 0, "");
                     }
-
                 }
             }
-        }
-
-        private void CommonPlusfinder_Click(object sender, RoutedEventArgs e)
-        {
-            TextBox txtbox = sender as TextBox;
-            if (txtbox != null)
+            catch(Exception ex)
             {
-                if (txtbox.Name.Contains("ArticleID"))
-                {
-                    pf.ReturnCode(txtbox, 77, "");
-
-                }
-                else if (txtbox.Name.Contains("BuyerArticleNo"))
-                {
-                    pf.ReturnCode(txtbox, 76, "");
-
-                }
-                else if (txtbox.Name.Contains("CustomID"))
-                {
-                    pf.ReturnCode(txtbox, 0, "");
-                }
+                MessageBox.Show("오류 발생, 오류 내용 : " + ex.ToString());
             }
+    
         }
 
 

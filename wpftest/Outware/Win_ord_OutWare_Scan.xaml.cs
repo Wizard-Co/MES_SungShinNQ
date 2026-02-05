@@ -452,7 +452,7 @@ namespace WizMes_SungShinNQ
             Dispatcher.BeginInvoke(new Action(() =>
 
             {
-                Thread.Sleep(2000);
+                Thread.Sleep(500);
 
                 //로직
                 try
@@ -1530,11 +1530,13 @@ namespace WizMes_SungShinNQ
                 sqlParameter.Add("ArticleID", chkArticle.IsChecked == true ? (txtArticle.Tag == null ? "" : txtArticle.Tag.ToString()) : "");
                 //sqlParameter.Add("ArticleID", chkArticle.IsChecked == true ? (txtArticle.Tag.ToString()) : "");
                 sqlParameter.Add("Article", txtArticle.Text);
-                sqlParameter.Add("ChkOrder", chkRadioOptionNum.IsChecked == true ?
-                                             (rbnManageNum.IsChecked == true ? 1 : 2) : 0);
 
+                //sqlParameter.Add("ChkOrder", chkRadioOptionNum.IsChecked == true ?
+                //                             (rbnManageNum.IsChecked == true ? 1 : 2) : 0);
+                //sqlParameter.Add("Order", chkRadioOptionNum.IsChecked == true ? (txtRadioOptionNum.Text) : "");
 
-                sqlParameter.Add("Order", chkRadioOptionNum.IsChecked == true ? (txtRadioOptionNum.Text) : "");
+                sqlParameter.Add("chkOrder", chkRadioOptionNum.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("Order", chkRadioOptionNum.IsChecked == true ? txtRadioOptionNum.Text : string.Empty);
                 sqlParameter.Add("OutFlag", 0);             // OutType조회, 0이면 구분없이 전체 조회
                 sqlParameter.Add("OutClss", "");            // 출고구분 같은데, 빈값이면 전체 조회
                 sqlParameter.Add("FromLocID", "");          // 무슨 일자인지 몰라서 빈값으로 전체조회
@@ -1542,8 +1544,8 @@ namespace WizMes_SungShinNQ
 
 
                 sqlParameter.Add("BuyerDirectYN", "Y");     //왜 Y만 검색하지?
-                sqlParameter.Add("nBuyerArticleNo", "");      //모르겠어서 빈값으로 전체조회
-                sqlParameter.Add("BuyerArticleNo", txtArticle.Text);
+                sqlParameter.Add("nBuyerArticleNo", chkArticle.IsChecked == true ? 1:0);      //모르겠어서 빈값으로 전체조회
+                sqlParameter.Add("BuyerArticleNo", chkArticle.IsChecked == true ? txtArticle.Tag?.ToString() ?? string.Empty : string.Empty);
 
                 sqlParameter.Add("ChkLabelID", chkLabelIDSrh.IsChecked == true ? 1 : 0);
                 sqlParameter.Add("LabelID", chkLabelIDSrh.IsChecked == true ? txtLabelIDSrh.Text : string.Empty);

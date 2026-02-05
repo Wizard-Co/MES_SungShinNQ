@@ -34,7 +34,7 @@
                         <ColumnDefinition Width="65*" />
                         <ColumnDefinition Width="85*" />
                     </Grid.ColumnDefinitions>
-                    <Label x:Name="lblDateSrh" Grid.Column="0" HorizontalContentAlignment="Center" 
+                    <Label x:Name="lblDateSrh" Grid.Column="0" 
                            MouseLeftButtonDown="lblDateSrh_MouseLeftButtonDown">
                         <StackPanel Orientation="Horizontal" Margin="-2">
                             <Viewbox VerticalAlignment="Center">
@@ -44,14 +44,14 @@
                             <TextBlock Text=" 수주 일자" VerticalAlignment="Center" />
                         </StackPanel>
                     </Label>
-                    <DatePicker x:Name="dtpSDate" Grid.Column="1" FontSize="15"  />
+                    <DatePicker x:Name="dtpSDate" Grid.Column="1"  />
                 </Grid>
                 <Grid Grid.Row="1" Grid.Column="1">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="65*" />
                         <ColumnDefinition Width="85*" />
                     </Grid.ColumnDefinitions>
-                    <DatePicker x:Name="dtpEDate" Grid.Column="1" FontSize="15" Grid.Row="1" Padding="0"/>
+                    <DatePicker x:Name="dtpEDate" Grid.Column="1"  Grid.Row="1" Padding="0"/>
                 </Grid>
                 <Grid Grid.Column="1" Grid.Row="2">
                     <Grid.ColumnDefinitions>
@@ -60,10 +60,10 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <Button x:Name="btnLastMonth" Grid.Column="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Content="전월" Margin="1" Click="btnLastMonth_Click"/>
-                    <Button x:Name="btnThisMonth" Grid.Column="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Content="금월" Margin="1" Click="btnThisMonth_Click" />
-                    <Button x:Name="btnYesterDay" Grid.Column="2" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Content="전일" Margin="1" Click="btnYesterDay_Click"/>
-                    <Button x:Name="btnToday" Grid.Column="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Content="금일" Margin="1" Click="btnToday_Click"/>
+                    <Button x:Name="btnLastMonth" Grid.Column="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Content="전월" Click="btnLastMonth_Click"/>
+                    <Button x:Name="btnThisMonth" Grid.Column="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Content="금월" Click="btnThisMonth_Click" />
+                    <Button x:Name="btnYesterDay" Grid.Column="2" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Content="전일" Click="btnYesterDay_Click"/>
+                    <Button x:Name="btnToday" Grid.Column="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Content="금일" Click="btnToday_Click"/>
                 </Grid>
                 <Grid Grid.Row="3" Grid.Column="1" Visibility="Hidden">
                     <Button x:Name="btnMassEnrollment" Margin="1" Click="btnMassEnrollment_Click">
@@ -169,7 +169,7 @@
                            MouseLeftButtonUp="CommonControl_Click">
                         <StackPanel Orientation="Horizontal" Margin="-2">
                             <Viewbox VerticalAlignment="Center">
-                                <CheckBox x:Name="chkReworkOrderYN"  VerticalAlignment="Center" Click="CommonControl_Click"/>
+                                <CheckBox x:Name="chkReworkOrderYNSrh"  VerticalAlignment="Center" Click="CommonControl_Click"/>
                             </Viewbox>
                             <TextBlock Text=" 재작업" VerticalAlignment="Center" />
                         </StackPanel>

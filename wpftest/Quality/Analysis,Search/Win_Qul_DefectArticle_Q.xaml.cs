@@ -4,6 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
+using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -12,10 +18,6 @@ using System.Windows.Media.Imaging;
 using WizMes_SungShinNQ.PopUp;
 using WizMes_SungShinNQ.PopUP;
 using WPF.MDI;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Threading;
 
 namespace WizMes_SungShinNQ
 {
@@ -32,6 +34,7 @@ namespace WizMes_SungShinNQ
         Win_Qul_DefectArticle_Q_Worker_CodeView WinWorkerName = new Win_Qul_DefectArticle_Q_Worker_CodeView();
 
         Lib lib = new Lib();
+        PlusFinder pf = new PlusFinder();
 
         //이건 뭐...
         string M1 = "       -       ";
@@ -70,7 +73,7 @@ namespace WizMes_SungShinNQ
             CreateDataGridRowsColumns();
             SetComboBox();
             lblchartMonth.Content = "2. " + dtpSDate.SelectedDate.Value.ToString().Replace("-", "").Substring(4, 2) + "월 불량유형";
-            cboProductGrpID.IsEnabled = false;
+            cboProductGrpIDSrh.IsEnabled = false;
             DataGridRowSize_Changed(null, null);
 
         }
@@ -80,9 +83,9 @@ namespace WizMes_SungShinNQ
         {
             // 제품군
             ObservableCollection<CodeView> ovcProductGrp = ComboBoxUtil.Instance.Gf_DB_CM_GetComCodeDataset(null, "CMPRDGRPID", "Y", "");
-            this.cboProductGrpID.ItemsSource = ovcProductGrp;
-            this.cboProductGrpID.DisplayMemberPath = "code_name";
-            this.cboProductGrpID.SelectedValuePath = "code_id";
+            this.cboProductGrpIDSrh.ItemsSource = ovcProductGrp;
+            this.cboProductGrpIDSrh.DisplayMemberPath = "code_name";
+            this.cboProductGrpIDSrh.SelectedValuePath = "code_id";
 
             ObservableCollection<CodeView> oveOrderForm = ComboBoxUtil.Instance.Gf_DB_CM_GetComCodeDataset(null, "QULSTEP", "Y", "", "");
             cboOccurStepSrh.ItemsSource = oveOrderForm;
@@ -111,7 +114,7 @@ namespace WizMes_SungShinNQ
         //전월
         private void BtnLastMonth_Click(object sender, RoutedEventArgs e)
         {
-            dtpSDate.SelectedDate = lib.BringLastMonthDatetimeList()[0];
+            dtpSDate.SelectedDate = lib.BringLastMonthContinue(dtpSDate.SelectedDate.Value)[0];
         }
 
         //금월
@@ -122,45 +125,7 @@ namespace WizMes_SungShinNQ
 
         #endregion
 
-        #region 체크박스 action
-
-        //품명
-        private void lblArticle_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            if (chkArticle.IsChecked == true) { chkArticle.IsChecked = false; }
-            else { chkArticle.IsChecked = true; }
-        }
-
-        //품명
-        private void chkArticle_Checked(object sender, RoutedEventArgs e)
-        {
-            txtArticle.IsEnabled = true;
-            btnPfArticle.IsEnabled = true;
-        }
-
-        //품명
-        private void chkArticle_Unchecked(object sender, RoutedEventArgs e)
-        {
-            txtArticle.IsEnabled = false;
-            btnPfArticle.IsEnabled = false;
-        }
-
-        //품명(품번을 보이게 수정요청, 2020.03.24, 장가빈)
-        private void txtArticle_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter)
-            {
-                MainWindow.pf.ReturnCode(txtArticle, 81, txtArticle.Text);
-            }
-        }
-
-        //품명(품번을 보이게 수정요청, 2020.03.24, 장가빈)
-        private void btnPfArticle_Click(object sender, RoutedEventArgs e)
-        {
-            MainWindow.pf.ReturnCode(txtArticle, 81, txtArticle.Text);
-        }
-
-        #endregion
+    
 
 
         // row header column 자동생성.
@@ -249,21 +214,10 @@ namespace WizMes_SungShinNQ
             //검색버튼 비활성화
             btnSearch.IsEnabled = false;
 
+
             Dispatcher.BeginInvoke(new Action(() =>
-
-            {
-                Thread.Sleep(2000);
-
-                //로직
+            {   
                 re_Search(0);
-
-            }), System.Windows.Threading.DispatcherPriority.Background);
-
-
-
-            Dispatcher.BeginInvoke(new Action(() =>
-
-            {
                 btnSearch.IsEnabled = true;
 
                 DataGridRowSize_Changed(null, null);
@@ -431,250 +385,214 @@ namespace WizMes_SungShinNQ
             }
         }
 
-        //월별불량지수 데이터 그리드와 그래프 값
         private void re_Search(int selectIndex)
         {
-            //검색 누를 때 re_Search 타니까 이 때 아이템들 비워주기
-
             if (dtpSDate.SelectedDate == null)
             {
                 MessageBox.Show("년도를 정확히 선택해 주세요. 필수선택입니다.");
-                //검색 다 되면 활성화
                 btnSearch.IsEnabled = true;
                 return;
             }
 
             try
             {
-
-                //조회할 때 선택된 조회 날짜를 반영하여 "00월 불량유형"이 들어가도록 
                 lblchartMonth.Content = "2. " + dtpSDate.SelectedDate.Value.ToString().Replace("-", "").Substring(4, 2) + "월 불량유형";
 
-                //불량지수 그래프 비워주기
+                // 초기화
                 if (lvcDayChart.Series != null && lvcDayChart.Series.Count > 0)
-                {
                     lvcDayChart.Series.Clear();
-                }
 
-                //불량건수 dgd 비워주기
                 if (dgdDefectArticle_DefectCount.Items.Count > 0)
-                {
                     dgdDefectArticle_DefectCount.Items.Clear();
-                }
 
-                //제품별 dgd 비워주기
                 if (dgdDefectArticle_ModelOccupy.Items.Count > 0)
-                {
                     dgdDefectArticle_ModelOccupy.Items.Clear();
-                }
 
-                //제품별 원그래프 비워주기
                 if (lvcProductPieChart.Series != null && lvcProductPieChart.Series.Count > 0)
-                {
                     lvcProductPieChart.Series.Clear();
-                }
 
-                //유형별 dgd 비워주기
                 if (dgdDefectArticle_DefectType.Items.Count > 0)
-                {
                     dgdDefectArticle_DefectType.Items.Clear();
-                }
 
-                //유형별 원그래프 비워주기
                 if (lvcTypePieChart.Series != null && lvcTypePieChart.Series.Count > 0)
-                {
                     lvcTypePieChart.Series.Clear();
-                }
 
-                //hidden dgd 비워주기
                 if (PieChartProductValue.Items.Count > 0)
-                {
                     PieChartProductValue.Items.Clear();
-                }
 
-                //hidden dgd 비워주기
                 if (PieChartTypeValue.Items.Count > 0)
-                {
                     PieChartTypeValue.Items.Clear();
-                }
 
-                //유형별 dgd 비워주기
                 if (dgdDefectArticle_Worker.Items.Count > 0)
-                {
                     dgdDefectArticle_Worker.Items.Clear();
-                }
 
-                //RowHeader값 다시 읽어주기
                 CreateDataGridRowsColumns();
 
-                string InsPoint = string.Empty;  //불량 발생 시점
-
-                if (cboOccurStepSrh.SelectedValue.ToString().Equals("0")){ InsPoint = ""; } //전체
-                else if (cboOccurStepSrh.SelectedValue.ToString().Equals("2")) { InsPoint = "3"; } //생산
-                else if (cboOccurStepSrh.SelectedValue.ToString().Equals("3")) { InsPoint = "2"; } //자주검사
-                else if (cboOccurStepSrh.SelectedValue.ToString().Equals("4")) { InsPoint = "0"; } //
-                else if (cboOccurStepSrh.SelectedValue.ToString().Equals("6")) { InsPoint = "6"; } //
-                else { InsPoint = cboOccurStepSrh.SelectedValue.ToString();  }
-
-
                 Dictionary<string, object> sqlParameter = new Dictionary<string, object>();
-                sqlParameter.Clear();
-                sqlParameter.Add("YYYY", chkDate.IsChecked == true ? dtpSDate.Text.Substring(0, 4) : "");
-                sqlParameter.Add("MM", chkDate.IsChecked == true ? dtpSDate.Text.Substring(5, 2) : "");
-                sqlParameter.Add("chkProdGroupID", chkProductGroup.IsChecked == true ? 1 : 0);
-                sqlParameter.Add("ProdGroupID", chkProductGroup.IsChecked == true ? cboProductGrpID.SelectedValue.ToString() : "");
-                sqlParameter.Add("chkInspectPointID", !InsPoint.Equals("") ? 1 : 0); // 전체가 아니면 1로 
-                sqlParameter.Add("InspectPointID", InsPoint); //빈값 : 전체, 1: 입고, 2: 자주검사, 3: 생산, 4: 최종검사, 5:출하
-                
-                sqlParameter.Add("chkArticleID", 0); // chkArticle.IsChecked == true ? 1 : 0);
-                sqlParameter.Add("ArticleID", ""); // chkArticle.IsChecked == true ? txtArticle.Tag.ToString() : "");
-                sqlParameter.Add("BuyerArticleNo", chkArticle.IsChecked == true ? txtArticle.Text : "");
+                sqlParameter.Add("YYYY", chkDate.IsChecked == true ? dtpSDate.SelectedDate?.ToString("yyyy") ?? string.Empty : string.Empty);
+                sqlParameter.Add("MM", chkDate.IsChecked == true ? dtpSDate.SelectedDate?.ToString("MM") ?? string.Empty : string.Empty);
+                sqlParameter.Add("chkProdGroupID", chkProductGrpIDSrh.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("ProdGroupID", chkProductGrpIDSrh.IsChecked == true ? cboProductGrpIDSrh.SelectedValue.ToString() : "");
+                sqlParameter.Add("chkInspectPointID", chkDefectOccurStep.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("InspectPointID", cboOccurStepSrh.SelectedValue?.ToString() ?? "0");
+                sqlParameter.Add("chkArticleID", chkArticleIDSrh.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("ArticleID", chkArticleIDSrh.IsChecked == true ? txtArticleIDSrh.Tag?.ToString() ?? string.Empty : string.Empty);
+                sqlParameter.Add("chkBuyerArticleNo", chkBuyerArticleNoSrh.IsChecked == true ? 1:0);
+                sqlParameter.Add("BuyerArticleNo", chkBuyerArticleNoSrh.IsChecked == true ? txtBuyerArticleNoSrh.Tag?.ToString() ?? string.Empty : string.Empty);
 
-
-                DataSet ds = DataStore.Instance.ProcedureToDataSet("xp_Qul_sStsDefectArticle_DefectCount_211005", sqlParameter, false);
+                DataSet ds = DataStore.Instance.ProcedureToDataSet("xp_Qul_sStsDefectArticle_DefectCount", sqlParameter, false);
                 if (ds != null && ds.Tables.Count > 0)
                 {
-                    DataTable dt = null;
-                    dt = ds.Tables[0];
+                    DataTable dt = ds.Tables[0];
 
                     if (dt.Rows.Count == 0)
                     {
+                        MessageBox.Show("조회된 데이터가 없습니다.", "확인");
                         return;
                     }
-                    else
+
+                    // seq로 각 행 가져오기
+                    DataRow drHeader = dt.Select("seq = 5").FirstOrDefault();
+                    DataRow drGoal = dt.Select("seq = 1").FirstOrDefault();      // 목표PPM
+                    DataRow drWorkQty = dt.Select("seq = 2").FirstOrDefault();   // 생산수량
+                    DataRow drDefectQty = dt.Select("seq = 3").FirstOrDefault(); // 불량수량
+                    DataRow drDefectPPM = dt.Select("seq = 4").FirstOrDefault(); // 불량PPM
+
+                    // 헤더 또는 불량 없으면 리턴
+                    if (drHeader == null || drDefectQty == null)
                     {
-                        DataRow drHeader = dt.Rows[4];
-                        X_Linelbl = new[] {Convert.ToString(Convert.ToInt32(drHeader["M1"]))+"월", Convert.ToString(Convert.ToInt32(drHeader["M2"]))+"월",
-                            Convert.ToString(Convert.ToInt32(drHeader["M3"]))+"월", Convert.ToString(Convert.ToInt32(drHeader["M4"]))+"월",
-                            Convert.ToString(Convert.ToInt32(drHeader["M5"]))+"월", Convert.ToString(Convert.ToInt32(drHeader["M6"]))+"월",
-                            Convert.ToString(Convert.ToInt32(drHeader["M7"]))+"월", Convert.ToString(Convert.ToInt32(drHeader["M8"]))+"월",
-                            Convert.ToString(Convert.ToInt32(drHeader["M9"]))+"월", Convert.ToString(Convert.ToInt32(drHeader["M10"]))+"월",
-                            Convert.ToString(Convert.ToInt32(drHeader["M11"]))+"월", Convert.ToString(Convert.ToInt32(drHeader["M12"]))+"월"};
+                        MessageBox.Show("조회된 데이터가 없습니다.", "확인");
+                        return;
+                    }
 
-                        //헤더변경
-                        for(int i = 0; i < 12; i++)
+                    // 헤더 설정
+                    X_Linelbl = new[] {
+                Convert.ToInt32(drHeader["M1"]) + "월",
+                Convert.ToInt32(drHeader["M2"]) + "월",
+                Convert.ToInt32(drHeader["M3"]) + "월",
+                Convert.ToInt32(drHeader["M4"]) + "월",
+                Convert.ToInt32(drHeader["M5"]) + "월",
+                Convert.ToInt32(drHeader["M6"]) + "월",
+                Convert.ToInt32(drHeader["M7"]) + "월",
+                Convert.ToInt32(drHeader["M8"]) + "월",
+                Convert.ToInt32(drHeader["M9"]) + "월",
+                Convert.ToInt32(drHeader["M10"]) + "월",
+                Convert.ToInt32(drHeader["M11"]) + "월",
+                Convert.ToInt32(drHeader["M12"]) + "월"
+            };
+
+                    for (int i = 0; i < 12; i++)
+                    {
+                        dgdDefectArticle_DefectCount.Columns[i].Header = Convert.ToInt32(drHeader["M" + (i + 1)]) + "월";
+                    }
+
+                    lbl_1Month.Text = Convert.ToInt32(drHeader["M1"]) + "월";
+                    lbl_2Month.Text = Convert.ToInt32(drHeader["M2"]) + "월";
+                    lbl_3Month.Text = Convert.ToInt32(drHeader["M3"]) + "월";
+                    lbl_4Month.Text = Convert.ToInt32(drHeader["M4"]) + "월";
+                    lbl_5Month.Text = Convert.ToInt32(drHeader["M5"]) + "월";
+                    lbl_6Month.Text = Convert.ToInt32(drHeader["M6"]) + "월";
+                    lbl_7Month.Text = Convert.ToInt32(drHeader["M7"]) + "월";
+                    lbl_8Month.Text = Convert.ToInt32(drHeader["M8"]) + "월";
+                    lbl_9Month.Text = Convert.ToInt32(drHeader["M9"]) + "월";
+                    lbl_10Month.Text = Convert.ToInt32(drHeader["M10"]) + "월";
+                    lbl_11Month.Text = Convert.ToInt32(drHeader["M11"]) + "월";
+                    lbl_12Month.Text = Convert.ToInt32(drHeader["M12"]) + "월";
+
+                    SeriesCollection = new SeriesCollection();
+
+                    // 데이터 행 처리
+                    DataRow[] dataRows = { drGoal, drWorkQty, drDefectQty, drDefectPPM };
+
+                    for (int j = 0; j < 4; j++)
+                    {
+                        DataRow dr = dataRows[j];
+                        if (dr == null) continue;  // 해당 행이 없으면 스킵
+
+                        DataGridRow dgr = lib.GetRow(j, dgdDefectArticle_DefectCount);
+                        var ViewReceiver = dgr.Item as Win_Qul_DefectArticle_Q_DefectCount_CodeView;
+
+                        double M1 = 0, M2 = 0, M3 = 0, M4 = 0, M5 = 0, M6 = 0;
+                        double M7 = 0, M8 = 0, M9 = 0, M10 = 0, M11 = 0, M12 = 0, M13 = 0;
+
+                        double.TryParse(dr["M1"].ToString(), out M1);
+                        double.TryParse(dr["M2"].ToString(), out M2);
+                        double.TryParse(dr["M3"].ToString(), out M3);
+                        double.TryParse(dr["M4"].ToString(), out M4);
+                        double.TryParse(dr["M5"].ToString(), out M5);
+                        double.TryParse(dr["M6"].ToString(), out M6);
+                        double.TryParse(dr["M7"].ToString(), out M7);
+                        double.TryParse(dr["M8"].ToString(), out M8);
+                        double.TryParse(dr["M9"].ToString(), out M9);
+                        double.TryParse(dr["M10"].ToString(), out M10);
+                        double.TryParse(dr["M11"].ToString(), out M11);
+                        double.TryParse(dr["M12"].ToString(), out M12);
+                        double.TryParse(dr["M13"].ToString(), out M13);
+
+                        if (j == 3)  // 불량PPM
                         {
-                            dgdDefectArticle_DefectCount.Columns[i].Header = Convert.ToString(Convert.ToInt32(drHeader["M"+(i+1)+""])) + "월";
+                            ViewReceiver.M1 = stringFormatN2(M1);
+                            ViewReceiver.M2 = stringFormatN2(M2);
+                            ViewReceiver.M3 = stringFormatN2(M3);
+                            ViewReceiver.M4 = stringFormatN2(M4);
+                            ViewReceiver.M5 = stringFormatN2(M5);
+                            ViewReceiver.M6 = stringFormatN2(M6);
+                            ViewReceiver.M7 = stringFormatN2(M7);
+                            ViewReceiver.M8 = stringFormatN2(M8);
+                            ViewReceiver.M9 = stringFormatN2(M9);
+                            ViewReceiver.M10 = stringFormatN2(M10);
+                            ViewReceiver.M11 = stringFormatN2(M11);
+                            ViewReceiver.M12 = stringFormatN2(M12);
+                            ViewReceiver.M13 = stringFormatN2(M13);
                         }
-                        
-                        lbl_1Month.Text = Convert.ToString(Convert.ToInt32(drHeader["M1"])) + "월";
-                        lbl_2Month.Text = Convert.ToString(Convert.ToInt32(drHeader["M2"])) + "월";
-                        lbl_3Month.Text = Convert.ToString(Convert.ToInt32(drHeader["M3"])) + "월";
-                        lbl_4Month.Text = Convert.ToString(Convert.ToInt32(drHeader["M4"])) + "월";
-                        lbl_5Month.Text = Convert.ToString(Convert.ToInt32(drHeader["M5"])) + "월";
-                        lbl_6Month.Text = Convert.ToString(Convert.ToInt32(drHeader["M6"])) + "월";
-                        lbl_7Month.Text = Convert.ToString(Convert.ToInt32(drHeader["M7"])) + "월";
-                        lbl_8Month.Text = Convert.ToString(Convert.ToInt32(drHeader["M8"])) + "월";
-                        lbl_9Month.Text = Convert.ToString(Convert.ToInt32(drHeader["M9"])) + "월";
-                        lbl_10Month.Text = Convert.ToString(Convert.ToInt32(drHeader["M10"])) + "월";
-                        lbl_11Month.Text = Convert.ToString(Convert.ToInt32(drHeader["M11"])) + "월";
-                        lbl_12Month.Text = Convert.ToString(Convert.ToInt32(drHeader["M12"])) + "월";
-                        
-                        for (int j = 0; j < 4; j++)
+                        else
                         {
-                            DataRow dr = dt.Rows[j];
-                            DataGridRow dgr = lib.GetRow(j, dgdDefectArticle_DefectCount);
-                            var ViewReceiver = dgr.Item as Win_Qul_DefectArticle_Q_DefectCount_CodeView;
+                            ViewReceiver.M1 = stringFormatN0(M1);
+                            ViewReceiver.M2 = stringFormatN0(M2);
+                            ViewReceiver.M3 = stringFormatN0(M3);
+                            ViewReceiver.M4 = stringFormatN0(M4);
+                            ViewReceiver.M5 = stringFormatN0(M5);
+                            ViewReceiver.M6 = stringFormatN0(M6);
+                            ViewReceiver.M7 = stringFormatN0(M7);
+                            ViewReceiver.M8 = stringFormatN0(M8);
+                            ViewReceiver.M9 = stringFormatN0(M9);
+                            ViewReceiver.M10 = stringFormatN0(M10);
+                            ViewReceiver.M11 = stringFormatN0(M11);
+                            ViewReceiver.M12 = stringFormatN0(M12);
+                            ViewReceiver.M13 = stringFormatN0(M13);
+                        }
 
-                            double M1 = 0;
-                            double M2 = 0;
-                            double M3 = 0;
-                            double M4 = 0;
-                            double M5 = 0;
-                            double M6 = 0;
-                            double M7 = 0;
-                            double M8 = 0;
-                            double M9 = 0;
-                            double M10 = 0;
-                            double M11 = 0;
-                            double M12 = 0;
-                            double M13 = 0;
-
-                            double.TryParse(dr["M1"].ToString(), out M1);
-                            double.TryParse(dr["M2"].ToString(), out M2);
-                            double.TryParse(dr["M3"].ToString(), out M3);
-                            double.TryParse(dr["M4"].ToString(), out M4);
-                            double.TryParse(dr["M5"].ToString(), out M5);
-                            double.TryParse(dr["M6"].ToString(), out M6);
-                            double.TryParse(dr["M7"].ToString(), out M7);
-                            double.TryParse(dr["M8"].ToString(), out M8);
-                            double.TryParse(dr["M9"].ToString(), out M9);
-                            double.TryParse(dr["M10"].ToString(), out M10);
-                            double.TryParse(dr["M11"].ToString(), out M11);
-                            double.TryParse(dr["M12"].ToString(), out M12);
-                            double.TryParse(dr["M13"].ToString(), out M13);
-
-
-                            if(j == 3)
+                        if (j == 0)  // 목표
+                        {
+                            SeriesCollection = new SeriesCollection
+                        {
+                            new LineSeries
                             {
-                                ViewReceiver.M1 = stringFormatN2(M1);
-                                ViewReceiver.M2 = stringFormatN2(M2);
-                                ViewReceiver.M3 = stringFormatN2(M3);
-                                ViewReceiver.M4 = stringFormatN2(M4);
-                                ViewReceiver.M5 = stringFormatN2(M5);
-                                ViewReceiver.M6 = stringFormatN2(M6);
-                                ViewReceiver.M7 = stringFormatN2(M7);
-                                ViewReceiver.M8 = stringFormatN2(M8);
-                                ViewReceiver.M9 = stringFormatN2(M9);
-                                ViewReceiver.M10 = stringFormatN2(M10);
-                                ViewReceiver.M11 = stringFormatN2(M11);
-                                ViewReceiver.M12 = stringFormatN2(M12);
-                                ViewReceiver.M13 = stringFormatN2(M13);
-                            }
-                            else
-                            {
-                                ViewReceiver.M1 = stringFormatN0(M1);
-                                ViewReceiver.M2 = stringFormatN0(M2);
-                                ViewReceiver.M3 = stringFormatN0(M3);
-                                ViewReceiver.M4 = stringFormatN0(M4);
-                                ViewReceiver.M5 = stringFormatN0(M5);
-                                ViewReceiver.M6 = stringFormatN0(M6);
-                                ViewReceiver.M7 = stringFormatN0(M7);
-                                ViewReceiver.M8 = stringFormatN0(M8);
-                                ViewReceiver.M9 = stringFormatN0(M9);
-                                ViewReceiver.M10 = stringFormatN0(M10);
-                                ViewReceiver.M11 = stringFormatN0(M11);
-                                ViewReceiver.M12 = stringFormatN0(M12);
-                                ViewReceiver.M13 = stringFormatN0(M13);
-                            }
-
- 
-
-                            if (j == 0)     // 목표, 그래프 그려야 한다.
-                            {
-                                SeriesCollection = new SeriesCollection
-                            {
-                                new LineSeries
-                                {
-                                    Title = "목표",
-                                    Values = new ChartValues<double>
-                                    {
-                                        M1, M2, M3, M4, M5, M6,
-                                        M7, M8, M9, M10, M11, M12
-                                    }
-                                }
-                            };
-                            }
-                            else if (j == 3)        // 불량율,ㅡ 그래프 그려야 한다.
-                            {
-                                SeriesCollection.Add(new LineSeries
-                                {
-                                    Title = "불량율",
-                                    Values = new ChartValues<double>
+                                Title = "목표",
+                                Values = new ChartValues<double>
                                 {
                                     M1, M2, M3, M4, M5, M6,
                                     M7, M8, M9, M10, M11, M12
                                 }
-                                });
                             }
+                        };
                         }
-
-                        
-
-                        lvcDayChart.Series = SeriesCollection;
-                        DataContext = this;
-
+                        else if (j == 3)  // 불량PPM
+                        {
+                            SeriesCollection.Add(new LineSeries
+                            {
+                                Title = "불량율",
+                                Values = new ChartValues<double>
+                        {
+                            M1, M2, M3, M4, M5, M6,
+                            M7, M8, M9, M10, M11, M12
+                        }
+                            });
+                        }
                     }
+
+                    lvcDayChart.Series = SeriesCollection;
+                    DataContext = this;
                 }
             }
             catch (Exception ex)
@@ -685,8 +603,265 @@ namespace WizMes_SungShinNQ
             FillGridModel();
             FillGridType();
             FillGridWorker();
-
         }
+
+        //월별불량지수 데이터 그리드와 그래프 값
+        //private void re_Search(int selectIndex)
+        //{
+        //    //검색 누를 때 re_Search 타니까 이 때 아이템들 비워주기
+
+        //    if (dtpSDate.SelectedDate == null)
+        //    {
+        //        MessageBox.Show("년도를 정확히 선택해 주세요. 필수선택입니다.");
+        //        //검색 다 되면 활성화
+        //        btnSearch.IsEnabled = true;
+        //        return;
+        //    }
+
+        //    try
+        //    {
+
+        //        //조회할 때 선택된 조회 날짜를 반영하여 "00월 불량유형"이 들어가도록 
+        //        lblchartMonth.Content = "2. " + dtpSDate.SelectedDate.Value.ToString().Replace("-", "").Substring(4, 2) + "월 불량유형";
+
+        //        //불량지수 그래프 비워주기
+        //        if (lvcDayChart.Series != null && lvcDayChart.Series.Count > 0)
+        //        {
+        //            lvcDayChart.Series.Clear();
+        //        }
+
+        //        //불량건수 dgd 비워주기
+        //        if (dgdDefectArticle_DefectCount.Items.Count > 0)
+        //        {
+        //            dgdDefectArticle_DefectCount.Items.Clear();
+        //        }
+
+        //        //제품별 dgd 비워주기
+        //        if (dgdDefectArticle_ModelOccupy.Items.Count > 0)
+        //        {
+        //            dgdDefectArticle_ModelOccupy.Items.Clear();
+        //        }
+
+        //        //제품별 원그래프 비워주기
+        //        if (lvcProductPieChart.Series != null && lvcProductPieChart.Series.Count > 0)
+        //        {
+        //            lvcProductPieChart.Series.Clear();
+        //        }
+
+        //        //유형별 dgd 비워주기
+        //        if (dgdDefectArticle_DefectType.Items.Count > 0)
+        //        {
+        //            dgdDefectArticle_DefectType.Items.Clear();
+        //        }
+
+        //        //유형별 원그래프 비워주기
+        //        if (lvcTypePieChart.Series != null && lvcTypePieChart.Series.Count > 0)
+        //        {
+        //            lvcTypePieChart.Series.Clear();
+        //        }
+
+        //        //hidden dgd 비워주기
+        //        if (PieChartProductValue.Items.Count > 0)
+        //        {
+        //            PieChartProductValue.Items.Clear();
+        //        }
+
+        //        //hidden dgd 비워주기
+        //        if (PieChartTypeValue.Items.Count > 0)
+        //        {
+        //            PieChartTypeValue.Items.Clear();
+        //        }
+
+        //        //유형별 dgd 비워주기
+        //        if (dgdDefectArticle_Worker.Items.Count > 0)
+        //        {
+        //            dgdDefectArticle_Worker.Items.Clear();
+        //        }
+
+        //        //RowHeader값 다시 읽어주기
+        //        CreateDataGridRowsColumns();
+
+        //        string InsPoint = string.Empty;  //불량 발생 시점
+
+        //        //if (cboOccurStepSrh.SelectedValue.ToString().Equals("0")){ InsPoint = ""; } //전체
+        //        //else if (cboOccurStepSrh.SelectedValue.ToString().Equals("2")) { InsPoint = "3"; } //생산
+        //        //else if (cboOccurStepSrh.SelectedValue.ToString().Equals("3")) { InsPoint = "2"; } //자주검사
+        //        //else if (cboOccurStepSrh.SelectedValue.ToString().Equals("4")) { InsPoint = "0"; } //
+        //        //else if (cboOccurStepSrh.SelectedValue.ToString().Equals("6")) { InsPoint = "6"; } //
+        //        //else { InsPoint = cboOccurStepSrh.SelectedValue.ToString();  }
+
+
+        //        Dictionary<string, object> sqlParameter = new Dictionary<string, object>();
+        //        sqlParameter.Clear();
+        //        sqlParameter.Add("YYYY", chkDate.IsChecked == true ? dtpSDate.SelectedDate?.ToString("yyyy") ?? string.Empty :string.Empty);
+        //        sqlParameter.Add("MM", chkDate.IsChecked == true ? dtpSDate.SelectedDate?.ToString("MM") ?? string.Empty : string.Empty);
+        //        sqlParameter.Add("chkProdGroupID", chkProductGrpIDSrh.IsChecked == true ? 1 : 0);
+        //        sqlParameter.Add("ProdGroupID", chkProductGrpIDSrh.IsChecked == true ? cboProductGrpIDSrh.SelectedValue.ToString() : "");
+        //        sqlParameter.Add("chkInspectPointID", chkDefectOccurStep.IsChecked == true? 1:0); // 전체가 아니면 1로 
+        //        sqlParameter.Add("InspectPointID", cboOccurStepSrh.SelectedValue?.ToString() ?? "0"); //빈값 : 전체, 1: 입고, 2: 자주검사, 3: 생산, 4: 최종검사, 5:출하
+
+        //        sqlParameter.Add("chkArticleID", chkArticle.IsChecked == true? 1:0); // chkArticle.IsChecked == true ? 1 : 0);
+        //        sqlParameter.Add("ArticleID", chkArticle.IsChecked == true ? txtArticle.Tag?.ToString() ?? string.Empty : string.Empty); // chkArticle.IsChecked == true ? txtArticle.Tag.ToString() : "");
+        //        sqlParameter.Add("chkBuyerArticleNo", 0);
+        //        sqlParameter.Add("BuyerArticleNo", "");
+
+
+        //        DataSet ds = DataStore.Instance.ProcedureToDataSet("xp_Qul_sStsDefectArticle_DefectCount", sqlParameter, false);
+        //        if (ds != null && ds.Tables.Count > 0)
+        //        {
+        //            DataTable dt = null;
+        //            dt = ds.Tables[0];
+
+        //            if (dt.Rows.Count == 0)
+        //            {
+        //                return;
+        //            }
+        //            else
+        //            {
+        //                DataRow drHeader = dt.Rows[4];
+        //                X_Linelbl = new[] {Convert.ToString(Convert.ToInt32(drHeader["M1"]))+"월", Convert.ToString(Convert.ToInt32(drHeader["M2"]))+"월",
+        //                    Convert.ToString(Convert.ToInt32(drHeader["M3"]))+"월", Convert.ToString(Convert.ToInt32(drHeader["M4"]))+"월",
+        //                    Convert.ToString(Convert.ToInt32(drHeader["M5"]))+"월", Convert.ToString(Convert.ToInt32(drHeader["M6"]))+"월",
+        //                    Convert.ToString(Convert.ToInt32(drHeader["M7"]))+"월", Convert.ToString(Convert.ToInt32(drHeader["M8"]))+"월",
+        //                    Convert.ToString(Convert.ToInt32(drHeader["M9"]))+"월", Convert.ToString(Convert.ToInt32(drHeader["M10"]))+"월",
+        //                    Convert.ToString(Convert.ToInt32(drHeader["M11"]))+"월", Convert.ToString(Convert.ToInt32(drHeader["M12"]))+"월"};
+
+        //                //헤더변경
+        //                for(int i = 0; i < 12; i++)
+        //                {
+        //                    dgdDefectArticle_DefectCount.Columns[i].Header = Convert.ToString(Convert.ToInt32(drHeader["M"+(i+1)+""])) + "월";
+        //                }
+
+        //                lbl_1Month.Text = Convert.ToString(Convert.ToInt32(drHeader["M1"])) + "월";
+        //                lbl_2Month.Text = Convert.ToString(Convert.ToInt32(drHeader["M2"])) + "월";
+        //                lbl_3Month.Text = Convert.ToString(Convert.ToInt32(drHeader["M3"])) + "월";
+        //                lbl_4Month.Text = Convert.ToString(Convert.ToInt32(drHeader["M4"])) + "월";
+        //                lbl_5Month.Text = Convert.ToString(Convert.ToInt32(drHeader["M5"])) + "월";
+        //                lbl_6Month.Text = Convert.ToString(Convert.ToInt32(drHeader["M6"])) + "월";
+        //                lbl_7Month.Text = Convert.ToString(Convert.ToInt32(drHeader["M7"])) + "월";
+        //                lbl_8Month.Text = Convert.ToString(Convert.ToInt32(drHeader["M8"])) + "월";
+        //                lbl_9Month.Text = Convert.ToString(Convert.ToInt32(drHeader["M9"])) + "월";
+        //                lbl_10Month.Text = Convert.ToString(Convert.ToInt32(drHeader["M10"])) + "월";
+        //                lbl_11Month.Text = Convert.ToString(Convert.ToInt32(drHeader["M11"])) + "월";
+        //                lbl_12Month.Text = Convert.ToString(Convert.ToInt32(drHeader["M12"])) + "월";
+
+        //                for (int j = 0; j < 4; j++)
+        //                {
+        //                    DataRow dr = dt.Rows[j];
+        //                    DataGridRow dgr = lib.GetRow(j, dgdDefectArticle_DefectCount);
+        //                    var ViewReceiver = dgr.Item as Win_Qul_DefectArticle_Q_DefectCount_CodeView;
+
+        //                    double M1 = 0;
+        //                    double M2 = 0;
+        //                    double M3 = 0;
+        //                    double M4 = 0;
+        //                    double M5 = 0;
+        //                    double M6 = 0;
+        //                    double M7 = 0;
+        //                    double M8 = 0;
+        //                    double M9 = 0;
+        //                    double M10 = 0;
+        //                    double M11 = 0;
+        //                    double M12 = 0;
+        //                    double M13 = 0;
+
+        //                    double.TryParse(dr["M1"].ToString(), out M1);
+        //                    double.TryParse(dr["M2"].ToString(), out M2);
+        //                    double.TryParse(dr["M3"].ToString(), out M3);
+        //                    double.TryParse(dr["M4"].ToString(), out M4);
+        //                    double.TryParse(dr["M5"].ToString(), out M5);
+        //                    double.TryParse(dr["M6"].ToString(), out M6);
+        //                    double.TryParse(dr["M7"].ToString(), out M7);
+        //                    double.TryParse(dr["M8"].ToString(), out M8);
+        //                    double.TryParse(dr["M9"].ToString(), out M9);
+        //                    double.TryParse(dr["M10"].ToString(), out M10);
+        //                    double.TryParse(dr["M11"].ToString(), out M11);
+        //                    double.TryParse(dr["M12"].ToString(), out M12);
+        //                    double.TryParse(dr["M13"].ToString(), out M13);
+
+
+        //                    if(j == 3)
+        //                    {
+        //                        ViewReceiver.M1 = stringFormatN2(M1);
+        //                        ViewReceiver.M2 = stringFormatN2(M2);
+        //                        ViewReceiver.M3 = stringFormatN2(M3);
+        //                        ViewReceiver.M4 = stringFormatN2(M4);
+        //                        ViewReceiver.M5 = stringFormatN2(M5);
+        //                        ViewReceiver.M6 = stringFormatN2(M6);
+        //                        ViewReceiver.M7 = stringFormatN2(M7);
+        //                        ViewReceiver.M8 = stringFormatN2(M8);
+        //                        ViewReceiver.M9 = stringFormatN2(M9);
+        //                        ViewReceiver.M10 = stringFormatN2(M10);
+        //                        ViewReceiver.M11 = stringFormatN2(M11);
+        //                        ViewReceiver.M12 = stringFormatN2(M12);
+        //                        ViewReceiver.M13 = stringFormatN2(M13);
+        //                    }
+        //                    else
+        //                    {
+        //                        ViewReceiver.M1 = stringFormatN0(M1);
+        //                        ViewReceiver.M2 = stringFormatN0(M2);
+        //                        ViewReceiver.M3 = stringFormatN0(M3);
+        //                        ViewReceiver.M4 = stringFormatN0(M4);
+        //                        ViewReceiver.M5 = stringFormatN0(M5);
+        //                        ViewReceiver.M6 = stringFormatN0(M6);
+        //                        ViewReceiver.M7 = stringFormatN0(M7);
+        //                        ViewReceiver.M8 = stringFormatN0(M8);
+        //                        ViewReceiver.M9 = stringFormatN0(M9);
+        //                        ViewReceiver.M10 = stringFormatN0(M10);
+        //                        ViewReceiver.M11 = stringFormatN0(M11);
+        //                        ViewReceiver.M12 = stringFormatN0(M12);
+        //                        ViewReceiver.M13 = stringFormatN0(M13);
+        //                    }
+
+
+
+        //                    if (j == 0)     // 목표, 그래프 그려야 한다.
+        //                    {
+        //                        SeriesCollection = new SeriesCollection
+        //                    {
+        //                        new LineSeries
+        //                        {
+        //                            Title = "목표",
+        //                            Values = new ChartValues<double>
+        //                            {
+        //                                M1, M2, M3, M4, M5, M6,
+        //                                M7, M8, M9, M10, M11, M12
+        //                            }
+        //                        }
+        //                    };
+        //                    }
+        //                    else if (j == 3)        // 불량율,ㅡ 그래프 그려야 한다.
+        //                    {
+        //                        SeriesCollection.Add(new LineSeries
+        //                        {
+        //                            Title = "불량율",
+        //                            Values = new ChartValues<double>
+        //                        {
+        //                            M1, M2, M3, M4, M5, M6,
+        //                            M7, M8, M9, M10, M11, M12
+        //                        }
+        //                        });
+        //                    }
+        //                }
+
+
+
+        //                lvcDayChart.Series = SeriesCollection;
+        //                DataContext = this;
+
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show(ex.Message);
+        //    }
+
+        //    FillGridModel();
+        //    FillGridType();
+        //    FillGridWorker();
+
+        //}
 
 
         //제품별 불량 dgdDefectArticle_ModelOccupy 데이터그리드 조회
@@ -694,12 +869,12 @@ namespace WizMes_SungShinNQ
         {
             string InsPoint = string.Empty;  //불량 발생 시점
 
-            if (cboOccurStepSrh.SelectedValue.ToString().Equals("0")) { InsPoint = ""; } //전체
-            else if (cboOccurStepSrh.SelectedValue.ToString().Equals("2")) { InsPoint = "3"; }
-            else if (cboOccurStepSrh.SelectedValue.ToString().Equals("3")) { InsPoint = "2"; }
-            else if (cboOccurStepSrh.SelectedValue.ToString().Equals("4")) { InsPoint = "0"; } //
-            else if (cboOccurStepSrh.SelectedValue.ToString().Equals("6")) { InsPoint = "5"; } //
-            else { InsPoint = cboOccurStepSrh.SelectedValue.ToString(); }
+            //if (cboOccurStepSrh.SelectedValue.ToString().Equals("0")) { InsPoint = ""; } //전체
+            //else if (cboOccurStepSrh.SelectedValue.ToString().Equals("2")) { InsPoint = "3"; }
+            //else if (cboOccurStepSrh.SelectedValue.ToString().Equals("3")) { InsPoint = "2"; }
+            //else if (cboOccurStepSrh.SelectedValue.ToString().Equals("4")) { InsPoint = "0"; } //
+            //else if (cboOccurStepSrh.SelectedValue.ToString().Equals("6")) { InsPoint = "5"; } //
+            //else { InsPoint = cboOccurStepSrh.SelectedValue.ToString(); }
 
             //헤더변경
             for (int i = 0; i < 12; i++)
@@ -715,15 +890,16 @@ namespace WizMes_SungShinNQ
                 DataSet ds = null;
                 Dictionary<string, object> sqlParameter = new Dictionary<string, object>();
                 sqlParameter.Clear();
-                sqlParameter.Add("YYYYMM", chkDate.IsChecked == true ? dtpSDate.SelectedDate.ToString().Replace("-", "").Substring(0, 6) : "");
-                sqlParameter.Add("chkProdGroupID", chkProductGroup.IsChecked == true ? 1 : 0);
-                sqlParameter.Add("ProdGroupID", chkProductGroup.IsChecked == true ? cboProductGrpID.SelectedValue.ToString() : "");
-                sqlParameter.Add("chkInspectPointID", 1);   // 뭐든 체크는 되어있을 거니까
-                sqlParameter.Add("InspectPointID", InsPoint);
-                sqlParameter.Add("chkArticleID", 0); // chkArticle.IsChecked == true ? 1 : 0);
-                sqlParameter.Add("ArticleID", ""); // chkArticle.IsChecked == true ? txtArticle.Tag.ToString() : "");
-                sqlParameter.Add("sGrouping", "3"); //varchar(1) 이라서 "3" ,  1 : 유형 , 3 : 제품
-                sqlParameter.Add("BuyerArticleNo", chkArticle.IsChecked == true ? txtArticle.Text : "");
+                sqlParameter.Add("YYYYMM", chkDate.IsChecked == true ? dtpSDate.SelectedDate?.ToString("yyyyMM") ?? string.Empty : string.Empty);
+                sqlParameter.Add("chkProdGroupID", chkProductGrpIDSrh.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("ProdGroupID", chkProductGrpIDSrh.IsChecked == true ? cboProductGrpIDSrh.SelectedValue.ToString() : "");
+                sqlParameter.Add("chkInspectPointID", chkDefectOccurStep.IsChecked == true ? 1 : 0); // 전체가 아니면 1로 
+                sqlParameter.Add("InspectPointID", cboOccurStepSrh.SelectedValue?.ToString() ?? "0"); //빈값 : 전체, 1: 입고, 2: 자주검사, 3: 생산, 4: 최종검사, 5:출하
+                sqlParameter.Add("chkArticleID", chkArticleIDSrh.IsChecked == true ? 1 : 0); // chkArticle.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("ArticleID", chkArticleIDSrh.IsChecked == true ? txtArticleIDSrh.Tag?.ToString() ?? string.Empty : string.Empty);
+                sqlParameter.Add("sGrouping", "3");
+                sqlParameter.Add("chkBuyerArticleNo", chkBuyerArticleNoSrh.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("BuyerArticleNo", chkBuyerArticleNoSrh.IsChecked == true ? txtBuyerArticleNoSrh.Tag?.ToString() ?? string.Empty : string.Empty);
 
                 ds = DataStore.Instance.ProcedureToDataSet("xp_Qul_sStsDefectArticle_DefectCountsub", sqlParameter, false);
                                                             
@@ -1184,12 +1360,12 @@ namespace WizMes_SungShinNQ
         {
             string InsPoint = string.Empty;  //불량 발생 시점
 
-            if (cboOccurStepSrh.SelectedValue.ToString().Equals("0")) { InsPoint = ""; } //전체
-            else if (cboOccurStepSrh.SelectedValue.ToString().Equals("2")) { InsPoint = "3"; }
-            else if (cboOccurStepSrh.SelectedValue.ToString().Equals("3")) { InsPoint = "2"; }
-            else if (cboOccurStepSrh.SelectedValue.ToString().Equals("4")) { InsPoint = "0"; } //
-            else if (cboOccurStepSrh.SelectedValue.ToString().Equals("6")) { InsPoint = "5"; } //
-            else { InsPoint = cboOccurStepSrh.SelectedValue.ToString(); }
+            //if (cboOccurStepSrh.SelectedValue.ToString().Equals("0")) { InsPoint = ""; } //전체
+            //else if (cboOccurStepSrh.SelectedValue.ToString().Equals("2")) { InsPoint = "3"; }
+            //else if (cboOccurStepSrh.SelectedValue.ToString().Equals("3")) { InsPoint = "2"; }
+            //else if (cboOccurStepSrh.SelectedValue.ToString().Equals("4")) { InsPoint = "0"; } //
+            //else if (cboOccurStepSrh.SelectedValue.ToString().Equals("6")) { InsPoint = "5"; } //
+            //else { InsPoint = cboOccurStepSrh.SelectedValue.ToString(); }
 
             //헤더변경
             for (int i = 0; i < 12; i++)
@@ -1205,15 +1381,16 @@ namespace WizMes_SungShinNQ
                 DataSet ds = null;
                 Dictionary<string, object> sqlParameter = new Dictionary<string, object>();
                 sqlParameter.Clear();
-                sqlParameter.Add("YYYYMM", chkDate.IsChecked == true ? dtpSDate.SelectedDate.ToString().Replace("-", "").Substring(0, 6) : "");
-                sqlParameter.Add("chkProdGroupID", chkProductGroup.IsChecked == true ? 1 : 0);
-                sqlParameter.Add("ProdGroupID", chkProductGroup.IsChecked == true ? cboProductGrpID.SelectedValue.ToString() : "");
-                sqlParameter.Add("chkInspectPointID", 1);   // 뭐든 체크는 되어있을 거니까
-                sqlParameter.Add("InspectPointID", InsPoint);
-                sqlParameter.Add("chkArticleID", 0);  //chkArticle.IsChecked == true ? 1 : 0);
-                sqlParameter.Add("ArticleID", ""); //chkArticle.IsChecked == true ? txtArticle.Tag.ToString() : "");
-                sqlParameter.Add("sGrouping", "1"); //varchar(1) 이라서 "1" ,  1 : 유형 , 3 : 제품
-                sqlParameter.Add("BuyerArticleNo", chkArticle.IsChecked == true ? txtArticle.Text : "");
+                sqlParameter.Add("YYYYMM", chkDate.IsChecked == true ? dtpSDate.SelectedDate?.ToString("yyyyMM") ?? string.Empty :string.Empty);
+                sqlParameter.Add("chkProdGroupID", chkProductGrpIDSrh.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("ProdGroupID", chkProductGrpIDSrh.IsChecked == true ? cboProductGrpIDSrh.SelectedValue.ToString() : "");
+                sqlParameter.Add("chkInspectPointID", chkDefectOccurStep.IsChecked == true ? 1 : 0); // 전체가 아니면 1로 
+                sqlParameter.Add("InspectPointID", cboOccurStepSrh.SelectedValue?.ToString() ?? "0"); //빈값 : 전체, 1: 입고, 2: 자주검사, 3: 생산, 4: 최종검사, 5:출하
+                sqlParameter.Add("chkArticleID", chkArticleIDSrh.IsChecked == true ? 1 : 0); // chkArticle.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("ArticleID", chkArticleIDSrh.IsChecked == true ? txtArticleIDSrh.Tag?.ToString() ?? string.Empty : string.Empty);
+                sqlParameter.Add("sGrouping", "1");
+                sqlParameter.Add("chkBuyerArticleNo", chkBuyerArticleNoSrh.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("BuyerArticleNo", chkBuyerArticleNoSrh.IsChecked == true ? txtBuyerArticleNoSrh.Tag?.ToString() ?? string.Empty : string.Empty);
 
 
                 ds = DataStore.Instance.ProcedureToDataSet("xp_Qul_sStsDefectArticle_DefectCountsub", sqlParameter, false);
@@ -1529,12 +1706,12 @@ namespace WizMes_SungShinNQ
         {
             string InsPoint = string.Empty;  //불량 발생 시점
             
-            if (cboOccurStepSrh.SelectedValue.ToString().Equals("0")) { InsPoint = ""; } //전체
-            else if (cboOccurStepSrh.SelectedValue.ToString().Equals("2")) { InsPoint = "3"; }
-            else if (cboOccurStepSrh.SelectedValue.ToString().Equals("3")) { InsPoint = "2"; }
-            else if (cboOccurStepSrh.SelectedValue.ToString().Equals("4")) { InsPoint = "0"; } //
-            else if (cboOccurStepSrh.SelectedValue.ToString().Equals("6")) { InsPoint = "5"; } //
-            else { InsPoint = cboOccurStepSrh.SelectedValue.ToString(); }
+            //if (cboOccurStepSrh.SelectedValue.ToString().Equals("0")) { InsPoint = ""; } //전체
+            //else if (cboOccurStepSrh.SelectedValue.ToString().Equals("2")) { InsPoint = "3"; }
+            //else if (cboOccurStepSrh.SelectedValue.ToString().Equals("3")) { InsPoint = "2"; }
+            //else if (cboOccurStepSrh.SelectedValue.ToString().Equals("4")) { InsPoint = "0"; } //
+            //else if (cboOccurStepSrh.SelectedValue.ToString().Equals("6")) { InsPoint = "5"; } //
+            //else { InsPoint = cboOccurStepSrh.SelectedValue.ToString(); }
 
             //헤더변경
             for (int i = 0; i < 12; i++)
@@ -1550,16 +1727,16 @@ namespace WizMes_SungShinNQ
                 DataSet ds = null;
                 Dictionary<string, object> sqlParameter = new Dictionary<string, object>();
                 sqlParameter.Clear();
-                sqlParameter.Add("YYYYMM", chkDate.IsChecked == true ? dtpSDate.SelectedDate.ToString().Replace("-", "").Substring(0, 6) : "");
-                sqlParameter.Add("chkProdGroupID", chkProductGroup.IsChecked == true ? 1 : 0);
-                sqlParameter.Add("ProdGroupID", chkProductGroup.IsChecked == true ? cboProductGrpID.SelectedValue.ToString() : "");
-                sqlParameter.Add("chkInspectPointID", 1);   // 뭐든 체크는 되어있을 거니까
-                sqlParameter.Add("InspectPointID", InsPoint);
-                
-                sqlParameter.Add("chkArticleID", 0); // chkArticle.IsChecked == true ? 1 : 0);
-                sqlParameter.Add("ArticleID", ""); // chkArticle.IsChecked == true ? txtArticle.Tag.ToString() : "");
-                sqlParameter.Add("sGrouping", "4"); //varchar(1) 이라서 "3" ,  1 : 유형 , 3 : 제품
-                sqlParameter.Add("BuyerArticleNo", chkArticle.IsChecked == true ? txtArticle.Text : "");
+                sqlParameter.Add("YYYYMM", chkDate.IsChecked == true ? dtpSDate.SelectedDate?.ToString("yyyyMM") ?? string.Empty : string.Empty);
+                sqlParameter.Add("chkProdGroupID", chkProductGrpIDSrh.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("ProdGroupID", chkProductGrpIDSrh.IsChecked == true ? cboProductGrpIDSrh.SelectedValue.ToString() : "");
+                sqlParameter.Add("chkInspectPointID", chkDefectOccurStep.IsChecked == true ? 1 : 0); // 전체가 아니면 1로 
+                sqlParameter.Add("InspectPointID", cboOccurStepSrh.SelectedValue?.ToString() ?? "0"); //빈값 : 전체, 1: 입고, 2: 자주검사, 3: 생산, 4: 최종검사, 5:출하
+                sqlParameter.Add("chkArticleID", chkArticleIDSrh.IsChecked == true ? 1 : 0); // chkArticle.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("ArticleID", chkArticleIDSrh.IsChecked == true ? txtArticleIDSrh.Tag?.ToString() ?? string.Empty : string.Empty);
+                sqlParameter.Add("sGrouping", "4");
+                sqlParameter.Add("chkBuyerArticleNo", chkBuyerArticleNoSrh.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("BuyerArticleNo", chkBuyerArticleNoSrh.IsChecked == true ? txtBuyerArticleNoSrh.Tag?.ToString() ?? string.Empty : string.Empty);
 
 
                 ds = DataStore.Instance.ProcedureToDataSet("xp_Qul_sStsWorker_DefectCountsub", sqlParameter, false);
@@ -1828,12 +2005,12 @@ namespace WizMes_SungShinNQ
             try
             {
                 List<DataGrid> dataGrids = new List<DataGrid>
-        {
-            dgdDefectArticle_DefectCount,
-            dgdDefectArticle_DefectType,
-            dgdDefectArticle_ModelOccupy,
-            dgdDefectArticle_Worker
-        };
+                {
+                    dgdDefectArticle_DefectCount,
+                    dgdDefectArticle_DefectType,
+                    dgdDefectArticle_ModelOccupy,
+                    dgdDefectArticle_Worker
+                };
 
                 foreach (DataGrid dgd in dataGrids)
                 {             
@@ -1910,24 +2087,8 @@ namespace WizMes_SungShinNQ
         #endregion 가빈
 
 
-        //제품그룹 체크
-        private void ChkProductGroup_Checked(object sender, RoutedEventArgs e)
-        {
-            cboProductGrpID.IsEnabled = true;
-        }
+     
 
-        //제품그룹 체크해제
-        private void ChkProductGroup_Unchecked(object sender, RoutedEventArgs e)
-        {
-            cboProductGrpID.IsEnabled = false;
-        }
-
-        //제품그룹 라벨 클릭
-        private void LblProductGroup_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            if (chkProductGroup.IsChecked == true) { chkProductGroup.IsChecked = false; }
-            else { chkProductGroup.IsChecked = true; }
-        }
 
         // 천자리 콤마, 소수점 버리기
         private string stringFormatN0(object obj)
@@ -1959,7 +2120,69 @@ namespace WizMes_SungShinNQ
             }
         }
 
+        private void CommonControl_Click(object sender, MouseButtonEventArgs e)
+        {
+            Lib.Instance.CommonControl_Click(sender, e);
+        }
 
+        private void CommonControl_Click(object sender, RoutedEventArgs e)
+        {
+            Lib.Instance.CommonControl_Click(sender, e);
+        }
+
+        private void CommonPlusfinder_KeyDown(object sender, KeyEventArgs e)
+        {
+            if(e.Key == Key.Enter)
+            {
+                try
+                {
+                    TextBox txtbox = sender as TextBox;
+                    if (txtbox != null && !string.IsNullOrWhiteSpace(txtbox.Name))
+                    {
+                        if (txtbox.Name.Contains("BuyerAritcleNo"))
+                        {
+                            pf.ReturnCode(txtbox, 76, "");
+                        }
+                        else if (txtbox.Name.Contains("ArticleID"))
+                        {
+                            pf.ReturnCode(txtbox, 77, "");
+                        }
+                    }
+                  
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show($"오류 발생 : {ex.ToString()}");
+                }
+            }
+      
+        }
+
+        private void CommonPlusfinder_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+
+                TextBox txtbox = Lib.Instance.FindSiblingControl<TextBox>((Button)sender);
+                if (txtbox != null && !string.IsNullOrWhiteSpace(txtbox.Name))
+                {
+                    if (txtbox.Name.Contains("BuyerAritcleNo"))
+                    {
+                        pf.ReturnCode(txtbox, 76, "");
+                    }
+                    else if (txtbox.Name.Contains("ArticleID"))
+                    {
+                        pf.ReturnCode(txtbox, 77, "");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"오류 발생 : {ex.ToString()}");
+            }
+        }
+
+ 
     }
 
 
