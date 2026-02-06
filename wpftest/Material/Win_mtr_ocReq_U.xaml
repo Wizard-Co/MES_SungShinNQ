@@ -524,7 +524,7 @@
                                     </DataGridTemplateColumn.CellEditingTemplate>
                                 </DataGridTemplateColumn>
                                 <!--<DataGridTextColumn Header="입고마감여부" Width="auto" Binding="{Binding InwareCloseYN}"/>-->
-                                <DataGridTemplateColumn Header="입고마감" Width="auto" MinWidth="100">
+                                <DataGridTemplateColumn Header="입고마감여부" Width="auto" MinWidth="100">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <CheckBox x:Name="chkInwareCloseYN" IsChecked="{Binding InwareCloseChecked, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Checked="chkInwareCloseYN_Checked" Unchecked="chkInwareCloseYN_Unchecked" 
