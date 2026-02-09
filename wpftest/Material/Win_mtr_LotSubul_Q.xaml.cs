@@ -238,13 +238,13 @@ namespace WizMes_SungShinNQ
         {
             if (e.Key == Key.Enter)
             {
-                MainWindow.pf.ReturnCode(txtMtrArticleSrh, 1, "");
+                MainWindow.pf.ReturnCode(txtMtrArticleSrh, 76, "");
             }
         }
         // 자재품명 플러스파인더
         private void btnMtrArticleSrh_Click(object sender, RoutedEventArgs e)
         {
-            MainWindow.pf.ReturnCode(txtMtrArticleSrh, 1, "");
+            MainWindow.pf.ReturnCode(txtMtrArticleSrh, 76, "");
         }
 
         //자재품명 초기화

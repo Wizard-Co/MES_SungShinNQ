@@ -1739,7 +1739,7 @@ namespace WizMes_SungShinNQ
                 sqlParameter.Add("nBuyerArticleNo", chkArticleSrh.IsChecked == true ? 1 : 0);
                 sqlParameter.Add("BuyerArticleNo", chkArticleSrh.IsChecked == true && !txtArticleSrh.Text.Trim().Equals("") ? txtArticleSrh.Text : "");
 
-                DataSet ds = DataStore.Instance.ProcedureToDataSet("xp_Outware_sOrder", sqlParameter, false);
+                DataSet ds = DataStore.Instance.ProcedureToDataSet("xp_Outware_sOrder_mtr", sqlParameter, false);
 
                 if (ds != null && ds.Tables.Count > 0)
                 {
