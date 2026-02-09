@@ -205,14 +205,14 @@ namespace WizMes_SungShinNQ
         {
             if (e.Key == Key.Enter)
             {
-                MainWindow.pf.ReturnCode(txtArticle, 82, "");
+                MainWindow.pf.ReturnCode(txtArticle, 77, "");   // 2026.02.09 강현선, 품명으로 검색안돼서 수정
             }
         }
 
         //품명
         private void btnPfArticle_Click(object sender, RoutedEventArgs e)
         {
-            MainWindow.pf.ReturnCode(txtArticle, 82, "");
+            MainWindow.pf.ReturnCode(txtArticle, 77, "");   // 2026.02.09 강현선, 품명으로 검색안돼서 수정
         }
 
         //관리번호
