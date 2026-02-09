@@ -3406,9 +3406,14 @@ namespace WizMes_SungShinNQ
         //<Grid><Label/><CheckBox/></Grid>
         public void CommonControl_Click(object sender, EventArgs e)
         {
+            // sender 자체가 비활성화 상태면 바로 리턴
+            if (sender is Control senderControl && !senderControl.IsEnabled)
+            {
+                return;
+            }
+
             CheckBox checkBox = null;
             DependencyObject parentGrid = null;
-
             if (sender is Label label)
             {
                 // 라벨의 부모 그리드 찾기
@@ -3417,7 +3422,7 @@ namespace WizMes_SungShinNQ
                 {
                     // 같은 그리드 내에서 체크박스 찾기
                     checkBox = FindChild<CheckBox>(parentGrid);
-                    if (checkBox != null)
+                    if (checkBox != null && checkBox.IsEnabled)  
                     {
                         // 체크박스 상태 토글
                         checkBox.IsChecked = !checkBox.IsChecked;
@@ -3435,7 +3440,6 @@ namespace WizMes_SungShinNQ
             if (checkBox != null && parentGrid != null)
             {
                 List<Control> controlsToToggle = new List<Control>();
-
                 // 그리드 내 모든 Control 찾기 (체크박스 제외)
                 FindUiObject(parentGrid, obj => {
                     if (obj is Control control && obj != checkBox && !(obj is Label) && !(obj is CheckBox))
@@ -3443,7 +3447,6 @@ namespace WizMes_SungShinNQ
                         controlsToToggle.Add(control);
                     }
                 });
-
                 // 컨트롤 활성화/비활성화
                 foreach (var control in controlsToToggle)
                 {

@@ -8,8 +8,8 @@
              d:DesignHeight="620" d:DesignWidth="820" Loaded="Window_InOutTotalGrid_Loaded">
 
     <!--#region  그리드 리스트로 그리기-->
-    <!--<UserControl.Resources>
-        --><!-- 셀 병합 그리드 <InOutTotalGrid_Period>--><!--
+    <UserControl.Resources>
+        <!-- 셀 병합 그리드 <InOutTotalGrid_Period>-->
         <Color x:Key="customBlue"  A="255"   R="54" G="95" B="177"  />
         <SolidColorBrush x:Key="customBlueBrush" Color="{StaticResource customBlue}"></SolidColorBrush>
         <SolidColorBrush x:Key="customBlueBrushOpacity" Color="LightGray" Opacity="0.11"></SolidColorBrush>
@@ -28,7 +28,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-    </UserControl.Resources>-->
+    </UserControl.Resources>
 
     <!--#endregion-->
 
@@ -40,58 +40,61 @@
         </Grid.RowDefinitions>
 
         <!-- 화면 상단 / 조회(검색) 조건 화면라인 -->
-        <Grid Margin="2" Grid.Column="0" Grid.Row="0" Background="{DynamicResource WizMes_SungShinNQ}">
+        <Grid Margin="1" Grid.Column="0" Grid.Row="0" Background="{DynamicResource WizMes_SungShinNQ}">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="100*"/>
-                <ColumnDefinition Width="160*"/>
-                <ColumnDefinition Width="230*"/>
-                <ColumnDefinition Width="230*"/>
-                <ColumnDefinition Width="100*"/>
+                <ColumnDefinition Width="100*" />
+                <ColumnDefinition Width="160*" />
+                <ColumnDefinition Width="180*" />
+                <ColumnDefinition Width="180*" />
+                <ColumnDefinition Width="200*" />
             </Grid.ColumnDefinitions>
 
             <!-- 기준 일자, 날짜버튼 모음-->
-            <Grid Grid.Column="1" Grid.Row="0">
+            <Grid Margin="1" Grid.Column="1" Grid.Row="0">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="2*"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <Grid Grid.Row="0" Grid.Column="1">
+                <Grid Grid.Row="0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="41*"/>
-                        <ColumnDefinition Width="27*"/>
-                        <ColumnDefinition Width="89*"/>
+                        <ColumnDefinition Width="75*" />
+                        <ColumnDefinition Width="85*" />
                     </Grid.ColumnDefinitions>
-                        <TextBlock Text="기준일자" Margin="-2" ></TextBlock>
 
-                    <Label x:Name="lblDate"  Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" MouseLeftButtonDown="lblDate_Click" >
-                        <StackPanel Orientation="Horizontal" Margin="-2">
-                            <Viewbox VerticalAlignment="Center">
-                                <CheckBox x:Name="chkDate"  Click="chkDate_Click" ></CheckBox>
+                    <Label  Grid.Column="0" Grid.Row="0"  Style="{DynamicResource LabelSearch}">
+                        <StackPanel Style="{DynamicResource StackPanelInLabel}" >
+                            <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}">
+                                <CheckBox x:Name="chkDateSrh" VerticalAlignment="Center" IsChecked="True" IsEnabled="False"/>
                             </Viewbox>
-                            <TextBlock Text="기준 일자" VerticalAlignment="Center"/>
+                            <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}" >
+                                <TextBlock Text="기준일자" Style="{DynamicResource TextBlockInViewBoxSearch}" />
+                            </Viewbox>
                         </StackPanel>
                     </Label>
-                    <DatePicker x:Name="dtpFromDate" Grid.Column="2" Grid.Row="0" Padding="0"/>
-                    <DatePicker x:Name="dtpToDate"  Grid.Column="2" Grid.Row="1" Padding="0"/>
+                    <DatePicker x:Name="dtpFromDate" Grid.Column="2" Grid.Row="0" Style="{DynamicResource DatePickerSearch}" IsEnabled="True"/>
+                    <DatePicker x:Name="dtpToDate"  Grid.Column="2" Grid.Row="1" Style="{DynamicResource DatePickerSearch}" IsEnabled="True"/>
                 </Grid>
 
-                <Grid Grid.Column="1" Grid.Row="1">
+                <Grid Grid.Row="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <Button x:Name="btnLastMonth" Grid.Column="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Content="전월" Margin="1" Click="btnLastMonth_Click"/>
-                    <Button x:Name="btnThisMonth" Grid.Column="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Content="금월" Margin="1" Click="btnThisMonth_Click" />
-                    <Button x:Name="btnYesterDay" Grid.Column="2" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Content="전일" Margin="1" Click="btnYesterDay_Click"/>
-                    <Button x:Name="btnToday" Grid.Column="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Content="금일" Margin="1" Click="btnToday_Click"/>
+                    <Button x:Name="btnLastMonth" Content="전월"  Grid.Column="0" Grid.Row="0" Click="btnLastMonth_Click"/>
+                    <Button x:Name="btnThisMonth" Content="금월"  Grid.Column="1" Grid.Row="0" Click="btnThisMonth_Click"/>
+                    <Button x:Name="btnYesterday" Content="전일" Grid.Column="2" Grid.Row="0" Click="btnYesterday_Click"/>
+                    <Button x:Name="btnToday" Content="금일"  Grid.Column="3" Grid.Row="0" Click="btnToday_Click"/>
                 </Grid>
             </Grid>
 
@@ -104,36 +107,90 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="95*"/>
-                    <ColumnDefinition Width="95*"/>
-                    <ColumnDefinition Width="20*"/>
+                    <ColumnDefinition Width="75*" />
+                    <ColumnDefinition Width="90*" />
+                    <ColumnDefinition Width="20*" />
                 </Grid.ColumnDefinitions>
 
-                <Label  Grid.Column="0" Grid.Row="0" MouseLeftButtonUp="chkCustomer_Click">
-                    <StackPanel Orientation="Horizontal" Margin="-2">
-                        <Viewbox VerticalAlignment="Center">
-                            <CheckBox x:Name="chkCustomer"  Click="chkCustomer_Click" ></CheckBox>
-                        </Viewbox>
-                        <TextBlock Text="거 래 처" VerticalAlignment="Center"/>
-                    </StackPanel>
-                </Label>
-                <TextBox x:Name="txtCustomer" Grid.Column="1" Grid.Row="0" Padding="0" KeyDown="txtCustomer_KeyDown" />
-                <Label  Grid.Column="0" Grid.Row="1" MouseLeftButtonUp="chkArticle_Click">
-                    <StackPanel Orientation="Horizontal" Margin="-2" >
-                        <Viewbox VerticalAlignment="Center">
-                            <CheckBox x:Name="chkArticle"  Click="chkArticle_Click"></CheckBox>
-                        </Viewbox>
-                        <TextBlock Text="품     번" VerticalAlignment="Center"/>
-                    </StackPanel>
-                </Label>
-                <TextBox x:Name="txtArticle" Grid.ColumnSpan="2" Grid.Column="1" Grid.Row="1" Padding="0"
-                         KeyDown="txtArticle_KeyDown"/>
-                <Button x:Name="btnCustomer"  Grid.Column="3" Grid.Row="0" Click="btnCustomer_Click">
-                    <Image Source="{DynamicResource btiPlusFind}" Style="{DynamicResource imgPlusFind}" Margin="-2"/>
-                </Button>
-                <Button x:Name="btnArticle"  Grid.Column="3" Grid.Row="1" Click="btnArticle_Click">
-                    <Image Source="{DynamicResource btiPlusFind}" Style="{DynamicResource imgPlusFind}" Margin="-2"/>
-                </Button>
+                <!--거래처-->
+                <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="75*" />
+                        <ColumnDefinition Width="90*" />
+                        <ColumnDefinition Width="20*" />
+                    </Grid.ColumnDefinitions>
+                    <Label  Grid.Column="0" Grid.Row="0" MouseLeftButtonUp="CommonControl_Click" Style="{DynamicResource LabelSearch}">
+                        <StackPanel Style="{DynamicResource StackPanelInLabel}">
+                            <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}">
+                                <CheckBox x:Name="chkCustomIDSrh"  Click="CommonControl_Click" ></CheckBox>
+                            </Viewbox>
+                            <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}">
+                                <TextBlock Text="거 래 처" Style="{DynamicResource TextBlockInViewBoxSearch}"/>
+                            </Viewbox>
+
+                        </StackPanel>
+                    </Label>
+                    <TextBox x:Name="txtCustomIDSrh" Grid.Column="1" Grid.Row="0" Style="{DynamicResource TextBoxSearch}" 
+                    KeyDown="CommonPlusfinder_KeyDown" />
+                    <Button x:Name="btnCustomIDSrh"  Grid.Column="3" Grid.Row="0" Click="CommonPlusfinder_Click" IsEnabled="False">
+                        <Image Source="{DynamicResource btiPlusFind}" Style="{DynamicResource imgPlusFind}"/>
+                    </Button>
+                </Grid>
+
+
+                <!--품번-->
+                <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="75*" />
+                        <ColumnDefinition Width="90*" />
+                        <ColumnDefinition Width="20*" />
+                    </Grid.ColumnDefinitions>
+                    <Label  Grid.Column="0" Grid.Row="2" MouseLeftButtonUp="CommonControl_Click" Style="{DynamicResource LabelSearch}">
+                        <StackPanel Style="{DynamicResource StackPanelInLabel}">
+                            <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}">
+                                <CheckBox x:Name="chkBuyerArticleNoSrh"  Click="CommonControl_Click"></CheckBox>
+                            </Viewbox>
+                            <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}">
+                                <TextBlock Text="품     번" Style="{DynamicResource TextBlockInViewBoxSearch}"/>
+                            </Viewbox>
+
+                        </StackPanel>
+                    </Label>
+                    <TextBox x:Name="txtBuyerArticleNoSrh"  Grid.Column="1" Grid.Row="2" Style="{DynamicResource TextBoxSearch}"
+                         KeyDown="CommonPlusfinder_KeyDown"/>
+                    <Button x:Name="btnBuyerArticleNoSrh"  Grid.Column="3" Grid.Row="2" Click="CommonPlusfinder_Click" IsEnabled="False">
+                        <Image Source="{DynamicResource btiPlusFind}" Style="{DynamicResource imgPlusFind}"/>
+                    </Button>
+                </Grid>
+
+                <!--품명-->
+                <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="75*" />
+                        <ColumnDefinition Width="90*" />
+                        <ColumnDefinition Width="20*" />
+                    </Grid.ColumnDefinitions>
+                    <Label  Grid.Column="0" Grid.Row="1" MouseLeftButtonUp="CommonControl_Click" Style="{DynamicResource LabelSearch}">
+                        <StackPanel Style="{DynamicResource StackPanelInLabel}">
+                            <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}">
+                                <CheckBox x:Name="chkArticleIDSrh"  Click="CommonControl_Click"></CheckBox>
+                            </Viewbox>
+                            <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}">
+                                <TextBlock Text="품     명" Style="{DynamicResource TextBlockInViewBoxSearch}"/>
+                            </Viewbox>
+
+                        </StackPanel>
+                    </Label>
+                    <TextBox x:Name="txtArticleIDSrh"  Grid.Column="1" Grid.Row="1" Style="{DynamicResource TextBoxSearch}"
+                         KeyDown="CommonPlusfinder_KeyDown"/>
+                    <Button x:Name="btnArticleIDSrh"  Grid.Column="3" Grid.Row="1" Click="CommonPlusfinder_Click" IsEnabled="False">
+                        <Image Source="{DynamicResource btiPlusFind}" Style="{DynamicResource imgPlusFind}"/>
+                    </Button>
+                </Grid>
+
+
+
+
             </Grid>
 
             <!-- 관리번호, 출고구분 모음 -->
@@ -145,43 +202,128 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="95*"/>
-                    <ColumnDefinition Width="95*"/>
-                    <ColumnDefinition Width="20*"/>
+                    <ColumnDefinition Width="75*" />
+                    <ColumnDefinition Width="90*" />
+                    <ColumnDefinition Width="20*" />
                 </Grid.ColumnDefinitions>
 
-                <Label  Grid.Column="0" Grid.Row="0" MouseLeftButtonUp="chkInOutGubun_Click" Visibility="Hidden">
-                    <StackPanel Orientation="Horizontal" Margin="-2">
-                        <Viewbox VerticalAlignment="Center">
-                            <CheckBox x:Name="chkInOutGubun" Click="chkInOutGubun_Click" ></CheckBox>
+                <!--관리번호, 오더번호-->
+                <Grid Grid.Row="0" Grid.ColumnSpan="3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="95*"/>
+                        <ColumnDefinition Width="95*"/>
+                        <ColumnDefinition Width="20*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label  Grid.Column="0" Grid.Row="0" MouseLeftButtonUp="CommonControl_Click" Style="{DynamicResource LabelSearch}">
+                        <StackPanel Style="{DynamicResource StackPanelInLabel}">
+                            <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}">
+                                <CheckBox x:Name="chkOrderIDSrh" Click="CommonControl_Click"/>
+                            </Viewbox>
+                            <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}">
+                                <TextBlock x:Name="tblOrderIDSrh" Text=" 관리번호" Style="{DynamicResource TextBlockInViewBoxSearch}"/>
+                            </Viewbox>
+                        </StackPanel>
+                    </Label>
+                    <TextBox x:Name="txtOrderIDSrh"  Grid.Column="1" Grid.Row="0" Padding="0" Style="{DynamicResource TextBoxSearch}"/>
+                </Grid>
+
+
+                <!--라디오버튼-->
+                <Border Grid.ColumnSpan="2" Grid.Column="0" Grid.Row="1" Margin="1"
+                        HorizontalAlignment="Stretch" Background="#ededed" BorderBrush="Gray" BorderThickness="1">
+                    <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+
+                        <RadioButton x:Name="rbnOrderNOSrh" Grid.Column="0" Margin="-5,0,0,0"
+                                 Click="rbnOrderNOSrh_Click" HorizontalAlignment="Center" VerticalAlignment="Center" >
+                            <TextBlock Text="Order No." Style="{DynamicResource TextBlockInViewBoxSearch}" Margin="0"/>
+                        </RadioButton>
+                        <RadioButton x:Name="rbnOrderIDSrh" Grid.Column="1" Margin="-5,0,0,0" IsChecked="True"
+                                 Click="rbnOrderIDSrh_Click" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="관리번호" Style="{DynamicResource TextBlockInViewBoxSearch}" Margin="0"/>
+                        </RadioButton>
+                    </Grid>
+                </Border>
+
+                <!--입출고구분-->
+                <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Visibility="Hidden">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="75*" />
+                        <ColumnDefinition Width="90*" />
+                        <ColumnDefinition Width="20*" />
+                    </Grid.ColumnDefinitions>
+                    <Label  Grid.Column="0" Grid.Row="0" MouseLeftButtonUp="CommonControl_Click" Style="{DynamicResource LabelSearch}">
+                        <StackPanel Style="{DynamicResource StackPanelInLabel}">
+                            <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}">
+                                <CheckBox x:Name="chkInOutGubunSrh" Click="CommonControl_Click" ></CheckBox>
+                            </Viewbox>
+                            <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}">
+                                <TextBlock Text="입출고구분" Style="{DynamicResource TextBlockInViewBoxSearch}" />
+                            </Viewbox>
+
+                        </StackPanel>
+                    </Label>
+                    <ComboBox x:Name="cboInOutGubunSrh" Grid.Column="1" Grid.Row="0" Style="{DynamicResource ComboBoxSearchString}"/>
+                </Grid>
+
+
+
+                <!--입고검수구분-->
+                <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Visibility="Hidden">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="75*" />
+                        <ColumnDefinition Width="90*" />
+                        <ColumnDefinition Width="20*" />
+                    </Grid.ColumnDefinitions>
+                    <Label  Grid.Column="0" Grid.Row="0" MouseLeftButtonUp="CommonControl_Click" Style="{DynamicResource LabelSearch}">
+                        <StackPanel Style="{DynamicResource StackPanelInLabel}">
+                            <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}">
+                                <CheckBox x:Name="chkInInsepectGubunSrh" Click="CommonControl_Click" ></CheckBox>
+                            </Viewbox>
+                            <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}">
+                                <TextBlock Text="입고검수구분" Style="{DynamicResource TextBlockInViewBoxSearch}" />
+                            </Viewbox>
+
+                        </StackPanel>
+                    </Label>
+                    <ComboBox x:Name="cboInInspectGubunSrh"  Grid.Column="1" Grid.Row="0" Style="{DynamicResource ComboBoxSearchString}" />
+                </Grid>
+
+
+                <!--주요관심품목-->
+                <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Visibility="Hidden">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="75*" />
+                        <ColumnDefinition Width="90*" />
+                        <ColumnDefinition Width="20*" />
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" Grid.Row="0" Style="{DynamicResource LabelSearch}">
+                        <StackPanel Style="{DynamicResource StackPanelInLabel}">
+                            <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}">
+                                <CheckBox x:Name="chkMainInterestItemSrh" Click="CommonControl_Click" ></CheckBox>
+                            </Viewbox>
+                            <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}">
+                                <TextBlock Text="주요 관심 품목" Style="{DynamicResource TextBlockInViewBoxSearch}" />
+                            </Viewbox>
+                        </StackPanel>
+                    </Label>
+                </Grid>
+
+
+                <!--거래처별 등록 품목-->
+                <Label Grid.Column="0" Grid.Row="1"  Style="{DynamicResource LabelSearch}" MouseLeftButtonDown="CommonControl_Click"
+                       Visibility="Hidden">
+                    <StackPanel Style="{DynamicResource StackPanelInLabel}">
+                        <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}">
+                            <CheckBox x:Name="chkCustomsEnrollItem" Click="CommonControl_Click" ></CheckBox>
                         </Viewbox>
-                        <TextBlock Text="입출고구분" VerticalAlignment="Center" />
-                    </StackPanel>
-                </Label>
-                <ComboBox x:Name="cboInOutGubun" Grid.Column="1" Grid.Row="0" Padding="0" Visibility="Hidden"/>
-                <Label  Grid.Column="0" Grid.Row="1" MouseLeftButtonUp="chkInInspectGubun_Click" Visibility="Hidden">
-                    <StackPanel Orientation="Horizontal" Margin="-2">
-                        <Viewbox VerticalAlignment="Center">
-                            <CheckBox x:Name="chkInInsepectGubun" Click="chkInInspectGubun_Click" ></CheckBox>
+                        <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight}">
+                            <TextBlock Text="거래처별 등록 품목" Style="{DynamicResource TextBlockInViewBoxSearch}" />
                         </Viewbox>
-                        <TextBlock Text="입고검수구분" VerticalAlignment="Center" />
-                    </StackPanel>
-                </Label>
-                <ComboBox x:Name="cboInInspectGubun"  Grid.Column="1" Grid.Row="1" Padding="0" Visibility="Hidden" />
-                <Label Grid.Column="0" Grid.Row="0" >
-                    <StackPanel Orientation="Horizontal" Margin="-2">
-                        <Viewbox VerticalAlignment="Center">
-                            <CheckBox x:Name="chkMainInterestItem" Click="chkInInspectGubun_Click" ></CheckBox>
-                        </Viewbox>
-                        <TextBlock Text="주요 관심 품목" VerticalAlignment="Center" />
-                    </StackPanel>
-                </Label>
-                <Label Grid.Column="0" Grid.Row="3" Visibility="Hidden">
-                    <StackPanel Orientation="Horizontal" Margin="-2">
-                        <Viewbox VerticalAlignment="Center">
-                            <CheckBox x:Name="chkCustomsEnrollItem" Click="chkInInspectGubun_Click" ></CheckBox>
-                        </Viewbox>
-                        <TextBlock Text="거래처별 등록 품목" VerticalAlignment="Center" />
+
                     </StackPanel>
                 </Label>
             </Grid>
@@ -189,8 +331,10 @@
             <!-- 검색/닫기/엑셀 버튼 -->
             <Grid Grid.Column="4" Grid.Row="0">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="45*"/>
-                    <ColumnDefinition Width="45*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
@@ -199,7 +343,7 @@
                 </Grid.RowDefinitions>
 
                 <!-- 검색(조회) 버튼 -->
-                <Button x:Name="btnSearch" Grid.Column="0" Grid.Row="0" 
+                <Button x:Name="btnSearch" Grid.Column="2" Grid.Row="0" 
                         Click="btnSearch_Click" Margin="1">
                     <StackPanel Orientation="Horizontal">
                         <Image Source="{DynamicResource btiSearch}" Style="{DynamicResource imgSize}" VerticalAlignment="Center" />
@@ -208,7 +352,7 @@
                 </Button>
 
                 <!-- 닫기 버튼 -->
-                <Button x:Name="btnClose"  Grid.Column="1" Grid.Row="0" Click="btnClose_Click" Margin="1" >
+                <Button x:Name="btnClose"  Grid.Column="3" Grid.Row="0" Click="btnClose_Click" Margin="1" >
                     <StackPanel Orientation="Horizontal">
                         <Image Source="{DynamicResource btiClose}" Style="{DynamicResource imgSize}" VerticalAlignment="Center" />
                         <TextBlock Text="{Binding Source={StaticResource tblClose},Mode=OneWay,Path=Text}" VerticalAlignment="Center" />
@@ -216,7 +360,7 @@
                 </Button>
 
                 <!-- 엑셀 버튼 -->
-                <Button x:Name="btnExcel"  Grid.Column="1" Grid.Row="1" Click="btnExcel_Click" Margin="1">
+                <Button x:Name="btnExcel"  Grid.Column="3" Grid.Row="1" Click="btnExcel_Click" Margin="1">
                     <StackPanel Orientation="Horizontal">
                         <Image Source="{DynamicResource btiExcel}" Style="{DynamicResource imgSize}" VerticalAlignment="Center" />
                         <TextBlock Text="{Binding Source={StaticResource tblExcel},Mode=OneWay,Path=Text}" VerticalAlignment="Center" />
@@ -232,76 +376,29 @@
             </UniformGrid>
 
             <TabControl x:Name="tabconGrid" Grid.ColumnSpan="4" SelectionChanged="tabconGrid_SelectionChanged">
-                <TabItem x:Name="tiPeriod"  Header="기간집계" Width="{Binding Path=ActualWidth, ElementName=c1}" Height="25" >
+                <TabItem x:Name="tiPeriod"  Header="기간집계" Width="{Binding Path=ActualWidth, ElementName=c1}" Height="25"  >
                     <Grid>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="auto"/>
+                            <!--<RowDefinition Height="auto" />-->
+                            <RowDefinition  />
+                            <RowDefinition Height="0.13*"/>
                         </Grid.RowDefinitions>
-
-                        <ScrollViewer Grid.Row="0"  HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Visible"  Visibility="Hidden">
-                            <Grid x:Name="grdHeader_Period" ShowGridLines="False" >
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="auto"/>
-                                </Grid.RowDefinitions>
-
-                                <Label Grid.Row="0" Grid.Column="0" Content="순번"  />
-                                <Label Grid.Row="0" Grid.Column="1" Content="기간" />
-                                <Label Grid.Row="0" Grid.Column="2" Content="구분" />
-                                <Label Grid.Row="0" Grid.Column="3" Content="거래처" />
-                                <Label Grid.Row="0" Grid.Column="4" Content="품번" />
-                                <Label Grid.Row="0" Grid.Column="5" Content="품명" />
-                                <Label Grid.Row="0" Grid.Column="6" Content="품명코드" />
-                                <Label Grid.Row="0" Grid.Column="7" Content="건수" />
-                                <Label Grid.Row="0" Grid.Column="8" Content="수량" />
-                                <Label Grid.Row="0" Grid.Column="9" Content="단위" />
-                                <Label Grid.Row="0" Grid.Column="10" Content="점유율" />
-                            </Grid>
-                        </ScrollViewer>
-
-                        <ScrollViewer  HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" 
-                          SelectiveScrollingGrid.SelectiveScrollingOrientation="Both" Selector.IsSelected="True" Visibility="Hidden" Grid.ColumnSpan="2">
-                            <Grid x:Name="grdMerge_Period" ShowGridLines="False"  >
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                            </Grid>
-                        </ScrollViewer>
-                        
-                        <DataGrid x:Name="grdPeriod" IsReadOnly="True" Grid.ColumnSpan="2"  
-                                  SelectionChanged="grdPeriod_SelectionChanged_1"
-                                  Style="{DynamicResource DataGridSet1}">
+                        <DataGrid x:Name="grdPeriod" IsReadOnly="True" Grid.ColumnSpan="2"  Style="{DynamicResource DataGridSet1}"                                 
+                                  SizeChanged="DataGrid_SizeChange" >
                             <DataGrid.Resources>
                                 <Style TargetType="DataGridRow">
+                                    <Style.Resources>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#3399FF"/>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="White"/>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="#3399FF" />
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.ControlTextBrushKey}" Color="White"/>
+                                    </Style.Resources>
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding P_ArticleID}" Value="거래처계">
+                                        <DataTrigger Binding="{Binding P_Color1}" Value="true">
                                             <Setter Property="Background" Value="#D8D8D8"/>
                                         </DataTrigger>
 
-                                        <DataTrigger Binding="{Binding P_cls}" Value="0">
+                                        <DataTrigger Binding="{Binding P_Color2}" Value="true">
                                             <Setter Property="Background" Value="#BDBDBD"/>
                                         </DataTrigger>
                                     </Style.Triggers>
@@ -309,39 +406,46 @@
                             </DataGrid.Resources>
 
                             <DataGrid.Columns>
-                                
-                                <DataGridTextColumn Header="순서" Binding="{Binding P_NUM}" />
-                                <DataGridTextColumn Header="기간" Binding="{Binding P_IODate}"/>
-                                <DataGridTextColumn Header="구분" Binding="{Binding P_Gbn}" />
-                                <DataGridTextColumn Header="거래처" Binding="{Binding P_CustomName}" Width="*"/>
-                                <DataGridTextColumn Header="품번" Binding="{Binding P_BuyerArticleNo}" Width="1.2*"/>
-                                <DataGridTextColumn Header="품명" Binding="{Binding P_Article}" Width="1.2*"/>
-                                <DataGridTextColumn Header="품명코드" Binding="{Binding P_ArticleID}" Width="1.2*"/>
+                                <DataGridTextColumn Header="순" Binding="{Binding P_NUM}" />
+                                <DataGridTextColumn Header="구분" Binding="{Binding P_Gbn}" ElementStyle="{StaticResource DataGridCellCenter}" />
+                                <DataGridTextColumn x:Name="dtcOrderID_P" Header="관리번호" Binding="{Binding P_OrderID}" ElementStyle="{StaticResource DataGridCellCenter}" />
+                                <DataGridTextColumn x:Name="dtcOrderNo_P" Header="OrderNo" Binding="{Binding P_OrderNo}" ElementStyle="{StaticResource DataGridCellCenter}" Visibility="Hidden"/>
+                                <DataGridTextColumn Header="거래처" Binding="{Binding P_CustomName}" Width="*" ElementStyle="{StaticResource DataGridCellLeft}" />
+                                <DataGridTextColumn Header="품번" Binding="{Binding P_BuyerArticleNo}" Width="*" ElementStyle="{StaticResource DataGridCellLeft}" />
+                                <DataGridTextColumn Header="품명" Binding="{Binding P_Article}" Width="1.2*">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="TextAlignment" Value="{Binding P_Article_TextAlignment}"/>
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <!--<DataGridTextColumn Header="규격" Binding="{Binding P_Spec}" Width="1.2*" ElementStyle="{StaticResource DataGridCellLeft}"/>-->
                                 <DataGridTextColumn Header="건수" Binding="{Binding P_Roll}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellRight}"/>
-                                <DataGridTextColumn Header="수량" Binding="{Binding P_Qty}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellRight}"/>
+                                  ElementStyle="{StaticResource DataGridCellRight}"/>
+                                <DataGridTextColumn Header="수량" Binding="{Binding P_Qty, Converter={StaticResource NumberConverter}}" Width="*"
+                                  ElementStyle="{StaticResource DataGridCellRight}"/>
                                 <DataGridTextColumn Header="단위" Binding="{Binding P_UnitClssName}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellRight}"/>
-                                <DataGridTextColumn Header="점유율" Binding="{Binding P_CustomRate}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellRight}"/>
+                                  ElementStyle="{StaticResource DataGridCellCenter}"/>
+                                <DataGridTextColumn Header="점유율" Binding="{Binding P_CustomRate, Converter={StaticResource NumberConverter},ConverterParameter=2}" Width="*"
+                                  ElementStyle="{StaticResource DataGridCellRight}"/>
                             </DataGrid.Columns>
                         </DataGrid>
-                        
-                        <DataGrid x:Name="grdTotal" Grid.Row="1" IsReadOnly="True" Grid.ColumnSpan="2"  
-                                  SelectionChanged="grdPeriod_SelectionChanged_1"
-                                  Style="{DynamicResource TotalGridSet2}">
-                         
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="구분" Binding="{Binding P_Gbn}" Width="70"  ElementStyle="{StaticResource DataGridCellCenter}"/>
-                                <DataGridTextColumn Header="건수" Binding="{Binding P_Roll}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellCenter}"/>
-                                <DataGridTextColumn Header="수량" Binding="{Binding P_Qty}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellCenter}"/>
-                                <DataGridTextColumn Header="점유율" Binding="{Binding P_CustomRate}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellCenter}"/>
-                            </DataGrid.Columns>
-                        </DataGrid>
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="10*"/>
+                                <ColumnDefinition Width="90*"/>
+                            </Grid.ColumnDefinitions>
+                            <DataGridRowHeader Grid.Column="0" Content="합 계" Style="{StaticResource RowHeaderStyle}"/>
+                            <DataGrid x:Name="dgdPeriodTotal" Grid.Column="1" Style="{DynamicResource DataGridSet1}" HeadersVisibility="Column">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="출고 건수" Binding="{Binding P_TotalOutRoll, Converter={StaticResource NumberConverter}}" Width="*" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                    <DataGridTextColumn Header="출고 수량" Binding="{Binding P_TotalOutQty, Converter={StaticResource NumberConverter} }"  Width="*" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                    <DataGridTextColumn Header="입고 건수" Binding="{Binding P_TotalStuffRoll,Converter={StaticResource NumberConverter}}" Width="*" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                    <DataGridTextColumn Header="입고 수량" Binding="{Binding P_TotalStuffQty,Converter={StaticResource NumberConverter} }"  Width="*" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
                     </Grid>
                 </TabItem>
 
@@ -349,82 +453,31 @@
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="79*"/>
-                            <ColumnDefinition Width="56*"/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="90"/>
+                            <!--<RowDefinition Height="auto" />-->
+                            <RowDefinition />
+                            <RowDefinition Height="0.13*"/>
                         </Grid.RowDefinitions>
 
-                        <ScrollViewer Grid.Row="0"  HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Visible" Visibility="Hidden" Grid.ColumnSpan="2" >
-                            <Grid x:Name="grdHeader_Days" ShowGridLines="False"  >
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="auto" />
-                                </Grid.RowDefinitions>
-
-                                <Label Grid.Row="0" Grid.Column="0" Content="순번"  />
-                                <Label Grid.Row="0" Grid.Column="1" Content="일자" />
-                                <Label Grid.Row="0" Grid.Column="2" Content="구분" />
-                                <Label Grid.Row="0" Grid.Column="3" Content="거래처" />
-                                <Label Grid.Row="0" Grid.Column="4" Content="품번" />
-                                <Label Grid.Row="0" Grid.Column="5" Content="품명" />
-                                <Label Grid.Row="0" Grid.Column="6" Content="건수" />
-                                <Label Grid.Row="0" Grid.Column="7" Content="수량" />
-                                <Label Grid.Row="0" Grid.Column="8" Content="단위" />
-                                <Label Grid.Row="0" Grid.Column="9" Content="금액" />
-                                <Label Grid.Row="0" Grid.Column="10" Content="부가세" />
-                                <Label Grid.Row="0" Grid.Column="11" Content="합계금액" />
-                                <Label Grid.Row="0" Grid.Column="12" Content="점유율" />
-                            </Grid>
-                        </ScrollViewer>
-
-                        <ScrollViewer HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" 
-                          SelectiveScrollingGrid.SelectiveScrollingOrientation="Both" Selector.IsSelected="True" Grid.ColumnSpan="2" >
-                            <Grid x:Name="grdMerge_Days" ShowGridLines="False" >
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                            </Grid>
-                        </ScrollViewer>
-
-                        <DataGrid x:Name="grdMergeDays" Grid.Row ="0"  Grid.ColumnSpan="2" SelectionChanged="grdMergeDays_SelectionChanged" 
-                                  Style="{DynamicResource DataGridSet1}">
+                        <DataGrid x:Name="grdMergeDays" IsReadOnly="True" Grid.ColumnSpan="2" 
+                                  Style="{DynamicResource DataGridSet1}"
+                                  SizeChanged="DataGrid_SizeChange" >
 
                             <DataGrid.Resources>
                                 <Style TargetType="DataGridRow">
+                                    <Style.Resources>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#3399FF"/>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="White"/>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="#3399FF" />
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.ControlTextBrushKey}" Color="White"/>
+                                    </Style.Resources>
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding D_ArticleID}" Value="">
+                                        <DataTrigger Binding="{Binding D_Color1}" Value="true">
                                             <Setter Property="Background" Value="#D8D8D8"/>
                                         </DataTrigger>
 
-                                        <DataTrigger Binding="{Binding D_cls}" Value="0">
+                                        <DataTrigger Binding="{Binding D_Color2}" Value="true">
                                             <Setter Property="Background" Value="#BDBDBD"/>
                                         </DataTrigger>
                                     </Style.Triggers>
@@ -432,122 +485,126 @@
                             </DataGrid.Resources>
 
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="순서" Binding="{Binding D_NUM}" />
-                                <DataGridTextColumn Header="일자" Binding="{Binding D_IODate}"/>
-                                <DataGridTextColumn Header="구분" Binding="{Binding D_Gbn}" />
-                                <DataGridTextColumn Header="거래처" Binding="{Binding D_CustomName}" Width="*"/>
-                                <DataGridTextColumn Header="품번" Binding="{Binding D_BuyerArticleNo}" Width="1.8*" />
-                                <DataGridTextColumn Header="품명" Binding="{Binding D_Article}" Width="1.8*"/>
-                                <DataGridTextColumn Header="건수" Binding="{Binding D_Roll}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellRight}"/>
-                                <DataGridTextColumn Header="수량" Binding="{Binding D_Qty}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellRight}"/>
+                                <DataGridTextColumn Header="순서" Binding="{Binding D_NUM}" ElementStyle="{StaticResource DataGridCellCenter}"/>
+                                <DataGridTextColumn Header="일자" Binding="{Binding D_IODate}" ElementStyle="{StaticResource DataGridCellCenter}"/>
+                                <DataGridTextColumn Header="구분" Binding="{Binding D_Gbn}" ElementStyle="{StaticResource DataGridCellCenter}" />
+                                <DataGridTextColumn x:Name="dtcOrderID_D" Header="관리번호" Binding="{Binding D_OrderID}" ElementStyle="{StaticResource DataGridCellCenter}" />
+                                <DataGridTextColumn x:Name="dtcOrderNo_D" Header="OrderNo" Binding="{Binding D_OrderNo}" ElementStyle="{StaticResource DataGridCellCenter}" Visibility="Hidden"/>
+                                <DataGridTextColumn Header="거래처" Binding="{Binding D_CustomName}" Width="*" >
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="TextAlignment" Value="{Binding D_CustomName_TextAlignment}"/>
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="품번" Binding="{Binding D_BuyerArticleNo}" Width="*" ElementStyle="{StaticResource DataGridCellLeft}"/>
+                                <DataGridTextColumn Header="품명" Binding="{Binding D_Article}" Width="*" ElementStyle="{StaticResource DataGridCellLeft}"/>
+                                <!--<DataGridTextColumn Header="규격" Binding="{Binding D_Spec}" Width="1.8*"/>-->
+                                <DataGridTextColumn Header="건수" Binding="{Binding D_Roll,Converter={StaticResource NumberConverter}}" Width="*"
+                                         ElementStyle="{StaticResource DataGridCellRight}"/>
+                                <DataGridTextColumn Header="수량" Binding="{Binding D_Qty,Converter={StaticResource NumberConverter} }" Width="*"
+                                         ElementStyle="{StaticResource DataGridCellRight}"/>
                                 <DataGridTextColumn Header="단위" Binding="{Binding D_UnitClssName}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellRight}"/>
-                                <DataGridTextColumn Header="금액" Binding="{Binding D_Amount}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellRight}"/>
-                                <DataGridTextColumn Header="부가세" Binding="{Binding D_VatAmount}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellRight}"/>
-                                <DataGridTextColumn Header="합계" Binding="{Binding D_TotAmount}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellRight}"/>
-                                <DataGridTextColumn Header="점유율" Binding="{Binding D_CustomRate}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellRight}"/>
+                                         ElementStyle="{StaticResource DataGridCellCenter}"/>
+                                <DataGridTextColumn Header="금액" Binding="{Binding D_Amount, Converter={StaticResource NumberConverter}}" Width="*"
+                                         ElementStyle="{StaticResource DataGridCellRight}"/>
+                                <DataGridTextColumn Header="부가세" Binding="{Binding D_VatAmount, Converter={StaticResource NumberConverter}}" Width="*"
+                                         ElementStyle="{StaticResource DataGridCellRight}"/>
+                                <DataGridTextColumn Header="총금액" Binding="{Binding D_TotAmount, Converter={StaticResource NumberConverter}}" Width="*"
+                                         ElementStyle="{StaticResource DataGridCellRight}"/>
+                                <DataGridTextColumn Header="점유율" Binding="{Binding D_CustomRate, Converter={StaticResource NumberConverter},ConverterParameter=2}" Width="*"
+                                         ElementStyle="{StaticResource DataGridCellRight}"/>
                             </DataGrid.Columns>
                         </DataGrid>
-                        <DataGrid x:Name="grdTotal2" Grid.Row="1" IsReadOnly="True" Grid.ColumnSpan="2"  
-                                  SelectionChanged="grdPeriod_SelectionChanged_1"
-                                  Style="{DynamicResource TotalGridSet2}">
-
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="구분" Binding="{Binding D_IODate}" Width="70"  ElementStyle="{StaticResource DataGridCellCenter}"/>
-                                <DataGridTextColumn Header="건수" Binding="{Binding D_Roll}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellCenter}"/>
-                                <DataGridTextColumn Header="수량" Binding="{Binding D_Qty}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellCenter}"/>
-                                <DataGridTextColumn Header="금액" Binding="{Binding D_Amount}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellCenter}"/>
-                                <DataGridTextColumn Header="부가세" Binding="{Binding D_VatAmount}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellCenter}"/>
-                                <DataGridTextColumn Header="합계" Binding="{Binding D_TotAmount}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellCenter}"/>
-                            </DataGrid.Columns>
-                        </DataGrid>
+                        <Grid Grid.Row="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="10*"/>
+                                <ColumnDefinition Width="90*"/>
+                            </Grid.ColumnDefinitions>
+                            <DataGridRowHeader Grid.Column="0" Grid.Row="0" Content="구분" Style="{StaticResource RowHeaderStyle}"/>
+                            <DataGridRowHeader x:Name="drhTotalOut_D" Grid.Column="0" Grid.Row="1" Content="출고" Style="{StaticResource RowHeaderStyle}"/>
+                            <DataGridRowHeader Grid.Column="0" Grid.Row="2" Content="입고" Style="{StaticResource RowHeaderStyle}" />
+                            <Grid Grid.Row="0" Grid.Column="1">
+                                <Grid.Resources>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="FontSize" Value="16"/>
+                                        <Setter Property="Background" Value="#365fb1" />
+                                        <Setter Property="BorderBrush" Value="White" />
+                                        <Setter Property="Foreground" Value="White" />
+                                        <Setter Property="BorderThickness" Value="0.7" />
+                                        <Setter Property="FontWeight" Value="Thin" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                    </Style>
+                                </Grid.Resources>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="{Binding ElementName=D_TotalOutRoll,Path=ActualWidth}"/>
+                                    <ColumnDefinition Width="{Binding ElementName=D_TotalOutQty,Path=ActualWidth}"/>
+                                    <ColumnDefinition Width="{Binding ElementName=D_TotalOutAmount,Path=ActualWidth}"/>
+                                    <ColumnDefinition Width="{Binding ElementName=D_TotalOutVatAmount,Path=ActualWidth}"/>
+                                    <ColumnDefinition Width="{Binding ElementName=D_TotalOutPrice,Path=ActualWidth}"/>
+                                </Grid.ColumnDefinitions>
+                                <DataGridColumnHeader Grid.Row="0" Grid.Column="0" Content="건수" FontSize="12"/>
+                                <DataGridColumnHeader Grid.Row="0" Grid.Column="1" Content="수량" FontSize="12"/>
+                                <DataGridColumnHeader Grid.Row="0" Grid.Column="2" Content="금액" FontSize="12"/>
+                                <DataGridColumnHeader Grid.Row="0" Grid.Column="3" Content="부가세" FontSize="12"/>
+                                <DataGridColumnHeader Grid.Row="0" Grid.Column="4" Content="합계" FontSize="12"/>
+                            </Grid>
+                            <DataGrid x:Name="dgdDaysOutTotal" Grid.Row="1" Grid.Column="1" HeadersVisibility="None"  BorderThickness="0" Padding="0" BorderBrush="{x:Null}" Margin="0">
+                                <DataGrid.RowStyle>
+                                    <Style TargetType="DataGridRow">
+                                        <Setter Property="Height" Value="{Binding ElementName=drhTotalOut_D, Path=ActualHeight}"/>
+                                    </Style>
+                                </DataGrid.RowStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn x:Name="D_TotalOutRoll" MinWidth="80" Width="*" Binding="{Binding D_TotalOutRoll,Converter={StaticResource NumberConverter}}" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                    <DataGridTextColumn x:Name="D_TotalOutQty" MinWidth="80" Width="*"  Binding="{Binding D_TotalOutQty, Converter={StaticResource NumberConverter} }" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                    <DataGridTextColumn x:Name="D_TotalOutAmount" MinWidth="80"  Width="*"  Binding="{Binding D_TotalOutAmount, Converter={StaticResource NumberConverter}}" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                    <DataGridTextColumn x:Name="D_TotalOutVatAmount" MinWidth="80"  Width="*"  Binding="{Binding D_TotalOutVatAmount, Converter={StaticResource NumberConverter}}" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                    <DataGridTextColumn x:Name="D_TotalOutPrice" MinWidth="80"  Width="*"  Binding="{Binding D_TotalOutPrice, Converter={StaticResource NumberConverter}}" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                            <DataGrid x:Name="dgdDaysStuffTotal" Grid.Row="2" Grid.Column="1" HeadersVisibility="None"  BorderThickness="0" Padding="0"  BorderBrush="{x:Null}" Margin="0" >
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn x:Name="D_TotalStuffRoll" MinWidth="80" Width="*" Binding="{Binding D_TotalStuffRoll, Converter={StaticResource NumberConverter}}" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                    <DataGridTextColumn x:Name="D_TotalStuffQty" MinWidth="80" Width="*"  Binding="{Binding D_TotalStuffQty, Converter={StaticResource NumberConverter} }" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                    <DataGridTextColumn x:Name="D_TotalStuffAmount" MinWidth="80"  Width="*"  Binding="{Binding D_TotalStuffAmount, Converter={StaticResource NumberConverter}}" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                    <DataGridTextColumn x:Name="D_TotalStuffVatAmount" MinWidth="80"  Width="*"  Binding="{Binding D_TotalStuffVatAmount, Converter={StaticResource NumberConverter}}" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                    <DataGridTextColumn x:Name="D_TotalStuffPrice" MinWidth="80"  Width="*"  Binding="{Binding D_TotalStuffPrice, Converter={StaticResource NumberConverter}}" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
                     </Grid>
                 </TabItem>
 
                 <TabItem x:Name="tiMonth_V" Header="월별집계(세로)" Width="{Binding Path=ActualWidth, ElementName=c1}" Height="25" >
                     <Grid>
-                        <!--<Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="171*"/>
-                            <ColumnDefinition Width="7*"/>
-                            <ColumnDefinition Width="227*"/>
-                        </Grid.ColumnDefinitions>-->
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="90"/>
+                            <RowDefinition />
+                            <RowDefinition Height="0.13*"/>
                         </Grid.RowDefinitions>
+                        <DataGrid x:Name="grdMergeMonth_V" IsReadOnly="True" SizeChanged="DataGrid_SizeChange"
+                                  Style="{DynamicResource DataGridSet1}">
 
-                        <ScrollViewer Grid.Row="0" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Visible" Visibility="Hidden" Grid.ColumnSpan="3" >
-                            <Grid x:Name="grdHeader_Month_V" ShowGridLines="False" >
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="auto" />
-                                </Grid.RowDefinitions>
-
-                                <Label Grid.Row="0" Grid.Column="0" Content="순번"  />
-                                <Label Grid.Row="0" Grid.Column="1" Content="월" />
-                                <Label Grid.Row="0" Grid.Column="2" Content="구분" />
-                                <Label Grid.Row="0" Grid.Column="3" Content="거래처" />
-                                <Label Grid.Row="0" Grid.Column="4" Content="품번" />
-                                <Label Grid.Row="0" Grid.Column="5" Content="품명" />
-                                <Label Grid.Row="0" Grid.Column="6" Content="품명코드" />
-                                <Label Grid.Row="0" Grid.Column="7" Content="건수" />
-                                <Label Grid.Row="0" Grid.Column="8" Content="수량" />
-                                <Label Grid.Row="0" Grid.Column="9" Content="단위" />
-                                <Label Grid.Row="0" Grid.Column="10" Content="점유율" />
-                            </Grid>
-                        </ScrollViewer>
-                        
-                        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" 
-                          SelectiveScrollingGrid.SelectiveScrollingOrientation="Both" Selector.IsSelected="True" Grid.ColumnSpan="3" Visibility="Hidden">
-                            <Grid x:Name="grdMerge_Month_V" ShowGridLines="False" >
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                            </Grid>
-                        </ScrollViewer>
-
-                        <DataGrid x:Name="grdMergeMonth_V" Grid.Row="0"  SelectionChanged="grdMergeMonth_V_SelectionChanged" Style="{DynamicResource DataGridSet1}">
                             <DataGrid.Resources>
                                 <Style TargetType="DataGridRow">
+                                    <Style.Resources>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#3399FF"/>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="White"/>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="#3399FF" />
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.ControlTextBrushKey}" Color="White"/>
+                                    </Style.Resources>
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding V_ArticleID}" Value="">
+                                        <DataTrigger Binding="{Binding V_Color1}" Value="true">
                                             <Setter Property="Background" Value="#D8D8D8"/>
                                         </DataTrigger>
 
-                                        <DataTrigger Binding="{Binding V_cls}" Value="0">
+                                        <DataTrigger Binding="{Binding V_Color2}" Value="true">
                                             <Setter Property="Background" Value="#BDBDBD"/>
                                         </DataTrigger>
                                     </Style.Triggers>
@@ -555,179 +612,337 @@
                             </DataGrid.Resources>
 
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="순서" Binding="{Binding V_NUM}" />
-                                <DataGridTextColumn Header="월" Binding="{Binding V_IODate}"/>
-                                <DataGridTextColumn Header="구분" Binding="{Binding V_Gbn}" />
-                                <DataGridTextColumn Header="거래처" Binding="{Binding V_CustomName}" Width="*"/>
-                                <DataGridTextColumn Header="품번" Binding="{Binding V_BuyerArticleNo}" Width="1.2*"/>
-                                <DataGridTextColumn Header="품명" Binding="{Binding V_Article}" Width="1.2*"/>
-                                <DataGridTextColumn Header="품명코드" Binding="{Binding V_ArticleID}" Width="1.2*"/>
-                                <DataGridTextColumn Header="건수" Binding="{Binding V_Roll}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellRight}"/>
-                                <DataGridTextColumn Header="수량" Binding="{Binding V_Qty}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellRight}"/>
-                                <DataGridTextColumn Header="단위" Binding="{Binding V_UnitClssName}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellRight}"/>
-                                <DataGridTextColumn Header="점유율" Binding="{Binding V_CustomRate}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellRight}"/>
+                                <DataGridTextColumn Header="순서" Binding="{Binding V_NUM}" ElementStyle="{StaticResource DataGridCellCenter}"/>
+                                <DataGridTextColumn Header="년월" Binding="{Binding V_IODate}" ElementStyle="{StaticResource DataGridCellCenter}"/>
+                                <DataGridTextColumn Header="구분" Binding="{Binding V_Gbn}" ElementStyle="{StaticResource DataGridCellCenter}"/>
+                                <DataGridTextColumn Header="거래처" Binding="{Binding V_CustomName}" Width="*" ElementStyle="{StaticResource DataGridCellCenter}"/>
+                                <DataGridTextColumn Header="품번" Binding="{Binding V_BuyerArticleNo}" Width="*"  ElementStyle="{StaticResource DataGridCellLeft}" />
+                                <DataGridTextColumn Header="품명" Binding="{Binding V_Article}" Width="*">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="TextAlignment" Value="{Binding V_Article_TextAlignment}"/>
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <!--<DataGridTextColumn Header="규격" Binding="{Binding V_Spec}" Width="*" ElementStyle="{StaticResource DataGridCellLeft}"/>-->
+                                <DataGridTextColumn Header="건수" Binding="{Binding V_Roll}" Width="*" ElementStyle="{StaticResource DataGridCellRight}"/>
+                                <DataGridTextColumn Header="수량" Binding="{Binding V_Qty, Converter={StaticResource NumberConverter}}" Width="*" ElementStyle="{StaticResource DataGridCellRight}"/>
+                                <DataGridTextColumn Header="단위" Binding="{Binding V_UnitClssName}" Width="*" ElementStyle="{StaticResource DataGridCellCenter}"/>
+                                <DataGridTextColumn Header="점유율" Binding="{Binding V_CustomRate,Converter={StaticResource NumberConverter} }" Width="*" ElementStyle="{StaticResource DataGridCellRight}"/>
                             </DataGrid.Columns>
                         </DataGrid>
-                        <DataGrid x:Name="grdTotal3" Grid.Row="1" SelectionChanged="grdMergeMonth_V_SelectionChanged" Style="{DynamicResource TotalGridSet2}">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="구분" Binding="{Binding V_IODate}" Width="70" ElementStyle="{StaticResource DataGridCellCenter}" />
-                                <DataGridTextColumn Header="건수" Binding="{Binding V_Roll}" Width="*" ElementStyle="{StaticResource DataGridCellCenter}"/>
-                                <DataGridTextColumn Header="수량" Binding="{Binding V_Qty}" Width="*"  ElementStyle="{StaticResource DataGridCellCenter}"/>
-                                <DataGridTextColumn Header="점유율" Binding="{Binding V_CustomRate}" Width="*" ElementStyle="{StaticResource DataGridCellCenter}"/>
-                            </DataGrid.Columns>
-                        </DataGrid>
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="10*"/>
+                                <ColumnDefinition Width="90*"/>
+                            </Grid.ColumnDefinitions>
+                            <DataGridRowHeader Grid.Column="0" Content="합 계" Style="{StaticResource RowHeaderStyle}"/>
+                            <DataGrid x:Name="dgdMonthVtotal" Grid.Column="1" Style="{DynamicResource DataGridSet1}" HeadersVisibility="Column">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="출고 건수" Binding="{Binding V_TotalOutRoll,Converter={StaticResource NumberConverter}}" Width="*" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                    <DataGridTextColumn Header="출고 수량" Binding="{Binding V_TotalOutQty, Converter={StaticResource NumberConverter} }"  Width="*" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                    <DataGridTextColumn Header="입고 건수" Binding="{Binding V_TotalStuffRoll, Converter={StaticResource NumberConverter}}" Width="*" ElementStyle="{DynamicResource DataGridCellCenter}" />
+                                    <DataGridTextColumn Header="입고 수량" Binding="{Binding V_TotalStuffQty, Converter={StaticResource NumberConverter}}"  Width="*" ElementStyle="{DynamicResource DataGridCellCenter}" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
                     </Grid>
                 </TabItem>
 
                 <TabItem x:Name="tiMonth_H" Header="월별집계(가로)" Width="{Binding Path=ActualWidth, ElementName=c1}" Height="25">
-                    
                     <Grid>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="90"/>
+                            <RowDefinition/>
+                            <RowDefinition Height="0.21*"/>
                         </Grid.RowDefinitions>
+                        <Grid Grid.Row="0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="10*"/>
+                                <RowDefinition Height="90*"/>
+                            </Grid.RowDefinitions>
+                            <ScrollViewer x:Name="dgdMergeMonth_H_SV" Grid.Column="0" HorizontalScrollBarVisibility="Hidden" 
+                          ScrollViewer.CanContentScroll="False" VerticalScrollBarVisibility="Hidden">
+                                <ScrollViewer.Resources>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="FontSize" Value="16"/>
+                                        <Setter Property="Background" Value="#365fb1" />
+                                        <Setter Property="BorderBrush" Value="White" />
+                                        <Setter Property="Foreground" Value="White" />
+                                        <Setter Property="BorderThickness" Value="0.7" />
+                                        <Setter Property="FontWeight" Value="Thin" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                    </Style>
+                                </ScrollViewer.Resources>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="{Binding ElementName=H_NUM, Path=ActualWidth}"/>
+                                        <ColumnDefinition Width="{Binding ElementName=H_Gbn, Path=ActualWidth}"/>
+                                        <ColumnDefinition Width="{Binding ElementName=H_CustomName, Path=ActualWidth}"/>
+                                        <ColumnDefinition Width="{Binding ElementName=H_BuyerArticleNo, Path=ActualWidth}"/>
+                                        <ColumnDefinition Width="{Binding ElementName=H_Article, Path=ActualWidth}"/>
+                                        <!--<ColumnDefinition Width="{Binding ElementName=H_Spec, Path=ActualWidth}"/>-->
+                                        <ColumnDefinition Width="{Binding ElementName=H_UnitClssName, Path=ActualWidth}"/>
 
-                        <ScrollViewer Grid.Row="0" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Visible" Visibility="Hidden" >
-                            <Grid x:Name="grdHeader_Month_H" ShowGridLines="False"   >
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="{Binding ElementName=H_TotalMonthRoll, Path=ActualWidth}"/>
+                                        <ColumnDefinition Width="{Binding ElementName=H_TotalMonthQty, Path=ActualWidth}"/>
+                                        <ColumnDefinition Width="{Binding ElementName=H_BaseMonthRoll, Path=ActualWidth}"/>
+                                        <ColumnDefinition Width="{Binding ElementName=H_BaseMonthQty, Path=ActualWidth}"/>
+                                        <ColumnDefinition Width="{Binding ElementName=H_Add1MonthRoll, Path=ActualWidth}"/>
+                                        <ColumnDefinition Width="{Binding ElementName=H_Add1MonthQty, Path=ActualWidth}"/>
+                                        <ColumnDefinition Width="{Binding ElementName=H_Add2MonthRoll, Path=ActualWidth}"/>
+                                        <ColumnDefinition Width="{Binding ElementName=H_Add2MonthQty, Path=ActualWidth}"/>
+                                    </Grid.ColumnDefinitions>
+                                    <DataGridColumnHeader Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Content="순" FontSize="12"/>
+                                    <DataGridColumnHeader Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Content="구분" FontSize="12"/>
+                                    <DataGridColumnHeader Grid.Row="0" Grid.RowSpan="2" Grid.Column="2" Content="거래처" FontSize="12"/>
+                                    <DataGridColumnHeader Grid.Row="0" Grid.RowSpan="2" Grid.Column="3" Content="품번" FontSize="12"/>
+                                    <DataGridColumnHeader Grid.Row="0" Grid.RowSpan="2" Grid.Column="4" Content="품명" FontSize="12"/>
+                                    <!--<DataGridColumnHeader Grid.Row="0" Grid.RowSpan="2" Grid.Column="5" Content="규격" FontSize="12"/>-->
+                                    <DataGridColumnHeader Grid.Row="0" Grid.RowSpan="2" Grid.Column="5" Content="단위" FontSize="12"/>
+
+                                    <!--합계-->
+                                    <DataGridColumnHeader Grid.Row="0" Grid.ColumnSpan="2" Grid.Column="6"  Content="합계" FontSize="12"/>
+                                    <DataGridColumnHeader Grid.Row="1" Grid.Column="6" Content="수량" FontSize="12"/>
+                                    <DataGridColumnHeader Grid.Row="1" Grid.Column="7" Content="금액" FontSize="12"/>
+
+                                    <!--기준월-->
+                                    <DataGridColumnHeader Grid.Row="0" Grid.ColumnSpan="2" Grid.Column="8"  Content="기준월" FontSize="12"/>
+                                    <DataGridColumnHeader Grid.Row="1" Grid.Column="8" Content="수량" FontSize="12"/>
+                                    <DataGridColumnHeader Grid.Row="1" Grid.Column="9" Content="금액" FontSize="12"/>
+
+                                    <!--기준+2월-->
+                                    <DataGridColumnHeader Grid.Row="0" Grid.ColumnSpan="2" Grid.Column="10"  Content="기준+1월" FontSize="12"/>
+                                    <DataGridColumnHeader Grid.Row="1" Grid.Column="10" Content="수량" FontSize="12"/>
+                                    <DataGridColumnHeader Grid.Row="1" Grid.Column="11" Content="금액" FontSize="12"/>
+
+                                    <!--기준+2월-->
+                                    <DataGridColumnHeader Grid.Row="0" Grid.ColumnSpan="2" Grid.Column="12"  Content="기준+2월" FontSize="12"/>
+                                    <DataGridColumnHeader Grid.Row="1" Grid.Column="12" Content="수량" FontSize="12"/>
+                                    <DataGridColumnHeader Grid.Row="1" Grid.Column="13" Content="금액" FontSize="12"/>
+                                </Grid>
+                            </ScrollViewer>
+                            <DataGrid x:Name="grdMergeMonth_H" IsReadOnly="True" Style="{DynamicResource DataGridMultiLine}" Grid.Row="1"
+                       HeadersVisibility="None">
+                                <DataGrid.Resources>
+                                    <Style TargetType="DataGridRow">
+                                        <Style.Resources>
+                                            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#3399FF"/>
+                                            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="White"/>
+                                            <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="#3399FF" />
+                                            <SolidColorBrush x:Key="{x:Static SystemColors.ControlTextBrushKey}" Color="White"/>
+                                        </Style.Resources>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding H_Color1}" Value="true">
+                                                <Setter Property="Background" Value="#D8D8D8"/>
+                                            </DataTrigger>
+
+                                            <DataTrigger Binding="{Binding H_Color2}" Value="true">
+                                                <Setter Property="Background" Value="#BDBDBD"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGrid.Resources>
+
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="순" x:Name="H_NUM" Binding="{Binding H_NUM}" MinWidth="50" IsReadOnly="True" CellStyle="{DynamicResource DataGridCellAndCentering}"/>
+                                    <DataGridTextColumn Header="구분" x:Name="H_Gbn" Binding="{Binding H_Gbn}" MinWidth="50" IsReadOnly="True" CellStyle="{DynamicResource DataGridCellAndCentering}"/>
+                                    <DataGridTextColumn Header="거래처" x:Name="H_CustomName" Binding="{Binding H_CustomName}" MinWidth="80" IsReadOnly="True" ElementStyle="{StaticResource DataGridCellLeft}"/>
+                                    <DataGridTextColumn Header="품번" x:Name="H_BuyerArticleNo" Binding="{Binding H_BuyerArticleNo}" MinWidth="80" IsReadOnly="True" ElementStyle="{DynamicResource DataGridCellLeft}"/>
+                                    <DataGridTextColumn Header="품명" x:Name="H_Article" Binding="{Binding H_Article}" MinWidth="80" IsReadOnly="True">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="TextAlignment" Value="{Binding H_Article_TextAlignment}"/>
+                                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <!--<DataGridTextColumn Header="규격" x:Name="H_Spec" Binding="{Binding H_Spec}" MinWidth="80" IsReadOnly="True" ElementStyle="{DynamicResource DataGridCellLeft}"/>-->
+                                    <DataGridTextColumn Header="단위" x:Name="H_UnitClssName" Binding="{Binding H_UnitClssName}" MinWidth="80" IsReadOnly="True" CellStyle="{DynamicResource DataGridCellAndCentering}"/>
+
+                                    <!--합계-->
+                                    <DataGridTextColumn Header="수량" x:Name="H_TotalMonthRoll" Binding="{Binding H_TotalMonthQty, Converter={StaticResource NumberConverter},ConverterParameter=2}" MinWidth="80" Width="*" IsReadOnly="True" CellStyle="{DynamicResource NumericDataGridCell}"/>
+                                    <DataGridTextColumn Header="금액" x:Name="H_TotalMonthQty" Binding="{Binding H_TotalMonthAmount,Converter={StaticResource NumberConverter}}" MinWidth="80" Width="*" IsReadOnly="True" CellStyle="{DynamicResource NumericDataGridCell}"/>
+
+                                    <!--기준월-->
+                                    <DataGridTextColumn Header="수량" x:Name="H_BaseMonthRoll" Binding="{Binding H_BaseMonthQty, Converter={StaticResource NumberConverter} }" MinWidth="80" Width="*" IsReadOnly="True" CellStyle="{DynamicResource NumericDataGridCell}"/>
+                                    <DataGridTextColumn Header="금액" x:Name="H_BaseMonthQty" Binding="{Binding H_BaseMonthAmount, Converter={StaticResource NumberConverter} }" MinWidth="80" Width="*" IsReadOnly="True" CellStyle="{DynamicResource NumericDataGridCell}"/>
+
+                                    <!--기준+1월-->
+                                    <DataGridTextColumn Header="수량" x:Name="H_Add1MonthRoll" Binding="{Binding H_Add1MonthQty,Converter={StaticResource NumberConverter} }" MinWidth="80" Width="*" IsReadOnly="True" CellStyle="{DynamicResource NumericDataGridCell}"/>
+                                    <DataGridTextColumn Header="금액" x:Name="H_Add1MonthQty" Binding="{Binding H_Add1MonthAmount, Converter={StaticResource NumberConverter}}" MinWidth="80" Width="*" IsReadOnly="True" CellStyle="{DynamicResource NumericDataGridCell}"/>
+
+                                    <!--기준+2월-->
+                                    <DataGridTextColumn Header="수량" x:Name="H_Add2MonthRoll" Binding="{Binding H_Add2MonthQty, Converter={StaticResource NumberConverter} }" MinWidth="80" Width="*"  IsReadOnly="True" CellStyle="{DynamicResource NumericDataGridCell}"/>
+                                    <DataGridTextColumn Header="금액" x:Name="H_Add2MonthQty" Binding="{Binding H_Add2MonthAmount, Converter={StaticResource NumberConverter}}" MinWidth="80" Width="*" IsReadOnly="True" CellStyle="{DynamicResource NumericDataGridCell}"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                        <Grid Grid.Row="1">
+                            <Grid Grid.Row="1">
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="auto" />
-                                    <RowDefinition Height="auto" />
+                                    <RowDefinition Height="40*"/>
+                                    <RowDefinition Height="15.8*"/>
+                                    <RowDefinition Height="15.8*"/>
                                 </Grid.RowDefinitions>
-
-                                <Label Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Content="순번" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"  />
-                                <Label Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Content="구분" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
-                                <Label Grid.Row="0" Grid.RowSpan="2" Grid.Column="2" Content="거래처" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
-                                <Label Grid.Row="0" Grid.RowSpan="2" Grid.Column="3" Content="품번" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
-                                <Label Grid.Row="0" Grid.RowSpan="2" Grid.Column="4" Content="품명" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
-                                <Label Grid.Row="0" Grid.RowSpan="2" Grid.Column="5" Content="단위" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
-
-                                <Label Grid.Row="0" Grid.Column="6" Grid.ColumnSpan="3" Content="합계" HorizontalContentAlignment="Center" />
-                                <Label Grid.Row="1" Grid.Column="6" Content="점유율" />
-                                <Label Grid.Row="1" Grid.Column="7" Content="건수" />
-                                <Label Grid.Row="1" Grid.Column="8" Content="수량" />
-
-                                <Label x:Name="lblThisMonth" Grid.Row="0" Grid.Column="9" Grid.ColumnSpan="2" Content="젤 최근" HorizontalContentAlignment="Center" />
-                                <Label Grid.Row="1" Grid.Column="9" Content="건수" />
-                                <Label Grid.Row="1" Grid.Column="10" Content="수량" />
-
-                                <Label x:Name="lblMinusOneMonth" Grid.Row="0" Grid.Column="11" Grid.ColumnSpan="2" Content="한달전" HorizontalContentAlignment="Center" />
-                                <Label Grid.Row="1" Grid.Column="11" Content="건수" />
-                                <Label Grid.Row="1" Grid.Column="12" Content="수량" />
-
-                                <Label x:Name="lblMinusTwoMonth" Grid.Row="0" Grid.Column="13" Grid.ColumnSpan="2" Content="두달전" HorizontalContentAlignment="Center" />
-                                <Label Grid.Row="1" Grid.Column="13" Content="건수" />
-                                <Label Grid.Row="1" Grid.Column="14" Content="수량" />
-                            </Grid>
-                        </ScrollViewer>
-
-                        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" 
-                          SelectiveScrollingGrid.SelectiveScrollingOrientation="Both" Selector.IsSelected="True" Visibility="Hidden">
-                            <Grid x:Name="grdMerge_Month_H" ShowGridLines="False"   >
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="10*"/>
+                                    <ColumnDefinition Width="90*"/>
                                 </Grid.ColumnDefinitions>
+                                <DataGridRowHeader Grid.Column="0" Grid.Row="0" Content="구분" Style="{StaticResource RowHeaderStyle}"/>
+                                <DataGridRowHeader x:Name="drhTotalOut_H" Grid.Column="0" Grid.Row="1" Content="출고" Style="{StaticResource RowHeaderStyle}" />
+                                <DataGridRowHeader Grid.Column="0" Grid.Row="2" Content="입고" Style="{StaticResource RowHeaderStyle}" />
+                                <Grid Grid.Column="1" Grid.Row="0">
+                                    <ScrollViewer x:Name="dgddgdMonth_H_Total_SV" Grid.Column="0" HorizontalScrollBarVisibility="Hidden" 
+                                                 ScrollViewer.CanContentScroll="False" VerticalScrollBarVisibility="Hidden">
+                                        <ScrollViewer.Resources>
+                                            <Style TargetType="DataGridColumnHeader">
+                                                <Setter Property="FontSize" Value="16"/>
+                                                <Setter Property="Background" Value="#365fb1" />
+                                                <Setter Property="BorderBrush" Value="White" />
+                                                <Setter Property="Foreground" Value="White" />
+                                                <Setter Property="BorderThickness" Value="0.7" />
+                                                <Setter Property="FontWeight" Value="Thin" />
+                                                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                            </Style>
+                                        </ScrollViewer.Resources>
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="*"/>
+                                                <RowDefinition Height="*"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="{Binding ElementName=H_TotalOutRoll, Path=ActualWidth}"/>
+                                                <ColumnDefinition Width="{Binding ElementName=H_TotalOutQty, Path=ActualWidth}"/>
+                                                <ColumnDefinition Width="{Binding ElementName=H_TotalBaseOutRoll, Path=ActualWidth}"/>
+                                                <ColumnDefinition Width="{Binding ElementName=H_TotalBaseOutQty, Path=ActualWidth}"/>
+                                                <ColumnDefinition Width="{Binding ElementName=H_TotalAdd1OutRoll, Path=ActualWidth}"/>
+                                                <ColumnDefinition Width="{Binding ElementName=H_TotalAdd1OutQty, Path=ActualWidth}"/>
+                                                <ColumnDefinition Width="{Binding ElementName=H_TotalAdd2OutRoll, Path=ActualWidth}"/>
+                                                <ColumnDefinition Width="{Binding ElementName=H_TotalAdd2OutQty, Path=ActualWidth}"/>
+                                            </Grid.ColumnDefinitions>
+                                            <DataGridColumnHeader Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Content="합계" FontSize="12"/>
+                                            <DataGridColumnHeader Grid.Row="1" Grid.Column="0" Content="건수" FontSize="12"/>
+                                            <DataGridColumnHeader Grid.Row="1" Grid.Column="1" Content="수량" FontSize="12"/>
+
+                                            <DataGridColumnHeader Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Content="기준월" FontSize="12"/>
+                                            <DataGridColumnHeader Grid.Row="1" Grid.Column="2" Content="건수" FontSize="12"/>
+                                            <DataGridColumnHeader Grid.Row="1" Grid.Column="3" Content="수량" FontSize="12"/>
+
+                                            <DataGridColumnHeader Grid.Row="0" Grid.Column="4" Grid.ColumnSpan="2" Content="기준+1월" FontSize="12"/>
+                                            <DataGridColumnHeader Grid.Row="1" Grid.Column="4" Content="건수" FontSize="12"/>
+                                            <DataGridColumnHeader Grid.Row="1" Grid.Column="5" Content="수량" FontSize="12"/>
+
+                                            <DataGridColumnHeader Grid.Row="0" Grid.Column="6" Grid.ColumnSpan="2" Content="기준+2월" FontSize="12"/>
+                                            <DataGridColumnHeader Grid.Row="1" Grid.Column="6" Content="건수" FontSize="12"/>
+                                            <DataGridColumnHeader Grid.Row="1" Grid.Column="7" Content="수량" FontSize="12"/>
+                                        </Grid>
+                                    </ScrollViewer>
+                                </Grid>
+                                <DataGrid x:Name="dgdMonthHOutTotal" Grid.Row="1" Grid.Column="1" HeadersVisibility="None"  BorderThickness="0" Padding="0" BorderBrush="{x:Null}" Margin="0">
+                                    <DataGrid.RowStyle>
+                                        <Style TargetType="DataGridRow">
+                                            <Setter Property="Height" Value="{Binding ElementName=drhTotalOut_H, Path=ActualHeight}"/>
+                                        </Style>
+                                    </DataGrid.RowStyle>
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn x:Name="H_TotalOutRoll" MinWidth="80" Width="*" Binding="{Binding H_TotalOutRoll, Converter={StaticResource NumberConverter}}" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                        <DataGridTextColumn x:Name="H_TotalOutQty" MinWidth="80" Width="*"  Binding="{Binding H_TotalOutQty, Converter={StaticResource NumberConverter} }" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                        <DataGridTextColumn x:Name="H_TotalBaseOutRoll" MinWidth="80" Width="*" Binding="{Binding H_TotalBaseOutRoll, Converter={StaticResource NumberConverter}}" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                        <DataGridTextColumn x:Name="H_TotalBaseOutQty" MinWidth="80" Width="*"  Binding="{Binding H_TotalBaseOutQty, Converter={StaticResource NumberConverter} }" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                        <DataGridTextColumn x:Name="H_TotalAdd1OutRoll" MinWidth="80" Width="*"  Binding="{Binding H_TotalAdd1OutRoll, Converter={StaticResource NumberConverter}}" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                        <DataGridTextColumn x:Name="H_TotalAdd1OutQty" MinWidth="80" Width="*"  Binding="{Binding H_TotalAdd1OutQty, Converter={StaticResource NumberConverter} }" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                        <DataGridTextColumn x:Name="H_TotalAdd2OutRoll" MinWidth="80" Width="*"  Binding="{Binding H_TotalAdd2OutRoll, Converter={StaticResource NumberConverter}}" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                        <DataGridTextColumn x:Name="H_TotalAdd2OutQty" MinWidth="80" Width="*"  Binding="{Binding H_TotalAdd2OutQty, Converter={StaticResource NumberConverter} }" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <DataGrid x:Name="dgdMonthHStuffTotal" Grid.Row="2" Grid.Column="1" HeadersVisibility="None"  BorderThickness="0" Padding="0"  BorderBrush="{x:Null}" Margin="0" >
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn x:Name="H_TotalStuffRoll" MinWidth="80" Width="*" Binding="{Binding H_TotalStuffRoll, Converter={StaticResource NumberConverter}}" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                        <DataGridTextColumn x:Name="H_TotalStuffQty" MinWidth="80" Width="*"  Binding="{Binding H_TotalStuffQty, Converter={StaticResource NumberConverter} }" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                        <DataGridTextColumn x:Name="H_TotalBaseStuffRoll" MinWidth="80" Width="*" Binding="{Binding H_TotalBaseStuffRoll, Converter={StaticResource NumberConverter}}" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                        <DataGridTextColumn x:Name="H_TotalBaseStuffQty" MinWidth="80" Width="*"  Binding="{Binding H_TotalBaseStuffQty, Converter={StaticResource NumberConverter} }" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                        <DataGridTextColumn x:Name="H_TotalAdd1StuffRoll" MinWidth="80" Width="*" Binding="{Binding H_TotalAdd1StuffRoll, Converter={StaticResource NumberConverter}}" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                        <DataGridTextColumn x:Name="H_TotalAdd1StuffQty" MinWidth="80" Width="*"  Binding="{Binding H_TotalAdd1StuffQty, Converter={StaticResource NumberConverter} }" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                        <DataGridTextColumn x:Name="H_TotalAdd2StuffRoll" MinWidth="80" Width="*" Binding="{Binding H_TotalAdd2StuffRoll, Converter={StaticResource NumberConverter}}" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                        <DataGridTextColumn x:Name="H_TotalAdd2StuffQty" MinWidth="80" Width="*"  Binding="{Binding H_TotalAdd2StuffQty, Converter={StaticResource NumberConverter} }" ElementStyle="{DynamicResource DataGridCellCenter}"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
                             </Grid>
-                        </ScrollViewer>
-
-                        <DataGrid x:Name="grdMergeMonth_H" Grid.Row="0" Grid.ColumnSpan="2" Style="{DynamicResource DataGridSet1}">
-                            <DataGrid.Resources>
-                                <Style TargetType="DataGridRow">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding H_ArticleID}" Value="">
-                                            <Setter Property="Background" Value="#D8D8D8"/>
-                                        </DataTrigger>
-
-                                        <DataTrigger Binding="{Binding H_cls}" Value="0">
-                                            <Setter Property="Background" Value="#BDBDBD"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </DataGrid.Resources>
-
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="순서" Binding="{Binding H_NUM}" />
-                                <DataGridTextColumn Header="구분" Binding="{Binding H_Gbn}" />
-                                <DataGridTextColumn Header="거래처" Binding="{Binding H_CustomName}" Width="*"/>
-                                <DataGridTextColumn Header="품번" Binding="{Binding H_BuyerArticleNo}" Width="2.3*"/>
-                                <DataGridTextColumn Header="품명" Binding="{Binding H_Article}" Width="2.3*"/>
-                                <DataGridTextColumn Header="단위" Binding="{Binding H_UnitClssName}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellRight}"/>
-                                <DataGridTextColumn Header="합계점유율" Binding="{Binding H_CustomRate}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellRight}"/>
-                                <DataGridTextColumn Header="합계건수" Binding="{Binding H_roll13}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellRight}"/>
-                                <DataGridTextColumn Header="합계수량" Binding="{Binding H_Qty13}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellRight}"/>
-                                <DataGridTextColumn Header="현재월건수" Binding="{Binding H_roll12}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellRight}"/>
-                                <DataGridTextColumn Header="현재월수량" Binding="{Binding H_Qty12}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellRight}"/>
-                                <DataGridTextColumn Header="한달전건수" Binding="{Binding H_roll11}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellRight}"/>
-                                <DataGridTextColumn Header="한달전수량" Binding="{Binding H_Qty11}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellRight}"/>
-                                <DataGridTextColumn Header="두달전건수" Binding="{Binding H_roll10}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellRight}"/>
-                                <DataGridTextColumn Header="두달전수량" Binding="{Binding H_Qty10}" Width="*"
-                                                    ElementStyle="{StaticResource DataGridCellRight}"/>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                        <DataGrid x:Name="grdTotal4" Grid.Row="1" Grid.ColumnSpan="2" Style="{DynamicResource TotalGridSet2}">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="구분" Binding="{Binding H_Gbn}" Width="70" ElementStyle="{StaticResource DataGridCellCenter}"/>
-                                <DataGridTextColumn Header="합계점유율" Binding="{Binding H_CustomRate}" Width="*" ElementStyle="{StaticResource DataGridCellCenter}"/>
-                                <DataGridTextColumn Header="합계건수" Binding="{Binding H_roll13}" Width="*"       ElementStyle="{StaticResource DataGridCellCenter}"/>
-                                <DataGridTextColumn Header="합계수량" Binding="{Binding H_Qty13}" Width="*"        ElementStyle="{StaticResource DataGridCellCenter}"/>
-                                <DataGridTextColumn Header="현재월건수" Binding="{Binding H_roll12}" Width="*"     ElementStyle="{StaticResource DataGridCellCenter}"/>
-                                <DataGridTextColumn Header="현재월수량" Binding="{Binding H_Qty12}" Width="*"      ElementStyle="{StaticResource DataGridCellCenter}"/>
-                                <DataGridTextColumn Header="한달전건수" Binding="{Binding H_roll11}" Width="*"     ElementStyle="{StaticResource DataGridCellCenter}"/>
-                                <DataGridTextColumn Header="한달전수량" Binding="{Binding H_Qty11}" Width="*"      ElementStyle="{StaticResource DataGridCellCenter}"/>
-                                <DataGridTextColumn Header="두달전건수" Binding="{Binding H_roll10}" Width="*"     ElementStyle="{StaticResource DataGridCellCenter}"/>
-                                <DataGridTextColumn Header="두달전수량" Binding="{Binding H_Qty10}" Width="*"      ElementStyle="{StaticResource DataGridCellCenter}"/>
-                            </DataGrid.Columns>
-                        </DataGrid>
+                        </Grid>
                     </Grid>
+
+                    <!--<Grid>
+          <Grid.RowDefinitions>
+              -->
+                    <!--<RowDefinition Height="auto" />-->
+                    <!--
+              <RowDefinition />
+              -->
+                    <!--<RowDefinition Height="0.1*"/>-->
+                    <!--
+          </Grid.RowDefinitions>
+
+          <DataGrid x:Name="grdMergeMonth_H" IsReadOnly="True" Grid.ColumnSpan="2" Style="{DynamicResource DataGridSet1}"
+                    SizeChanged="DataGrid_SizeChange">
+
+              <DataGrid.Resources>
+                  <Style TargetType="DataGridRow">
+                      <Style.Resources>
+                          <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#3399FF"/>
+                          <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="White"/>
+                          <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="#3399FF" />
+                          <SolidColorBrush x:Key="{x:Static SystemColors.ControlTextBrushKey}" Color="White"/>
+                      </Style.Resources>
+                      <Style.Triggers>
+                          <DataTrigger Binding="{Binding H_Color1}" Value="true">
+                              <Setter Property="Background" Value="#D8D8D8"/>
+                          </DataTrigger>
+
+                          <DataTrigger Binding="{Binding H_Color2}" Value="true">
+                              <Setter Property="Background" Value="#BDBDBD"/>
+                          </DataTrigger>
+                      </Style.Triggers>
+                  </Style>
+              </DataGrid.Resources>
+
+              <DataGrid.Columns>
+                  <DataGridTextColumn Header="순서" Binding="{Binding H_NUM}" />
+                  <DataGridTextColumn Header="구분" Binding="{Binding H_Gbn}" ElementStyle="{StaticResource DataGridCellCenter}"/>
+                  <DataGridTextColumn Header="거래처" Binding="{Binding H_CustomName}" Width="*" ElementStyle="{StaticResource DataGridCellCenter}"/>
+                  <DataGridTextColumn Header="품명" Binding="{Binding H_Article}" Width="2.3*"/>
+                  <DataGridTextColumn Header="단위" Binding="{Binding H_UnitClssName}" Width="*"
+                                      ElementStyle="{StaticResource DataGridCellRight}"/>
+                  <DataGridTextColumn Header="합계건수" Binding="{Binding H_roll13}" Width="*"
+                                      ElementStyle="{StaticResource DataGridCellRight}"/>
+                  <DataGridTextColumn Header="합계수량" Binding="{Binding H_Qty13}" Width="*"
+                                      ElementStyle="{StaticResource DataGridCellRight}"/>
+                  <DataGridTextColumn Header="한달전건수" Binding="{Binding H_roll10}" Width="*"
+                                      ElementStyle="{StaticResource DataGridCellRight}"/>
+                  <DataGridTextColumn Header="한달전수량" Binding="{Binding H_Qty10}" Width="*"
+                                      ElementStyle="{StaticResource DataGridCellRight}"/>
+                  <DataGridTextColumn Header="두달전건수" Binding="{Binding H_roll11}" Width="*"
+                                      ElementStyle="{StaticResource DataGridCellRight}"/>
+                  <DataGridTextColumn Header="두달전수량" Binding="{Binding H_Qty11}" Width="*"
+                                      ElementStyle="{StaticResource DataGridCellRight}"/>
+                  <DataGridTextColumn Header="세달전건수" Binding="{Binding H_roll12}" Width="*"
+                                      ElementStyle="{StaticResource DataGridCellRight}"/>
+                  <DataGridTextColumn Header="세달전수량" Binding="{Binding H_Qty12}" Width="*"
+                                      ElementStyle="{StaticResource DataGridCellRight}"/>
+              </DataGrid.Columns>
+          </DataGrid>
+
+      </Grid>-->
                 </TabItem>
             </TabControl>
         </Grid>
 
         <!-- 화면 하단, 구매거래처 -->
-        <Grid Margin="2" Grid.Column="0" Grid.Row="3">
+        <Grid Margin="2" Grid.Column="0" Grid.Row="2">
             <StackPanel>
                 <TextBlock Text="☞ 품목은 거래처별 품목으로 등록된 품목 List입니다."></TextBlock>
                 <TextBlock x:Name="txtblMessage" Text="☞ 최근 3개월로 집계기간이 고정됩니다."></TextBlock>

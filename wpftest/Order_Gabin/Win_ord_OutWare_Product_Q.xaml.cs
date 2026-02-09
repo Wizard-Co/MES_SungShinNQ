@@ -546,8 +546,10 @@ namespace WizMes_SungShinNQ
                                     OutDate = item["OutDate"].ToString().Substring(4, 2) + "/" + item["OutDate"].ToString().Substring(6, 2),
                                     CustomID = item["CustomID"].ToString(),
                                     KCustom = "거래처 계",
+                                    KCustom_TextAlignment = TextAlignment.Center,
 
                                     OrderNo = "",
+                                    OrderNo_TextAlignment = TextAlignment.Center,
                                     OrderID = item["OrderID"].ToString(),
                                     OutCustom = item["OutCustom"].ToString(),
 
@@ -1005,8 +1007,10 @@ namespace WizMes_SungShinNQ
         public string OutDate { get; set; }
         public string CustomID { get; set; }
         public string KCustom { get; set; }
+        public TextAlignment KCustom_TextAlignment { get; set; } = TextAlignment.Left;
 
         public string OrderNo { get; set; }
+        public TextAlignment OrderNo_TextAlignment { get; set; } = TextAlignment.Left;
         public string OrderID { get; set; }
         public string OutCustom { get; set; }
 

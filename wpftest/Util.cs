@@ -2,15 +2,9 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Net;
 using System.Reflection;
-using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Data;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace WizMes_SungShinNQ
@@ -27,13 +21,18 @@ namespace WizMes_SungShinNQ
             var strArrType = typeof(string[]);
 
             var arrayTypes = new[] { strListType, strArrType };
-            var handledTypes = new[] { typeof(bool), typeof(Int32), typeof(String), typeof(DateTime), typeof(double), typeof(decimal), strListType, strArrType };
+            var handledTypes = new[] { typeof(bool), typeof(bool?), typeof(int), typeof(int?), typeof(string),
+                                       typeof(DateTime), typeof(DateTime?), typeof(double),
+                                       typeof(double?), typeof(decimal), typeof(decimal?), strListType, strArrType };
 
             var validProperties = instance.GetType()
                                           .GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
                                           .Where(prop => handledTypes.Contains(prop.PropertyType))
                                           .Where(prop => prop.GetValue(instance, null) != null)
                                           .ToList();
+
+            if (!validProperties.Any())
+                return string.Empty;
 
             var format = string.Format("{{0,-{0}}} : {{1}}", validProperties.Max(prp => prp.Name.Length));
 

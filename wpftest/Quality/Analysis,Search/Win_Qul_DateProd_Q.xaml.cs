@@ -3,18 +3,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using WizMes_SungShinNQ.PopUP;
 
 namespace WizMes_SungShinNQ
@@ -26,6 +19,8 @@ namespace WizMes_SungShinNQ
     {
         int rowNum = 0;
         Lib lib = new Lib();
+        PlusFinder pf = new PlusFinder();
+
         public Win_Qul_DateProd_Q()
         {
             InitializeComponent();
@@ -33,6 +28,8 @@ namespace WizMes_SungShinNQ
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
+            cboProcessIDSrh.SelectionChanged -= cboProcessIDSrh_SelectionChagned;
+
             Lib.Instance.UiLoading(sender);
 
             //콤보박스 셋팅       
@@ -41,23 +38,14 @@ namespace WizMes_SungShinNQ
             //입고일자 체크
             chkDate.IsChecked = true;
 
-            //공정 체크 해제
-            chkProcess.IsChecked = false;
-
-            //품명 체크 해제
-            chkArticle.IsChecked = false;
-
             //데이트피커 오늘 날짜
             dtpSDate.SelectedDate = DateTime.Today;
             dtpEDate.SelectedDate = DateTime.Today;
 
             //콤보박스 기본값 '전체'
-            cboProcess.SelectedIndex = 0;
+            cboProcessIDSrh.SelectedIndex = 0;
 
-            //조건 박스 false
-            cboProcess.IsEnabled = false;
-            txtArticle.IsEnabled = false;
-            btnPfArticle.IsEnabled = false;
+            cboProcessIDSrh.SelectionChanged += cboProcessIDSrh_SelectionChagned;
         }
 
         //콤보박스 셋팅
@@ -65,9 +53,20 @@ namespace WizMes_SungShinNQ
         {
             //공정
             ObservableCollection<CodeView> cboProcessGroup = ComboBoxUtil.Instance.GetWorkProcess(0, "");
-            this.cboProcess.ItemsSource = cboProcessGroup;
-            this.cboProcess.DisplayMemberPath = "code_name";
-            this.cboProcess.SelectedValuePath = "code_id";
+            var filteredItems = cboProcessGroup.Where(x => !x.code_id.Contains("7100") && !x.code_id.Contains("7101")).ToList();
+            this.cboProcessIDSrh.ItemsSource = filteredItems;
+            this.cboProcessIDSrh.DisplayMemberPath = "code_name";
+            this.cboProcessIDSrh.SelectedValuePath = "code_id";
+            cboProcessIDSrh.SelectedIndex = 0;
+
+
+            ObservableCollection<CodeView> cboMachineGroup = GetMachineByProcessID("");
+            this.cboMachineIDSrh.ItemsSource = cboMachineGroup;
+            this.cboMachineIDSrh.DisplayMemberPath = "code_name";
+            this.cboMachineIDSrh.SelectedValuePath = "code_id";
+            cboMachineIDSrh.SelectedIndex = 0;
+
+
         }
 
         #region 클릭 이벤트
@@ -137,78 +136,71 @@ namespace WizMes_SungShinNQ
 
 
 
-        //공정 라벨 클릭 이벤트
-        private void LblProcess_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            if (chkProcess.IsChecked == true)
-            {
-                chkProcess.IsChecked = false;
-                cboProcess.IsEnabled = false;
-            }
-            else
-            {
-                chkProcess.IsChecked = true;
-                cboProcess.IsEnabled = true;
-            }
-        }
 
-        //공정 체크 이벤트
-        private void ChkProcess_Checked(object sender, RoutedEventArgs e)
-        {
-            cboProcess.IsEnabled = true;
-        }
 
-        //공정 체크 해제 이벤트
-        private void ChkProcess_Unchecked(object sender, RoutedEventArgs e)
-        {
-            cboProcess.IsEnabled = false;
-        }
 
-        //품명 라벨 클릭 이벤트
-        private void LblArticle_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+
+
+        #region 플러스파인더
+
+
+        private void CommonPlusfinder_KeyDown(object sender, KeyEventArgs e)
         {
-            if (chkArticle.IsChecked == true)
+            try
             {
-                chkArticle.IsChecked = false;
-                txtArticle.IsEnabled = false;
-                btnPfArticle.IsEnabled = false;
+                if (e.Key == Key.Enter)
+                {
+                    TextBox txtbox = sender as TextBox;
+                    if (txtbox != null)
+                    {
+                        if (txtbox.Name.Contains("ArticleID"))
+                        {
+                            pf.ReturnCode(txtbox, 77, "");
+
+                        }
+                        else if (txtbox.Name.Contains("BuyerArticleNo"))
+                        {
+                            pf.ReturnCode(txtbox, 76, "");
+                        }
+
+                    }
+                }
             }
-            else
+            catch (Exception ex)
             {
-                chkArticle.IsChecked = true;
-                txtArticle.IsEnabled = true;
-                btnPfArticle.IsEnabled = true;
+                MessageBox.Show("오류 발생, 오류 내용 : " + ex.ToString());
             }
         }
 
-        //품명 체크 이벤트
-        private void ChkArticle_Checked(object sender, RoutedEventArgs e)
+        private void CommonPlusfinder_Click(object sender, RoutedEventArgs e)
         {
-            txtArticle.IsEnabled = true;
-            btnPfArticle.IsEnabled = true;
-        }
 
-        //품명 체크 해제 이벤트
-        private void ChkArticle_Unchecked(object sender, RoutedEventArgs e)
-        {
-            txtArticle.IsEnabled = false;
-            btnPfArticle.IsEnabled = false;
-        }
-
-        //품명 텍스트박스 키다운
-        private void txtArticle_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter)
+            try
             {
-                MainWindow.pf.ReturnCode(txtArticle, 83, txtArticle.Text);
+                TextBox txtbox = Lib.Instance.FindSiblingControl<TextBox>(sender as Button);
+                if (txtbox != null)
+                {
+                    if (txtbox.Name.Contains("ArticleID"))
+                    {
+                        pf.ReturnCode(txtbox, 77, "");
+
+                    }
+                    else if (txtbox.Name.Contains("BuyerArticleNo"))
+                    {
+                        pf.ReturnCode(txtbox, 76, "");
+                    }
+
+                }
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show("오류 발생, 오류 내용 : " + ex.ToString());
+            }
+
         }
 
-        //품명 플러스파인더
-        private void BtnPfArticle_Click(object sender, RoutedEventArgs e)
-        {
-            MainWindow.pf.ReturnCode(txtArticle, 83, txtArticle.Text);
-        }
+        #endregion
+
         #endregion 클릭이벤트, 날짜
 
         #region CRUD 버튼
@@ -216,30 +208,24 @@ namespace WizMes_SungShinNQ
         //검색(조회)
         private void btnSearch_Click(object sender, RoutedEventArgs e)
         {
-            //검색버튼 비활성화
-            btnSearch.IsEnabled = false;
-
-            Dispatcher.BeginInvoke(new Action(() =>
-
+            if(lib.DatePickerCheck(dtpSDate, dtpEDate, chkDate))
             {
-                Thread.Sleep(2000);
-
-                //로직
-                if (CheckData())
-                {
-                    re_Search(rowNum);
-                }
-
-            }), System.Windows.Threading.DispatcherPriority.Background);
+                //검색버튼 비활성화
+                btnSearch.IsEnabled = false;
 
 
+                    //로직
+                    if (CheckData())
+                    {
+                        re_Search(rowNum);
+                    }
 
-            Dispatcher.BeginInvoke(new Action(() =>
-
-            {
+         
                 btnSearch.IsEnabled = true;
 
-            }), System.Windows.Threading.DispatcherPriority.Background);
+
+            }
+  
         }
 
         //닫기
@@ -319,27 +305,32 @@ namespace WizMes_SungShinNQ
         //조회
         private void FillGrid()
         {
-            if (dgdMain.Items.Count > 0)
-            {
-                dgdMain.Items.Clear();
-            }
+            dgdMain.ItemsSource = null;
+            dgdTotal.Items.Clear();
 
             try
-            {
+            {             
+
                 Dictionary<string, object> sqlParameter = new Dictionary<string, object>();
-                dgdTotal.Items.Clear();
                 sqlParameter.Clear();
 
                 sqlParameter.Add("chkDate", chkDate.IsChecked == true ? 1 : 0);
-                sqlParameter.Add("sDate", chkDate.IsChecked == true ? dtpSDate.SelectedDate.Value.ToString("yyyyMMdd") : "");
-                sqlParameter.Add("eDate", chkDate.IsChecked == true ? dtpEDate.SelectedDate.Value.ToString("yyyyMMdd") : "");
-                sqlParameter.Add("chkProcess", chkProcess.IsChecked == true ? 1 : 0);
-                sqlParameter.Add("ProcessID", chkProcess.IsChecked == true ? cboProcess.SelectedValue.ToString() : "");
+                sqlParameter.Add("sDate", chkDate.IsChecked == true ? dtpSDate.SelectedDate?.ToString("yyyyMMdd") : string.Empty);
+                sqlParameter.Add("eDate", chkDate.IsChecked == true ? dtpEDate.SelectedDate?.ToString("yyyyMMdd") : string.Empty);
 
-                sqlParameter.Add("ChkArticle", 0); //chkArticle.IsChecked == true ? 1 : 0);
-                sqlParameter.Add("ArticleID", ""); // chkArticle.IsChecked == true ? txtArticle.Tag.ToString() : "");
-                sqlParameter.Add("BuyerArticleNo", chkArticle.IsChecked == true && !txtArticle.Text.Trim().Equals("") ?  txtArticle.Text : ""); //@Escape
+                sqlParameter.Add("chkProcessID", chkProcessIDSrh.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("ProcessID", chkProcessIDSrh.IsChecked == true ? cboProcessIDSrh.SelectedValue?.ToString() ?? string.Empty : string.Empty);
 
+                sqlParameter.Add("chkArticleID", chkArticleIDSrh.IsChecked == true ? 1:0);
+                sqlParameter.Add("ArticleID", chkArticleIDSrh.IsChecked == true? txtArticleIDSrh.Tag?.ToString() ?? string.Empty : string.Empty);
+
+                sqlParameter.Add("chkBuyerArticleNo", chkBuyerArticleNoSrh.IsChecked == true ? 1:0);
+                sqlParameter.Add("BuyerArticleNo", chkBuyerArticleNoSrh.IsChecked == true ? txtBuyerArticleNoSrh.Tag?.ToString() ?? string.Empty : string.Empty);
+
+                sqlParameter.Add("chkMachineID", chkMachineIDSrh.IsChecked == true ? 1 : 0);
+                sqlParameter.Add("MachineID", chkMachineIDSrh.IsChecked == true ? cboMachineIDSrh.SelectedValue?.ToString() ?? string.Empty : string.Empty);
+
+                sqlParameter.Add("chkExceptInitialDefect", chkExceptInitialDefectSrh.IsChecked == true ? 1 : 0);
 
                 DataSet ds = DataStore.Instance.ProcedureToDataSet("xp_Inspect_sInspectDefect", sqlParameter, false);
 
@@ -356,57 +347,60 @@ namespace WizMes_SungShinNQ
                     {
                         DataRowCollection drc = dt.Rows;
 
-                        int i = 0;
+                        int i = 0;             
+              
+
+                        List<Win_Qul_DateProd_Q_CodeView> lstRows = new List<Win_Qul_DateProd_Q_CodeView>();
+                        Win_Qul_DateProd_Q_CodeView_Total total = new Win_Qul_DateProd_Q_CodeView_Total();
+
+
                         foreach (DataRow dr in drc)
                         {
                             i++;
                             var DefectInfo = new Win_Qul_DateProd_Q_CodeView()
                             {
                                 Num = i,
-                                cls = dr["cls"].ToString(),
-                                ScanDate = dr["ScanDate"].ToString(),
+                                gbn = dr["gbn"].ToString(),
+                                ScanDate = lib.DateTypeHyphen(dr["ScanDate"].ToString()),
                                 ProcessID = dr["ProcessID"].ToString(),
                                 Process = dr["Process"].ToString(),
-                                BuyerModelID = dr["BuyerModelID"].ToString(),
+                                //BuyerModelID = dr["BuyerModelID"].ToString(),
                                 ArticleID = dr["ArticleID"].ToString(),
                                 Article = dr["Article"].ToString(),
+                                Spec = dr["Spec"].ToString(),
                                 BuyerArticleNo = dr["BuyerArticleNo"].ToString(),
                                 DefectID = dr["DefectID"].ToString(),
                                 KDefect = dr["KDefect"].ToString(),
-                                DefectQty = stringFormatN0(dr["DefectQty"]),
+                                DefectQty = Lib.Instance.ToDecimal(dr["DefectQty"]),
                                 WorkPersonID = dr["WorkPersonID"].ToString(),
-                                WorkPersonName = dr["WorkPersonName"].ToString()
+                                WorkPersonName = dr["WorkPersonName"].ToString(),
+                                WorkQty = Lib.Instance.ToDecimal(dr["WorkQty"]),
+                                MCNAME = dr["MCNAME"].ToString()
+                                //LabelID = dr["LabelID"].ToString(),
+                                //ChildLabelID = dr["ChildLabelID"].ToString()
                             };
 
-                            if ((DefectInfo.ScanDate != "" && DefectInfo.ScanDate != null))
+                            if(DefectInfo.gbn.Equals("1") || DefectInfo.Equals("2"))
                             {
-                                  DefectInfo.ScanDate = DefectInfo.ScanDate.ToString().Substring(0, 4) + "-"
-                                + DefectInfo.ScanDate.ToString().Substring(4, 2) + "-"
-                                + DefectInfo.ScanDate.ToString().Substring(6, 2);
+                                total.TotalCount++;
+                                total.TotalDefectQty += DefectInfo.DefectQty;
+
+                                if (DefectInfo.KDefect.Contains("초도"))
+                                    total.TotalInitialDefectQty += DefectInfo.DefectQty;
+
+                                lstRows.Add(DefectInfo);
+                            }
+                            else if (DefectInfo.gbn.Equals("3"))
+                            {
+                                DefectInfo.Color1 = true;
+                                lstRows.Add(DefectInfo);
                             }
 
-                            
-
-                            if (DefectInfo.DefectQty.Equals("") && DefectInfo.cls.Equals("9"))
-                            {
-                                MessageBox.Show("조회결과가 없습니다.");
-                                return;
-                            }
-
-                            if (DefectInfo.cls.Equals("9"))
-                            {
-                                
-                                DefectInfo.ScanDate = "총 발생수량";
-                                //DefectInfo.ColorLightLightGray = "false";
-                                DefectInfo.ColorGold = "true";
-                                dgdTotal.Items.Add(DefectInfo);
-                            }
-                            else
-                            {
-                                dgdMain.Items.Add(DefectInfo);
-                            }
-                            
                         }
+
+                        dgdMain.ItemsSource = lstRows;                      
+                        dgdTotal.Items.Add(total);
+
                     }
                 }
             }
@@ -425,22 +419,14 @@ namespace WizMes_SungShinNQ
         {
             bool flag = true;
 
-            if (chkArticle.IsChecked == true)
-            {
-                if(txtArticle.Text == "")
-                {
-                    MessageBox.Show("품번 선택이 되지 않았습니다. 체크를 해제하거나 품번을 선택하고 검색해 주세요.");
-                    flag = false;
-                    return flag;
-                }
-            }
+     
 
             return flag;
         }
 
 
         #endregion 조회관련(Fillgrid)
-        
+
         #region 기타 메소드 
         //특수문자 포함 검색
         private string Escape(string str)
@@ -489,6 +475,98 @@ namespace WizMes_SungShinNQ
                 dgs.FontSize = dgs.FontSize * c;
             }
         }
+
+        private void CommonControl_Click(object sender, MouseButtonEventArgs e)
+        {
+            lib.CommonControl_Click(sender, e);
+        }
+
+        private void CommonControl_Click(object sender, RoutedEventArgs e)
+        {
+            lib.CommonControl_Click(sender, e);
+        }
+
+        private void cboProcessIDSrh_SelectionChagned(object sender, SelectionChangedEventArgs e)
+        {
+            if (cboProcessIDSrh.SelectedValue != null)
+            {
+                ObservableCollection<CodeView> ovcMachine = GetMachineByProcessID(cboProcessIDSrh.SelectedValue?.ToString() ?? string.Empty);
+                var filteredMachines = ovcMachine.Where(x => !x.code_id.Contains("7100") && !x.code_id.Contains("7101")).ToList();
+                this.cboMachineIDSrh.ItemsSource = filteredMachines;
+                this.cboMachineIDSrh.DisplayMemberPath = "code_name";
+                this.cboMachineIDSrh.SelectedValuePath = "code_id";
+
+                if (filteredMachines.Count > 0)
+                {
+                    cboMachineIDSrh.SelectedIndex = 0;
+                    cboMachineIDSrh.IsEnabled = true;
+                    chkMachineIDSrh.IsEnabled = true;
+                }
+                else
+                {
+                    cboMachineIDSrh.IsEnabled = false;
+                    chkMachineIDSrh.IsChecked = false;
+                    chkMachineIDSrh.IsEnabled = false;
+                }
+            }
+        }
+
+        private void Grid_MouseEnter(object sender, MouseEventArgs e)
+        {
+            if (cboMachineIDSrh.Items.Count == 0)
+            {
+                Lib.Instance.ShowTooltipMessage(cboMachineIDSrh, "등록된 호기가 없습니다.",
+                    MessageBoxImage.Information, System.Windows.Controls.Primitives.PlacementMode.Top, 1.3);
+            }
+        }
+
+        private void Grid_MouseLeave(object sender, MouseEventArgs e)
+        {
+            Lib.Instance.CloseToolTip();
+        }
+
+        /// <summary>
+        /// 호기ID 가져오기
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public ObservableCollection<CodeView> GetMachineByProcessID(string value)
+        {
+            ObservableCollection<CodeView> ovcMachine = new ObservableCollection<CodeView>();
+
+            Dictionary<string, object> sqlParameter = new Dictionary<string, object>();
+            sqlParameter.Add("sProcessID", value);
+
+            DataSet ds = DataStore.Instance.ProcedureToDataSet("xp_prd_sMachineForComboBoxAndUsing", sqlParameter, false);
+
+            if (ds != null && ds.Tables.Count > 0)
+            {
+                DataTable dt = ds.Tables[0];
+                if (dt.Rows.Count > 0)
+                {
+                    CodeView CV = new CodeView();
+                    CV.code_id = "";
+                    CV.code_name = "전체";
+                    ovcMachine.Add(CV);
+
+                    DataRowCollection drc = dt.Rows;
+
+                    foreach (DataRow dr in drc)
+                    {
+                        CodeView mCodeView = new CodeView()
+                        {
+                            code_id = dr["Code"].ToString().Trim(),
+                            code_name = dr["Name"].ToString().Trim()
+                        };
+
+                        if(!mCodeView.code_id.Contains("7100") || !mCodeView.code_id.Contains("7101"))
+                            ovcMachine.Add(mCodeView);
+                    }
+                }
+            }
+
+            return ovcMachine;
+        }
     }
 
     #region 생성자들(CodeView)
@@ -496,23 +574,36 @@ namespace WizMes_SungShinNQ
     class Win_Qul_DateProd_Q_CodeView : BaseView
     {
         public int Num { get; set; }
-        public string cls { get; set; }
+        public string gbn { get; set; }
         public string ScanDate { get; set; }
         public string ProcessID { get; set; }
         public string Process { get; set; }
         public string BuyerModelID { get; set; }
         public string ArticleID { get; set; }
         public string Article { get; set; }
+        public string Spec { get; set; }
         public string BuyerArticleNo { get; set; }
         public string DefectID { get; set; }
         public string KDefect { get; set; }
-        public string DefectQty { get; set; }
+        public decimal? DefectQty { get; set; }
         public string WorkPersonID { get; set; }
         public string WorkPersonName { get; set; }
+        public decimal? WorkQty { get; set; }
+        public string MCNAME { get; set; }
 
-        public string ColorLightLightGray { get; set; }
+        //public string LabelID { get; set; }
+        //public string ChildLabelID { get; set; }
+        //public string ColorLightLightGray { get; set; }
+        //public string ColorGold { get; set; }
+        public bool Color1 { get; set; } = false;
+        public bool Color2 { get; set; } = false;
+    }
 
-        public string ColorGold { get; set; }
+    public class Win_Qul_DateProd_Q_CodeView_Total : BaseView
+    {
+        public decimal? TotalCount { get; set; } = 0m;
+        public decimal? TotalDefectQty { get; set; } = 0m;
+        public decimal? TotalInitialDefectQty { get; set; } = 0m;
     }
 
     #endregion 생성자들(CodeView)

@@ -348,12 +348,12 @@ namespace WizMes_SungShinNQ
         private void txtBuyerArticleNoSrh_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
-                MainWindow.pf.ReturnCode(txtBuyerArticleNoSrh, 7071, "");
+                MainWindow.pf.ReturnCode(txtBuyerArticleNoSrh, 76, "");
         }
         //검색조건 - 품번 - 버튼 클릭
         private void btnBuyerArticleNoSrh_KeyDown(object sender, RoutedEventArgs e)
         {
-              MainWindow.pf.ReturnCode(txtBuyerArticleNoSrh, 7071, "");
+              MainWindow.pf.ReturnCode(txtBuyerArticleNoSrh, 76, "");
         }
 
 
@@ -843,7 +843,7 @@ namespace WizMes_SungShinNQ
                                 OrderID = dr["OrderID"].ToString(),
                                 OrderNo = dr["OrderNo"].ToString(),
                                 KCustom = dr["KCustom"].ToString(),
-                                //BuyerArticleNo = dr["BuyerArticleNo"].ToString(),
+                                BuyerArticleNo = dr["BuyerArticleNo"].ToString(),
                                 Article = dr["Article"].ToString(),
                                 Spec = dr["Spec"].ToString(),
                                 BuyerModel = dr["BuyerModel"].ToString(),

@@ -2295,6 +2295,7 @@ namespace WizMes_SungShinNQ
                         sqlParameter.Add("DvlyCustomID", outData.DvlyCustomID ?? outData.CustomID);
                         sqlParameter.Add("LossRate", outData.LossRate);
                         sqlParameter.Add("LossQty", outData.LossQty);
+                        sqlParameter.Add("ArticleID", outData.ArticleID);
 
                         if (strFlag.Equals("I"))
                         {
@@ -2568,6 +2569,7 @@ namespace WizMes_SungShinNQ
                         LabelID = checkedItem.LabelID,
                         BoxQty = checkedItem.BoxQty,
                         OutQty = checkedItem.BoxQty,
+                        OutRoll = checkedItem.OutRoll,
                         OriginOutQty = checkedItem.BoxQty,
                         FixedOutQty = checkedItem.FixedOutQty,
                         OutQtySubulFromFn = checkedItem.OutQtySubulFromFn,
@@ -2626,6 +2628,7 @@ namespace WizMes_SungShinNQ
                         LabelID = SelectedItems.LabelID,
                         BoxQty = SelectedItems.OutQty,
                         OutQty = SelectedItems.OutQty,
+                        OutRoll = SelectedItems.OutRoll,
                         OriginOutQty = SelectedItems.OriginOutQty,
                         FixedOutQty = SelectedItems.FixedOutQty,
                         Article = SelectedItems.Article,

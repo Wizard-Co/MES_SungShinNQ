@@ -44,7 +44,7 @@
                         </Viewbox>
                     </StackPanel>
                 </Label>
-                <DatePicker x:Name="dtpSDate" Grid.Column="1" Padding="0" Style="{DynamicResource DatePickerMonthYearSearch_Q}" IsEnabled="true" />
+                <DatePicker x:Name="dtpSDate" Grid.Column="1" Padding="0" Style="{DynamicResource DatePickerMonthYearSearch}" IsEnabled="true" />
             </Grid>
 
             <!--전년, 금년, 최근6개월, 금월-->
@@ -68,46 +68,73 @@
                     <ColumnDefinition Width="95*" />
                     <ColumnDefinition Width="20*" />
                 </Grid.ColumnDefinitions>
-                <Label x:Name="lblArticle" Grid.Column="0" Style="{DynamicResource LabelSearch_Q}"
-                       MouseLeftButtonUp="lblArticle_MouseLeftButtonUp">
+                <Label Grid.Column="0" Style="{DynamicResource LabelSearch_Q}"
+                       MouseLeftButtonUp="CommonControl_Click">
                     <StackPanel Style="{DynamicResource StackPanelInLabel_Q}">
                         <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight_Q}">
-                            <CheckBox x:Name="chkArticle" Checked="chkArticle_Checked" Unchecked="chkArticle_Unchecked"/>
+                            <CheckBox x:Name="chkBuyerArticleNoSrh" Click="CommonControl_Click"/>
                         </Viewbox>
                         <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight_Q}">
                             <TextBlock Text="품       번" Style="{DynamicResource TextBlockInViewBoxSearch_Q}"/>
                         </Viewbox>
                     </StackPanel>
                 </Label>
-                <TextBox x:Name="txtArticle" Grid.Column="1" Background="White" Style="{DynamicResource TextBoxSearch_Q}"
-                         Keyboard.KeyDown="txtArticle_KeyDown" IsEnabled="False"/>
-                <Button x:Name="btnPfArticle" Grid.Column="2"
-                        Click="btnPfArticle_Click" IsEnabled="False">
+                <TextBox x:Name="txtBuyerArticleNoSrh" Grid.Column="1" Background="White" Style="{DynamicResource TextBoxSearch}"
+                         KeyDown="CommonPlusfinder_KeyDown" IsEnabled="False"/>
+                <Button x:Name="btnBuyerArticleNoSrh" Grid.Column="2"
+                        Click="CommonPlusfinder_Click" IsEnabled="False">
                     <Image Source="{DynamicResource btiPlusFind}" />
                 </Button>
             </Grid>
-            <Grid Grid.Column="2" Grid.Row="1" Visibility="Hidden">
+
+            <!--품명-->
+            <Grid Grid.Column="2" Grid.Row="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="95*" />
                     <ColumnDefinition Width="95*" />
                     <ColumnDefinition Width="20*" />
                 </Grid.ColumnDefinitions>
-                <Label x:Name="lblProductGroup" Grid.Column="0" Style="{DynamicResource LabelSearch_Q}"
-                       MouseLeftButtonUp="LblProductGroup_MouseLeftButtonUp">
+                <Label Grid.Column="0" Style="{DynamicResource LabelSearch_Q}"  MouseLeftButtonUp="CommonControl_Click">
                     <StackPanel Style="{DynamicResource StackPanelInLabel_Q}">
                         <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight_Q}">
-                            <CheckBox x:Name="chkProductGroup"
-                                      Checked="ChkProductGroup_Checked" Unchecked="ChkProductGroup_Unchecked"/>
+                            <CheckBox x:Name="chkArticleIDSrh" Click="CommonControl_Click"/>
                         </Viewbox>
                         <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight_Q}">
-                            <TextBlock Text="제 품 그 룹" Style="{DynamicResource TextBlockInViewBoxSearch_Q}"/>
+                            <TextBlock Text="품       명" Style="{DynamicResource TextBlockInViewBoxSearch_Q}"/>
                         </Viewbox>
                     </StackPanel>
                 </Label>
-                <ComboBox x:Name="cboProductGrpID" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Padding="0" Visibility="Visible" Style="{DynamicResource ComboBoxSearchString_Q}"/>
+                <TextBox x:Name="txtArticleIDSrh" Grid.Column="1" Background="White" Style="{DynamicResource TextBoxSearch}"
+                         KeyDown="CommonPlusfinder_KeyDown" IsEnabled="False"/>
+                <Button x:Name="btnPfArticle" Grid.Column="2"
+                        Click="CommonPlusfinder_Click" IsEnabled="False">
+                    <Image Source="{DynamicResource btiPlusFind}" />
+                </Button>
+            </Grid>            
+                  
 
+            <!--제품그룹-->
+            <Grid Grid.Column="3" Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="95*" />
+                    <ColumnDefinition Width="95*" />
+                    <ColumnDefinition Width="20*" />
+                </Grid.ColumnDefinitions>
+                <Label Grid.Column="0" Style="{DynamicResource LabelSearch_Q}"   MouseLeftButtonUp="CommonControl_Click">
+                    <StackPanel Style="{DynamicResource StackPanelInLabel_Q}">
+                        <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight_Q}">
+                            <CheckBox x:Name="chkProductGrpIDSrh" Click="CommonControl_Click"/>
+                        </Viewbox>
+                        <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight_Q}">
+                            <TextBlock Text=" 제품그룹" Style="{DynamicResource TextBlockInViewBoxSearch_Q}"/>
+                        </Viewbox>
+                    </StackPanel>
+                </Label>
+                <ComboBox x:Name="cboProductGrpIDSrh" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Padding="0" Visibility="Visible" Style="{DynamicResource ComboBoxSearchString_Q}"/>
             </Grid>
-            <Grid Grid.Column="2" Grid.Row="1">
+            
+            <!--불량발생단계-->
+            <Grid Grid.Column="3" Grid.Row="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="95*" />
                     <ColumnDefinition Width="95*" />
@@ -120,12 +147,13 @@
                             Checked="chkDefectOccurStep_Checked" Unchecked="chkDefectOccurStep_Unchecked" Width="16"/>
                         </Viewbox>
                         <Viewbox Style="{DynamicResource ViewBoxSetMaxMinHeight_Q}">
-                            <TextBlock Text=" 불량발생단계" Margin="0"/>
+                            <TextBlock Text=" 발생단계" Margin="0"/>
                         </Viewbox>
                     </StackPanel>
                 </Label>
                 <ComboBox x:Name="cboOccurStepSrh" Grid.Column="1" Background="White" Grid.ColumnSpan="2" Style="{DynamicResource ComboBoxSearchString_Q}" IsEnabled="True"/>
             </Grid>
+            
             <!--공정/자주,  출하샘플/출하전수-->
             <Grid Grid.Column="2" Grid.Row="3" Grid.ColumnSpan="2" Visibility="Hidden">
                 <Grid.ColumnDefinitions>

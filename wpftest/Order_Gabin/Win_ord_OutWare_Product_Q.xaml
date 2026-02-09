@@ -61,10 +61,10 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <Button x:Name="btnLastMonth" Grid.Column="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Content="전월" Margin="1" Click="btnLastMonth_Click"/>
-                    <Button x:Name="btnThisMonth" Grid.Column="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Content="금월" Margin="1" Click="btnThisMonth_Click" />
-                    <Button x:Name="btnYesterDay" Grid.Column="2" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Content="전일" Margin="1" Click="btnYesterDay_Click"/>
-                    <Button x:Name="btnToday" Grid.Column="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Content="금일" Margin="1" Click="btnToday_Click"/>
+                    <Button x:Name="btnLastMonth" Grid.Column="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Content="전월"  Click="btnLastMonth_Click"/>
+                    <Button x:Name="btnThisMonth" Grid.Column="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Content="금월"  Click="btnThisMonth_Click" />
+                    <Button x:Name="btnYesterDay" Grid.Column="2" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Content="전일"  Click="btnYesterDay_Click"/>
+                    <Button x:Name="btnToday" Grid.Column="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Content="금일"  Click="btnToday_Click"/>
                 </Grid>
             </Grid>
 
@@ -235,7 +235,7 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="52"/>
                 </Grid.RowDefinitions>
-            <DataGrid x:Name="dgdOutware" Style="{DynamicResource DataGridSet1}" Grid.Row="0">
+            <DataGrid x:Name="dgdOutware" Style="{DynamicResource DataGridSet1}" HeadersVisibility="Column" Grid.Row="0">
                 <DataGrid.RowStyle>
                     <Style TargetType="DataGridRow">
                         <Style.Triggers>
@@ -254,8 +254,15 @@
                                         ElementStyle="{StaticResource DataGridCellCenter}"/>
                     <DataGridTextColumn Header="출고일자" Width="auto" MinWidth="60" Binding="{Binding Path=OutDate}"
                                         ElementStyle="{StaticResource DataGridCellCenter}"/>
-                    <DataGridTextColumn Header="출고처명" Width="auto" MinWidth="130" Binding="{Binding Path=KCustom}" />
-                    <DataGridTextColumn Header="품번" Width="auto" MinWidth="120" Binding="{Binding Path=BuyerArticleNo}"/>
+                        <DataGridTextColumn Header="출고처명" Width="auto" MinWidth="130" Binding="{Binding Path=KCustom}">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="TextAlignment" Value="{Binding KCustom_TextAlignment}" />
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="품번" Width="auto" MinWidth="120" Binding="{Binding Path=BuyerArticleNo}"/>
                     <DataGridTextColumn Header="품명" Width="auto" MinWidth="120" Binding="{Binding Path=Article}"/>
                     <DataGridTextColumn Header="Order NO" Width="auto" MinWidth="70" Binding="{Binding Path=OrderNo}" >
                         <DataGridTextColumn.ElementStyle>
@@ -265,7 +272,9 @@
                                         <Setter Property="Background" Value="#EAEAEA" />
                                     </Trigger>
                                 </Style.Triggers>
-                            </Style>
+                                    <Setter Property="TextAlignment" Value="{Binding OrderNo_TextAlignment}"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                </Style>
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
                     <DataGridTextColumn Header="출고구분" Width="auto" MinWidth="90" Binding="{Binding Path=OutClssname}"
@@ -288,7 +297,7 @@
                                         ElementStyle="{StaticResource DataGridCellRight}"/>
                     <DataGridTextColumn Header="합계금액" MaxWidth="0" Binding="{Binding Path=TotAmount}"
                                         ElementStyle="{StaticResource DataGridCellRight}"/>
-                    <DataGridTextColumn Header="비고" Width="auto" MinWidth="110" Binding="{Binding Path=Remark}" />
+                    <DataGridTextColumn Header="비고" Width="auto" MinWidth="110" Binding="{Binding Path=Remark}" ElementStyle="{StaticResource DataGridCellLeft}"/>
                     <DataGridTextColumn Header="출고번호" Width="auto" MinWidth="110"  Binding="{Binding Path=OutwareID}"
                                         ElementStyle="{StaticResource DataGridCellCenter}"/>
                     <DataGridTextColumn Header="깊이" MaxWidth="0" Binding="{Binding Path=Depth}"
@@ -296,7 +305,7 @@
                 </DataGrid.Columns>
 
             </DataGrid>
-            <DataGrid x:Name="dgdTotal" Style="{DynamicResource TotalGridSet1}" Grid.Row="1">
+            <DataGrid x:Name="dgdTotal" Style="{DynamicResource DataGridSet1}" Grid.Row="1" HeadersVisibility="Column">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="" Width="50" Binding="{Binding Path=OutDate}"     ElementStyle="{StaticResource DataGridCellCenter}"/>
                     <DataGridTextColumn Header="건수" Width="*"  Binding="{Binding Path=OutRoll}"         ElementStyle="{StaticResource DataGridCellCenter}"/>
