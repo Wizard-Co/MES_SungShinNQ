@@ -260,7 +260,7 @@
                 </Grid>
 
                 <!-- 인쇄버튼 -->
-                <Grid Grid.Column="3" Grid.Row="2" Visibility="Hidden">
+                <Grid Grid.Column="3" Grid.Row="2">
                     <Button x:Name="btnPrint" Click="btnPrint_Click"   Margin="1" >
                         <StackPanel Orientation="Horizontal">
                             <Image Source="{DynamicResource btiPrint}" Style="{DynamicResource imgSize}" VerticalAlignment="Center"/>
@@ -348,7 +348,7 @@
                         <DataGridTextColumn Header="출고량" Binding="{Binding OutQty}" ElementStyle="{StaticResource DataGridCellRight}"/>
                         <DataGridTextColumn Header="수주거래처" Binding="{Binding KCustom}" Visibility="Hidden"/>
                         <DataGridTextColumn Header="차종" Binding="{Binding BuyerModel}" ElementStyle="{StaticResource DataGridCellCenter}" Visibility="Hidden"/>
-                        <DataGridTextColumn Header="비고" Binding="{Binding Remark}"/>
+                        <DataGridTextColumn Header="비고" Binding="{Binding Remark}" ElementStyle="{StaticResource DataGridCellRight}"/>
 
 
                         <DataGridTextColumn Header="품명코드" Binding="{Binding ArticleID}" ElementStyle="{StaticResource DataGridCellCenter}" Visibility="Hidden"/>
@@ -560,6 +560,9 @@
                         <ToggleButton x:Name="btnCustomerLabelScanYN" Grid.Column="4" Grid.Row="7" Click="btnCustomerLabelScanYN_Click" Visibility="Hidden">
                             <TextBlock Text="고객라벨 스캔" Margin="-2"/>
                         </ToggleButton>
+
+                        <TextBlock x:Name="txtUnitPrice" Text="{Binding UnitPrice}" Visibility="Hidden"/>
+                        <TextBlock x:Name="txtUnitPrice_Copy"  Visibility="Hidden"/>
                     </Grid>
                 </GroupBox>
 

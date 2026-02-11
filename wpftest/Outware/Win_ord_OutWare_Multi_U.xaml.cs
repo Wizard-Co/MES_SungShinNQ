@@ -1185,6 +1185,7 @@ namespace WizMes_SungShinNQ
                     pastesheet.Cells[currentPageStartRow + 5, 7] = mainItem.KCustom;
                     pastesheet.Cells[currentPageStartRow + 7, 7] = $"{mainItem.Address1}\n{mainItem.Address2}";
                     pastesheet.Cells[currentPageStartRow + 9, 7] = mainItem.Chief;
+                    pastesheet.Cells[currentPageStartRow + 24, 5] = mainItem.Amount;
 
                 }
 
@@ -1255,6 +1256,7 @@ namespace WizMes_SungShinNQ
                         pastesheet.Cells[insertStartRow + row + j, 3] = mainItem.OutDate?.ToString("MM");
                         pastesheet.Cells[insertStartRow + row + j, 4] = mainItem.OutDate?.ToString("dd");
                         pastesheet.Cells[insertStartRow + row + j, 5] = subItem.Article;
+                        pastesheet.Cells[insertStartRow + row + j, 11] = mainItem.BuyerArticleNo;
                         pastesheet.Cells[insertStartRow + row + j, 16] = subItem.OutQty;
                         pastesheet.Cells[insertStartRow + row + j, 18] = subItem.UnitPrice;
                         pastesheet.Cells[insertStartRow + row + j, 23] = subItem.OutQty * subItem.UnitPrice;
@@ -1629,6 +1631,13 @@ namespace WizMes_SungShinNQ
             {
                 Win_ord_OutWare_Multi_U_CodeView MainData = this.DataContext as Win_ord_OutWare_Multi_U_CodeView;
                 Win_ord_OutWare_Multi_U_dgdRight_CodeView rowData = txtbox.DataContext as Win_ord_OutWare_Multi_U_dgdRight_CodeView;
+
+                if (string.IsNullOrWhiteSpace(rowData.LabelID))
+                {
+                    SumScanQty();
+                    return;
+                }
+
                 var dgdLeftOriginInfo = new Dictionary<string, Win_ord_OutWare_Multi_U_dgdLEFT_CodeView>();
                 decimal boxQty = GetBoxQty(rowData.LabelID);
                 //decimal boxQty = strFlag.Equals("I") ? GetBoxQty(rowData.LabelID) : GetBoxQty(rowData.LabelID) + GetoutwareIDQty(MainData.OutWareID,rowData.LabelID) ;
@@ -1714,6 +1723,13 @@ namespace WizMes_SungShinNQ
                 {
                     Win_ord_OutWare_Multi_U_CodeView MainData = this.DataContext as Win_ord_OutWare_Multi_U_CodeView;
                     Win_ord_OutWare_Multi_U_dgdRight_CodeView rowData = txtbox.DataContext as Win_ord_OutWare_Multi_U_dgdRight_CodeView;
+
+                    if (string.IsNullOrWhiteSpace(rowData.LabelID))
+                    {
+                        SumScanQty();
+                        return;
+                    }
+
                     var dgdLeftOriginInfo = new Dictionary<string, Win_ord_OutWare_Multi_U_dgdLEFT_CodeView>();
                     decimal boxQty = GetBoxQty(rowData.LabelID);
                     //decimal boxQty = strFlag.Equals("I") ? GetBoxQty(rowData.LabelID) : GetBoxQty(rowData.LabelID) + GetoutwareIDQty(MainData.OutWareID, rowData.LabelID);
@@ -2138,6 +2154,11 @@ namespace WizMes_SungShinNQ
                                 OutQty = lib.RemoveComma(stringFormatN0(dr["OutQty"]), 0m),
                                 FromLocID = dr["FromLocID"].ToString(),
                                 Remark = dr["Remark"].ToString(),
+                                Address1 = dr["Address1"].ToString(),
+                                Address2 = dr["Address2"].ToString(),
+                                Chief = dr["Chief"].ToString(),
+                                CustomNo = dr["CustomNo"].ToString(),
+                                Amount = Lib.Instance.RemoveComma(dr["Amount"].ToString(), 0)
                             };
 
                             dgdOutware.Items.Add(OutwareInfo);
@@ -2358,17 +2379,20 @@ namespace WizMes_SungShinNQ
                             sqlParameter.Add("OrderSeq", subRow.OrderSeq);
                             sqlParameter.Add("OutSubSeq", index + 1);
                             sqlParameter.Add("LineSeq", 0);
+
                             sqlParameter.Add("LineSubSeq", 0);
                             sqlParameter.Add("RollSeq", index + 1);
                             sqlParameter.Add("LabelID", subRow.LabelID ?? string.Empty);
                             sqlParameter.Add("LabelGubun", "2");                    //박스출고가 2
                             sqlParameter.Add("LotNo", string.Empty);
+
                             sqlParameter.Add("StuffQty", 0);
                             sqlParameter.Add("OutRoll", subRow.OutRoll);
                             sqlParameter.Add("OutSeq", index + 1);
                             sqlParameter.Add("ArticleID", subRow.ArticleID);
                             //sqlParameter.Add("Spec", subRow.Spec ?? string.Empty);
                             sqlParameter.Add("UnitPrice", subRow.UnitPrice);
+
                             sqlParameter.Add("OutQty", subRow.OutQty);
                             sqlParameter.Add("OutRealQty", subRow.OutRealQty);
                             sqlParameter.Add("SetDate", DateTime.Today);

@@ -278,8 +278,8 @@ namespace WizMes_SungShinNQ
 
                 sqlParameter.Add("nChkReqID", 0);               //발주번호
                 sqlParameter.Add("sReqID", string.Empty);       //발주번호
-                sqlParameter.Add("incNotApprovalYN", chkIn_NotApprovedIncloudSrh.IsChecked == true ? 1:0);
-                sqlParameter.Add("incAutoInOutYN", chkAutoInOutItemsIncloudSrh.IsChecked == true? 1:0);
+                sqlParameter.Add("incNotApprovalYN", chkIn_NotApprovedIncloudSrh.IsChecked == true ? "Y":"N");
+                sqlParameter.Add("incAutoInOutYN", chkAutoInOutItemsIncloudSrh.IsChecked == true? "Y":"N");
 
                 sqlParameter.Add("sArticleIDS", string.Empty);
                 sqlParameter.Add("sMissSafelyStockQty", chkOptimumStockBelowSeeSrh.IsChecked == true ? "Y" : "");
